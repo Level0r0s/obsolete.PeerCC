@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PeerConnectionClient.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,6 +26,7 @@ namespace PeerConnectionClient
         public MainPage()
         {
             this.InitializeComponent();
+            this.DataContext = new MainViewModel();
         }
     }
 }

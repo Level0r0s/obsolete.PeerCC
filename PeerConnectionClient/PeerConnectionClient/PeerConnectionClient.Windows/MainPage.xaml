@@ -8,6 +8,58 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0"
+                    Orientation="Vertical">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right" >
+                <TextBlock Text="IP"                           
+                           VerticalAlignment="Center"
+                           Margin="5"/>
+                <TextBox Text="{Binding Ip}"                          
+                         VerticalAlignment="Center"
+                         HorizontalContentAlignment="Center"
+                         Width="120"
+                         Margin="5" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right" >
+                <TextBlock Text="Port"
+                           VerticalAlignment="Center"
+                           Margin="5"/>
+                <TextBox Text="{Binding Port}" 
+                         VerticalAlignment="Center"
+                         HorizontalContentAlignment="Center"
+                         Width="120"
+                         Margin="5" />
+            </StackPanel>
+            <Button Content="Connect" 
+                    Margin="5"
+                    Command="{Binding ConnectCommand}"
+                    HorizontalAlignment="Right"/>
+            <TextBlock Text="Connected Peers"
+                       Margin="5"/>
+            <ListBox Height="320"
+                     Width="200" 
+                     Margin="5" 
+                     ItemsSource="{Binding Peers}"/>
+            <Border BorderThickness="1"
+                    Margin="5"
+                    BorderBrush="Blue" >
+                <MediaElement Width="200"
+                              Height="200" 
+                              Name="SelfVideo"/>
+            </Border>
 
+        </StackPanel>
+        <Border BorderThickness="1"
+                BorderBrush="Blue"
+                Margin="5" 
+                Grid.Column="1" >
+            <MediaElement Name="PeerVideo" />
+        </Border>
     </Grid>
 </Page>
