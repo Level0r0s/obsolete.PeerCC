@@ -5,17 +5,17 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PeerConnectionClient", "PeerConnectionClient", "{577E856E-EB82-4690-A770-61CBDB2C214D}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PeerConnectionClient.Shared", "PeerConnectionClient\PeerConnectionClient.Shared\PeerConnectionClient.Shared.shproj", "{1C529FE5-1D52-4BC1-881C-59DC0AFEE4B3}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PeerConnectionClient.Shared", "PeerConnectionClient.Shared\PeerConnectionClient.Shared.shproj", "{1C529FE5-1D52-4BC1-881C-59DC0AFEE4B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeerConnectionClient.Windows", "PeerConnectionClient\PeerConnectionClient.Windows\PeerConnectionClient.Windows.csproj", "{9667CEE9-74D1-429C-9282-75B85495DC8B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeerConnectionClient.Windows", "PeerConnectionClient.Windows\PeerConnectionClient.Windows.csproj", "{9667CEE9-74D1-429C-9282-75B85495DC8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeerConnectionClient.WindowsPhone", "PeerConnectionClient\PeerConnectionClient.WindowsPhone\PeerConnectionClient.WindowsPhone.csproj", "{DE05E1E8-58CD-424F-B1FA-B3AA1A1CE637}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeerConnectionClient.WindowsPhone", "PeerConnectionClient.WindowsPhone\PeerConnectionClient.WindowsPhone.csproj", "{DE05E1E8-58CD-424F-B1FA-B3AA1A1CE637}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		PeerConnectionClient\PeerConnectionClient.Shared\PeerConnectionClient.Shared.projitems*{9667cee9-74d1-429c-9282-75b85495dc8b}*SharedItemsImports = 4
-		PeerConnectionClient\PeerConnectionClient.Shared\PeerConnectionClient.Shared.projitems*{de05e1e8-58cd-424f-b1fa-b3aa1a1ce637}*SharedItemsImports = 4
-		PeerConnectionClient\PeerConnectionClient.Shared\PeerConnectionClient.Shared.projitems*{1c529fe5-1d52-4bc1-881c-59dc0afee4b3}*SharedItemsImports = 13
+		PeerConnectionClient.Shared\PeerConnectionClient.Shared.projitems*{9667cee9-74d1-429c-9282-75b85495dc8b}*SharedItemsImports = 4
+		PeerConnectionClient.Shared\PeerConnectionClient.Shared.projitems*{de05e1e8-58cd-424f-b1fa-b3aa1a1ce637}*SharedItemsImports = 4
+		PeerConnectionClient.Shared\PeerConnectionClient.Shared.projitems*{1c529fe5-1d52-4bc1-881c-59dc0afee4b3}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
