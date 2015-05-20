@@ -29,7 +29,7 @@ namespace PeerConnectionClient
 
             this.NavigationCacheMode = NavigationCacheMode.Required;
 
-            this.DataContext = new MainViewModel();
+            this.DataContext = new MainViewModel(Dispatcher);
         }
 
         /// <summary>
