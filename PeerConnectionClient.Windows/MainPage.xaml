@@ -16,10 +16,10 @@
                     Orientation="Vertical">
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right" >
-                <TextBlock Text="IP"                           
+                <TextBlock Text="IP"
                            VerticalAlignment="Center"
                            Margin="5"/>
-                <TextBox Text="{Binding Ip}"                          
+                <TextBox Text="{Binding Ip, Mode=TwoWay}"
                          VerticalAlignment="Center"
                          HorizontalContentAlignment="Center"
                          Width="120"
@@ -30,7 +30,7 @@
                 <TextBlock Text="Port"
                            VerticalAlignment="Center"
                            Margin="5"/>
-                <TextBox Text="{Binding Port}" 
+                <TextBox Text="{Binding Port, Mode=TwoWay}"
                          VerticalAlignment="Center"
                          HorizontalContentAlignment="Center"
                          Width="120"
@@ -45,7 +45,11 @@
             <ListBox Height="320"
                      Width="200" 
                      Margin="5" 
-                     ItemsSource="{Binding Peers}"/>
+                     ItemsSource="{Binding Peers}"
+                     SelectedItem="{Binding SelectedPeer, Mode=TwoWay}"/>
+            <Button Content="Connect To Selected Peer"
+                    HorizontalAlignment="Center"
+                    Command="{Binding ConnectToPeerCommand}"/>
             <Border BorderThickness="1"
                     Margin="5"
                     BorderBrush="Blue" >

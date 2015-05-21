@@ -19,6 +19,46 @@ namespace PeerConnectionClient.ViewModels
             : base(uiDispatcher)
         {
             ConnectCommand = new ActionCommand(ConnectCommandExecute, ConnectCommandCanExecute);
+            ConnectToPeerCommand = new ActionCommand(ConnectToPeerCommandExecute, ConnectToPeerCommandCanExecute);
+
+            webrtc_winrt_api.WebRTC.Initialize(uiDispatcher);
+
+            Conductor.Instance.Signaller.OnPeerConnected += (peerId, peerName) =>
+            {
+                RunOnUiThread(() =>
+                {
+                    if (Peers == null)
+                        Peers = new ObservableCollection<Peer>();
+                    Peers.Add(new Peer { Id = peerId, Name = peerName });
+                });
+            };
+
+            Conductor.Instance.Signaller.OnPeerDisconnected += peerId =>
+            {
+                RunOnUiThread(() =>
+                {
+                    var peerToRemove = Peers.FirstOrDefault(p => p.Id == peerId);
+                    if (peerToRemove != null)
+                        Peers.Remove(peerToRemove);
+                });
+            };
+
+            Conductor.Instance.Signaller.OnSignedIn += () =>
+            {
+                RunOnUiThread(() =>
+                {
+                    IsConnected = true;
+                });
+            };
+
+            Conductor.Instance.Signaller.OnDisconnected += () =>
+            {
+                RunOnUiThread(() =>
+                {
+                    IsConnected = false;
+                });
+            };
+
         }
 
         #region Bindings
@@ -76,6 +116,18 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private Peer _selectedPeer;
+        public Peer SelectedPeer
+        {
+            get { return _selectedPeer; }
+            set
+            {
+                _selectedPeer = value;
+                NotifyPropertyChanged();
+                ConnectToPeerCommand.RaiseCanExecuteChanged();
+            }
+        }
+
         private ActionCommand _connectCommand;
         public ActionCommand ConnectCommand
         {
@@ -83,6 +135,17 @@ namespace PeerConnectionClient.ViewModels
             set 
             { 
                 _connectCommand = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        private ActionCommand _connectToPeerCommand;
+        public ActionCommand ConnectToPeerCommand
+        {
+            get { return _connectToPeerCommand; }
+            set
+            {
+                _connectToPeerCommand = value;
                 NotifyPropertyChanged();
             }
         }
@@ -101,8 +164,6 @@ namespace PeerConnectionClient.ViewModels
 
         #endregion
 
-        private Signaller _signaller;
-
         private bool ConnectCommandCanExecute(object obj)
         {
             return !IsConnected;
@@ -110,47 +171,22 @@ namespace PeerConnectionClient.ViewModels
 
         private void ConnectCommandExecute(object obj)
         {
-            _signaller = new Signaller();
-
-            _signaller.OnPeerConnected += (peerId, peerName) =>
-                {
-                    RunOnUiThread(() =>
-                    {
-                        if (Peers == null)
-                            Peers = new ObservableCollection<Peer>();
-                        Peers.Add(new Peer { Id = peerId, Name = peerName });
-                    });
-                };
-
-            _signaller.OnPeerDisconnected += peerId =>
-                {
-                    RunOnUiThread(() =>
-                    {
-                        var peerToRemove = Peers.FirstOrDefault(p => p.Id == peerId);
-                        if (peerToRemove != null)
-                            Peers.Remove(peerToRemove);
-                    });
-                };
-
-            _signaller.OnSignedIn += () =>
-                {
-                    RunOnUiThread(() =>
-                    {
-                        IsConnected = true;
-                    });
-                };
-
-            _signaller.OnDisconnected += () =>
-            {
-                RunOnUiThread(() =>
-                {
-                    IsConnected = false;
-                });
-            };
-
             new Task(() =>
             {
-                _signaller.Connect(_ip, _port, "Fred");
+                Conductor.Instance.StartLogin(Ip, Port);
+            }).Start();
+        }
+
+        private bool ConnectToPeerCommandCanExecute(object obj)
+        {
+            return SelectedPeer != null && Peers.Contains(SelectedPeer);
+        }
+
+        private void ConnectToPeerCommandExecute(object obj)
+        {
+            new Task(() =>
+            {
+                Conductor.Instance.ConnectToPeer(SelectedPeer.Id);
             }).Start();
         }
     }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Windows.Data.Json;
 using Windows.Networking;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
@@ -61,6 +63,11 @@ namespace PeerConnectionClient.Signalling
         private int _myId;
         private Dictionary<int, string> _peers = new Dictionary<int,string>();
 
+        public bool IsConnected()
+        {
+            return _myId != -1;
+        }
+
         public async void Connect(string server, string port, string client_name)
         {
             if (_state != State.NOT_CONNECTED)
@@ -73,7 +80,6 @@ namespace PeerConnectionClient.Signalling
             _port = port;
             _clientName = client_name;
 
-            _controlSocket = new StreamSocket();
             _state = State.SIGNING_IN;
             await ControlSocketRequestAsync(string.Format("GET /sign_in?{0} HTTP/1.0\r\n\r\n", client_name));
             if (_state != State.CONNECTED)
@@ -82,16 +88,11 @@ namespace PeerConnectionClient.Signalling
             }
             else
             {
-                //if (_hangingGetSocket != null)
-                //    throw new Exception("_hangingGetSocket != null");
-                //_hangingGetSocket = new StreamSocket();
-                //await _hangingGetSocket.ConnectAsync(_server, _port);
                 // Start the long polling loop.
                 HangingGetReadLoopAsync();
             }
         }
 
-        private StreamSocket _controlSocket;
         private StreamSocket _hangingGetSocket;
 
         #region Parsing
@@ -189,7 +190,7 @@ namespace PeerConnectionClient.Signalling
             int i = data.IndexOf("\r\n\r\n");
             if (i != -1)
             {
-                // LOG(INFO) << "Headers received";
+                Debug.WriteLine("Error: " + "Headers received");
                 if (GetHeaderValue(data, i, "\r\nContent-Length: ", out content_length))
                 {
                     int total_response_size = (i + 4) + content_length;
@@ -211,7 +212,7 @@ namespace PeerConnectionClient.Signalling
                 }
                 else
                 {
-                    // LOG(LS_ERROR) << "No content length field specified by the server.";
+                    Debug.WriteLine("Error: " + "No content length field specified by the server.");
                 }
             }
             return ret ? Tuple.Create(data, content_length) : null;
@@ -219,66 +220,69 @@ namespace PeerConnectionClient.Signalling
 
         private async Task<bool> ControlSocketRequestAsync(string sendBuffer)
         {
-            // Connect to the server
-            await _controlSocket.ConnectAsync(_server, _port);
-            // Send the request
-            _controlSocket.WriteStringAsync(sendBuffer);
-
-            // Read the return.
-            var readResult = await ReadIntoBufferAsync(_controlSocket);
-            if (readResult == null)
-                return false;
-
-            string buffer = readResult.Item1;
-            int content_length = readResult.Item2;
-
-            int peer_id, eoh;
-            if (!ParseServerResponse(buffer, out peer_id, out eoh))
-                return false;
-
-            if (_myId == -1)
+            using (var socket = new StreamSocket())
             {
-                if (_state != State.SIGNING_IN)
-                    throw new Exception("_state != State.SIGNING_IN");
-                _myId = peer_id;
+                // Connect to the server
+                await socket.ConnectAsync(_server, _port);
+                // Send the request
+                socket.WriteStringAsync(sendBuffer);
+
+                // Read the return.
+                var readResult = await ReadIntoBufferAsync(socket);
+                if (readResult == null)
+                    return false;
+
+                string buffer = readResult.Item1;
+                int content_length = readResult.Item2;
+
+                int peer_id, eoh;
+                if (!ParseServerResponse(buffer, out peer_id, out eoh))
+                    return false;
+
                 if (_myId == -1)
-                    throw new Exception("_myId == -1");
-
-                // The body of the response will be a list of already connected peers.
-                if (content_length > 0)
                 {
-                    int pos = eoh + 4; // Start after the header.
-                    while (pos < buffer.Length)
-                    {
-                        int eol = buffer.IndexOf('\n', pos);
-                        if (eol == -1)
-                            break;
-                        int id = 0;
-                        string name = "";
-                        bool connected = false;
-                        if (ParseEntry(buffer.Substring(pos, eol - pos), ref name, ref id, ref connected) && id != _myId)
-                        {
-                            _peers[id] = name;
-                            OnPeerConnected(id, name);
-                        }
-                        pos = eol + 1;
-                    }
-                    OnSignedIn();
-                }
-            }
-            else if (_state == State.SIGNING_OUT)
-            {
-                Close();
-                OnDisconnected();
-            }
-            else if (_state == State.SIGNING_OUT_WAITING)
-            {
-                await SignOut();
-            }
+                    if (_state != State.SIGNING_IN)
+                        throw new Exception("_state != State.SIGNING_IN");
+                    _myId = peer_id;
+                    if (_myId == -1)
+                        throw new Exception("_myId == -1");
 
-            if (_state == State.SIGNING_IN)
-            {
-                _state = State.CONNECTED;
+                    // The body of the response will be a list of already connected peers.
+                    if (content_length > 0)
+                    {
+                        int pos = eoh + 4; // Start after the header.
+                        while (pos < buffer.Length)
+                        {
+                            int eol = buffer.IndexOf('\n', pos);
+                            if (eol == -1)
+                                break;
+                            int id = 0;
+                            string name = "";
+                            bool connected = false;
+                            if (ParseEntry(buffer.Substring(pos, eol - pos), ref name, ref id, ref connected) && id != _myId)
+                            {
+                                _peers[id] = name;
+                                OnPeerConnected(id, name);
+                            }
+                            pos = eol + 1;
+                        }
+                        OnSignedIn();
+                    }
+                }
+                else if (_state == State.SIGNING_OUT)
+                {
+                    Close();
+                    OnDisconnected();
+                }
+                else if (_state == State.SIGNING_OUT_WAITING)
+                {
+                    await SignOut();
+                }
+
+                if (_state == State.SIGNING_IN)
+                {
+                    _state = State.CONNECTED;
+                }
             }
 
             return true;
@@ -347,38 +351,7 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
-        //private async void OnClose(StreamSocket socket, int err)
-        //{
-        //    if (true) // TODO: Not refused (err)
-        //    {
-        //        if (socket == _hangingGetSocket)
-        //        {
-        //            _hangingGetSocket.Dispose();
-        //            _hangingGetSocket = null;
-        //            // Restart the long poll.
-        //            HangingGetReadLoopAsync();
-        //        }
-        //        else
-        //        {
-        //            OnMessageSent(err);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        if (socket == _controlSocket)
-        //        {
-        //            // "Connection refused; retrying in 2 seconds"
-        //            // TODO
-        //        }
-        //        else
-        //        {
-        //            Close();
-        //            OnDisconnected();
-        //        }
-        //    }
-        //}
-
-        private async Task<bool> SignOut()
+        public async Task<bool> SignOut()
         {
             if (_state == State.NOT_CONNECTED || _state == State.SIGNING_OUT)
                 return true;
@@ -414,12 +387,6 @@ namespace PeerConnectionClient.Signalling
 
         private void Close()
         {
-            if (_controlSocket != null)
-            {
-                _controlSocket.Dispose();
-                _controlSocket = null;
-            }
-
             if (_hangingGetSocket != null)
             {
                 _hangingGetSocket.Dispose();
@@ -428,6 +395,27 @@ namespace PeerConnectionClient.Signalling
 
             _peers.Clear();
             _state = State.NOT_CONNECTED;
+        }
+
+        public async Task<bool> SendToPeer(int peerId, IJsonValue json)
+        {
+            if (_state != State.CONNECTED)
+                return false;
+
+            Debug.Assert(IsConnected());
+
+            if (!IsConnected() || peerId == -1)
+                return false;
+
+            string message = json.Stringify();
+            string buffer = String.Format(
+                "POST /message?peer_id={0}&to={1} HTTP/1.0\r\n" +
+                "Content-Length: {2}\r\n" +
+                "Content-Type: text/plain\r\n" +
+                "\r\n" +
+                "{3}",
+                _myId, peerId, message.Length, message);
+            return await ControlSocketRequestAsync(buffer);
         }
     }
 
