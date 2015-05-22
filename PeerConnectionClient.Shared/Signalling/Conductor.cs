@@ -43,6 +43,9 @@ namespace PeerConnectionClient.Signalling
         Media _media;
         private int _peerId = -1;
 
+        public event Action<MediaStreamEvent> OnAddLocalStream;
+        public event Action<MediaStreamEvent> OnRemoveLocalStream;
+
         private async Task<bool> CreatePeerConnection()
         {
             Debug.Assert(_peerConnection == null);
@@ -57,9 +60,6 @@ namespace PeerConnectionClient.Signalling
                         new RTCIceServer { Url = "stun:stun2.l.google.com:19302" },
                         new RTCIceServer { Url = "stun:stun3.l.google.com:19302" },
                         new RTCIceServer { Url = "stun:stun4.l.google.com:19302" },
-                        new RTCIceServer { Url = "stun:stun.ekiga.net" },
-                        new RTCIceServer { Url = "stun:stunserver.org" },
-                        new RTCIceServer { Url = "stun:stun.voiparound.com" },
                     }
             };
 
@@ -77,6 +77,8 @@ namespace PeerConnectionClient.Signalling
             var stream = await _media.GetUserMedia();
             Debug.WriteLine("Conductor: Adding local media stream.");
             _peerConnection.AddStream(stream);
+            if (OnAddLocalStream != null)
+                OnAddLocalStream(new MediaStreamEvent() { Stream = stream });
 
             return true;
         }
@@ -86,21 +88,23 @@ namespace PeerConnectionClient.Signalling
             var json = new JsonObject();
             json.Add(kCandidateSdpMidName, JsonValue.CreateStringValue(evt.Candidate.SdpMid));
             json.Add(kCandidateSdpMlineIndexName, JsonValue.CreateNumberValue(evt.Candidate.SdpMLineIndex));
-            json.Add(kSessionDescriptionSdpName, JsonValue.CreateStringValue(evt.Candidate.Candidate));
-            Debug.WriteLine("Conductor: Sending ice candidate.");
+            json.Add(kCandidateSdpName, JsonValue.CreateStringValue(evt.Candidate.Candidate));
+            Debug.WriteLine("Conductor: Sending ice candidate.\n" + json.Stringify());
             SendMessage(json);
         }
 
-        private void PeerConnection_OnAddStream(MediaStreamEvent __param0)
+        public event Action<MediaStreamEvent> OnAddRemoteStream;
+        private void PeerConnection_OnAddStream(MediaStreamEvent evt)
         {
-            // TODO: Set remote renderer.
-            Debug.Assert(true);
+            if (OnAddRemoteStream != null)
+                OnAddRemoteStream(evt);
         }
 
-        private void PeerConnection_OnRemoveStream(MediaStreamEvent __param0)
+        public event Action<MediaStreamEvent> OnRemoveRemoteStream;
+        private void PeerConnection_OnRemoveStream(MediaStreamEvent evt)
         {
-            // TODO: Close remote renderer.
-            Debug.Assert(true);
+            if (OnRemoveRemoteStream != null)
+                OnRemoveRemoteStream(evt);
         }
 
         private Conductor()
@@ -211,7 +215,7 @@ namespace PeerConnectionClient.Signalling
                         var sdp = jMessage.ContainsKey(kCandidateSdpName) ? jMessage.GetNamedString(kCandidateSdpName) : null;
                         if (String.IsNullOrEmpty(sdpMid) || sdpMlineIndex == -1 || String.IsNullOrEmpty(sdp))
                         {
-                            Debug.WriteLine("Conductor: Can't parse received message.");
+                            Debug.WriteLine("Conductor: Can't parse received message.\n" + message);
                             return;
                         }
 
@@ -226,7 +230,7 @@ namespace PeerConnectionClient.Signalling
         {
         }
 
-        public async void StartLogin(string server, string port)
+        public void StartLogin(string server, string port)
         {
             if (_signaller.IsConnected())
                 return;
@@ -275,8 +279,9 @@ namespace PeerConnectionClient.Signalling
             SendMessage(json);
         }
 
-        private async void SendMessage(IJsonValue json)
+        private void SendMessage(IJsonValue json)
         {
+            // Don't await, send it async.
             _signaller.SendToPeer(_peerId, json);
         }
     }

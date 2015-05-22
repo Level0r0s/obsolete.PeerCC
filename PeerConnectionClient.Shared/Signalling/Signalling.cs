@@ -88,7 +88,7 @@ namespace PeerConnectionClient.Signalling
             }
             else
             {
-                // Start the long polling loop.
+                // Start the long polling loop without await.
                 HangingGetReadLoopAsync();
             }
         }
@@ -223,6 +223,7 @@ namespace PeerConnectionClient.Signalling
             using (var socket = new StreamSocket())
             {
                 // Connect to the server
+                // TODO: Try-catch timeout exception.
                 await socket.ConnectAsync(_server, _port);
                 // Send the request
                 socket.WriteStringAsync(sendBuffer);

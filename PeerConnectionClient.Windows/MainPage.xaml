@@ -55,6 +55,7 @@
                     BorderBrush="Blue" >
                 <MediaElement Width="200"
                               Height="200" 
+                              RealTimePlayback="True"
                               Name="SelfVideo"/>
             </Border>
 
@@ -63,7 +64,7 @@
                 BorderBrush="Blue"
                 Margin="5" 
                 Grid.Column="1" >
-            <MediaElement Name="PeerVideo" />
+            <MediaElement Name="PeerVideo" RealTimePlayback="True" />
         </Border>
     </Grid>
 </Page>

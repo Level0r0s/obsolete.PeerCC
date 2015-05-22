@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Input;
 using System.Threading.Tasks;
 using Windows.UI.Core;
+using webrtc_winrt_api;
+using Windows.UI.Xaml.Controls;
 
 namespace PeerConnectionClient.ViewModels
 {
@@ -15,11 +17,15 @@ namespace PeerConnectionClient.ViewModels
     {
         // Take the UI dispatcher because INotifyPropertyChanged doesn't handle
         // that automatically.
-        public MainViewModel(CoreDispatcher uiDispatcher)
+        // Also take the media elements as they don't databind easily to a media stream source.
+        public MainViewModel(CoreDispatcher uiDispatcher, MediaElement selfVideo, MediaElement peerVideo)
             : base(uiDispatcher)
         {
             ConnectCommand = new ActionCommand(ConnectCommandExecute, ConnectCommandCanExecute);
             ConnectToPeerCommand = new ActionCommand(ConnectToPeerCommandExecute, ConnectToPeerCommandCanExecute);
+
+            SelfVideo = selfVideo;
+            PeerVideo = peerVideo;
 
             webrtc_winrt_api.WebRTC.Initialize(uiDispatcher);
 
@@ -59,11 +65,33 @@ namespace PeerConnectionClient.ViewModels
                 });
             };
 
+            Conductor.Instance.OnAddRemoteStream += Conductor_OnAddRemoteStream;
+            Conductor.Instance.OnRemoveRemoteStream += Conductor_OnRemoveRemoteStream;
+        }
+
+        private void Conductor_OnAddRemoteStream(MediaStreamEvent evt)
+        {
+            RunOnUiThread(() =>
+                {
+                    var videoTrack = evt.Stream.GetVideoTracks().First();
+                    var source = new Media().CreateMediaStreamSource(videoTrack, 640, 480, 30);
+                    PeerVideo.SetMediaStreamSource(source);
+                });
+        }
+
+        private void Conductor_OnRemoveRemoteStream(MediaStreamEvent evt)
+        {
+            RunOnUiThread(() =>
+            {
+                PeerVideo.SetMediaStreamSource(null);
+            });
         }
 
         #region Bindings
 
-        private string _ip = "localhost";
+        //private string _ip = "localhost";
+        // Temporary: Our Azure server.
+        private string _ip = "23.96.124.41";
         public string Ip
         {
             get
@@ -161,6 +189,9 @@ namespace PeerConnectionClient.ViewModels
                 ConnectCommand.RaiseCanExecuteChanged();
             }
         }
+
+        private MediaElement SelfVideo;
+        private MediaElement PeerVideo;
 
         #endregion
 
