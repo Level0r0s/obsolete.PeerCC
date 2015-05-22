@@ -1,0 +1,79 @@
+﻿<Page
+    x:Class="PeerConnectionClient.UAP.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PeerConnectionClient.UAP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"    
+    mc:Ignorable="d">
+    <Page.Resources>
+        <local:BoolToVisConverter x:Key="BoolToVisNegatedConverter" Negated="true"/>
+        <local:BoolToVisConverter x:Key="BoolToVisConverter" Negated="false"/>
+    </Page.Resources>
+    <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel x:Name="ConnectionStackPanel"
+                    Visibility="{Binding Path=IsConnected, Converter={StaticResource BoolToVisNegatedConverter}}"
+                    Grid.Column="0"
+                    Orientation="Vertical">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right" >
+                <TextBlock Text="IP"
+                           VerticalAlignment="Center"
+                           Margin="5"/>
+                <TextBox Text="{Binding Ip}"
+                         VerticalAlignment="Center"
+                         HorizontalContentAlignment="Center"
+                         Width="120"
+                         Margin="5" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right" >
+                <TextBlock Text="Port"
+                           VerticalAlignment="Center"
+                           Margin="5"/>
+                <TextBox Text="{Binding Port}" 
+                         VerticalAlignment="Center"
+                         HorizontalContentAlignment="Center"
+                         Width="120"
+                         Margin="5" />
+            </StackPanel>
+            <Button Content="Connect" 
+                    Margin="5"
+                    Command="{Binding ConnectCommand}"
+                    HorizontalAlignment="Right"/>
+            <TextBlock Text="Connected Peers"
+                       Margin="5"/>
+            <ListBox Height="320"
+                     Width="200" 
+                     Margin="5" 
+                     ItemsSource="{Binding Peers}"/>
+        </StackPanel>
+        <Button x:Name="DisconnectButton"
+                Content="Disconnect"
+                Margin="20"
+                Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"
+                RelativePanel.AlignBottomWithPanel="True"
+                RelativePanel.AlignLeftWithPanel="True">            
+        </Button>
+        <Border BorderThickness="1"
+                BorderBrush="Blue"
+                Margin="5" 
+                Grid.Column="1" 
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"
+                RelativePanel.RightOf="ConnectionStackPanel">
+            <MediaElement Name="PeerVideo" />
+        </Border>
+        <Border BorderThickness="1"
+                Margin="20"
+                BorderBrush="Blue" 
+                Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"
+                RelativePanel.AlignBottomWithPanel="True"
+                RelativePanel.AlignRightWithPanel="True">
+            <MediaElement Width="200"
+                          Height="200" 
+                          Name="SelfVideo"/>
+        </Border>
+    </RelativePanel>
+</Page>
