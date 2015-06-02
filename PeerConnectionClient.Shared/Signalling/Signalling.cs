@@ -82,11 +82,7 @@ namespace PeerConnectionClient.Signalling
 
             _state = State.SIGNING_IN;
             await ControlSocketRequestAsync(string.Format("GET /sign_in?{0} HTTP/1.0\r\n\r\n", client_name));
-            if (_state != State.CONNECTED)
-            {
-                throw new Exception("_state != State.CONNECTED");
-            }
-            else
+            if (_state == State.CONNECTED)
             {
                 // Start the long polling loop without await.
                 HangingGetReadLoopAsync();
@@ -96,7 +92,7 @@ namespace PeerConnectionClient.Signalling
         private StreamSocket _hangingGetSocket;
 
         #region Parsing
-        private bool GetHeaderValue(string buffer, int eoh, string header, out int value)
+        private static bool GetHeaderValue(string buffer, int eoh, string header, out int value)
         {
             try
             {
@@ -111,7 +107,7 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
-        private bool GetHeaderValue(string buffer, int eoh, string header, out string value)
+        private static bool GetHeaderValue(string buffer, int eoh, string header, out string value)
         {
             try
             {
@@ -154,7 +150,7 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
-        private bool ParseEntry(string entry, ref string name, ref int id, ref bool connected)
+        private static bool ParseEntry(string entry, ref string name, ref int id, ref bool connected)
         {
             connected = false;
             int separator = entry.IndexOf(',');
@@ -171,7 +167,6 @@ namespace PeerConnectionClient.Signalling
             return name.Length > 0;
         }
         #endregion
-
 
         private async Task<Tuple<string, int>> ReadIntoBufferAsync(StreamSocket socket)
         {
@@ -197,13 +192,6 @@ namespace PeerConnectionClient.Signalling
                     if (data.Length >= total_response_size)
                     {
                         ret = true;
-                        string should_close;
-                        if (GetHeaderValue(data, i, "\r\nConnection: ", out should_close) && should_close == "close")
-                        {
-                            // Since we closed the socket, there was no notification delivered
-                            // to us.  Compensate by letting ourselves know.
-                            //OnClose(socket, 0);
-                        }
                     }
                     else
                     {
@@ -223,12 +211,20 @@ namespace PeerConnectionClient.Signalling
             using (var socket = new StreamSocket())
             {
                 // Connect to the server
-                // TODO: Try-catch timeout exception.
-                await socket.ConnectAsync(_server, _port);
+                try
+                {
+                    await socket.ConnectAsync(_server, _port);
+                }
+                catch (Exception e)
+                {
+                    // This could be a connection failure like a timeout.
+                    Debug.WriteLine(e.Message);
+                    return false;
+                }
                 // Send the request
                 socket.WriteStringAsync(sendBuffer);
 
-                // Read the return.
+                // Read the response.
                 var readResult = await ReadIntoBufferAsync(socket);
                 if (readResult == null)
                     return false;
@@ -242,11 +238,9 @@ namespace PeerConnectionClient.Signalling
 
                 if (_myId == -1)
                 {
-                    if (_state != State.SIGNING_IN)
-                        throw new Exception("_state != State.SIGNING_IN");
+                    Debug.Assert(_state == State.SIGNING_IN);
                     _myId = peer_id;
-                    if (_myId == -1)
-                        throw new Exception("_myId == -1");
+                    Debug.Assert(_myId != -1);
 
                     // The body of the response will be a list of already connected peers.
                     if (content_length > 0)
@@ -300,7 +294,7 @@ namespace PeerConnectionClient.Signalling
                     // Send the request
                     _hangingGetSocket.WriteStringAsync(String.Format("GET /wait?peer_id={0} HTTP/1.0\r\n\r\n", _myId));
 
-                    // Read the return.
+                    // Read the response.
                     var readResult = await ReadIntoBufferAsync(_hangingGetSocket);
                     if (readResult == null)
                         return;
@@ -363,24 +357,16 @@ namespace PeerConnectionClient.Signalling
                 _hangingGetSocket = null;
             }
 
-            //TODO: if (control_socket_->GetState() == rtc::Socket::CS_CLOSED)
-            if (true)
-            {
-                _state = State.SIGNING_OUT;
+            _state = State.SIGNING_OUT;
 
-                if (_myId != -1)
-                {
-                    await ControlSocketRequestAsync(String.Format("GET /sign_out?peer_id={0} HTTP/1.0\r\n\r\n", _myId));
-                }
-                else 
-                {
-                    // Can occur if the app is closed before we finish connecting.
-                    return true;
-                }
+            if (_myId != -1)
+            {
+                await ControlSocketRequestAsync(String.Format("GET /sign_out?peer_id={0} HTTP/1.0\r\n\r\n", _myId));
             }
             else
             {
-                _state = State.SIGNING_OUT_WAITING;
+                // Can occur if the app is closed before we finish connecting.
+                return true;
             }
 
             return true;
