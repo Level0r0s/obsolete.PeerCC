@@ -67,6 +67,7 @@ namespace PeerConnectionClient.ViewModels
 
             Conductor.Instance.OnAddRemoteStream += Conductor_OnAddRemoteStream;
             Conductor.Instance.OnRemoveRemoteStream += Conductor_OnRemoveRemoteStream;
+            Conductor.Instance.OnAddLocalStream += Conductor_OnAddLocalStream;
         }
 
         private void Conductor_OnAddRemoteStream(MediaStreamEvent evt)
@@ -85,6 +86,14 @@ namespace PeerConnectionClient.ViewModels
             {
                 PeerVideo.SetMediaStreamSource(null);
             });
+        }
+
+        private void Conductor_OnAddLocalStream(MediaStreamEvent evt)
+        {
+            if (_microphoneIsOn)
+                Conductor.Instance.UnmuteMicrophone();
+            else
+                Conductor.Instance.MuteMicrophone();
         }
 
         #region Bindings
@@ -190,9 +199,25 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private bool _microphoneIsOn = true;
+        public bool MicrophoneIsOn
+        {
+            get { return _microphoneIsOn; }
+            set
+            {
+                if (_microphoneIsOn != value)
+                {
+                    _microphoneIsOn = value;
+                    if (_microphoneIsOn)
+                        Conductor.Instance.UnmuteMicrophone();
+                    else
+                        Conductor.Instance.MuteMicrophone();
+                }
+            }
+        }
+
         private MediaElement SelfVideo;
         private MediaElement PeerVideo;
-
         #endregion
 
         private bool ConnectCommandCanExecute(object obj)
@@ -219,11 +244,6 @@ namespace PeerConnectionClient.ViewModels
             {
                 Conductor.Instance.ConnectToPeer(SelectedPeer.Id);
             }).Start();
-        }
-
-        public void MuteMicrophone(bool mute)
-        {
-            Conductor.Instance.MicrophoneMuted = mute;
         }
     }
 }

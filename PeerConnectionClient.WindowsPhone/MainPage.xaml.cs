@@ -29,8 +29,7 @@ namespace PeerConnectionClient
 
             this.NavigationCacheMode = NavigationCacheMode.Required;
 
-            this.DataContext = mainViewModel = new MainViewModel(Dispatcher, null, null);
-            mainViewModel.MuteMicrophone(!MicrophoneSwitch.IsOn);
+            this.DataContext = new MainViewModel(Dispatcher, null, null);
         }
 
         /// <summary>

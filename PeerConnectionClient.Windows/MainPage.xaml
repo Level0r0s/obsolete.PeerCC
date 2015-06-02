@@ -44,8 +44,7 @@
                     Header="Microphone"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
-                    IsOn="True"
-                    Toggled="MicrophoneSwitch_Toggled"
+                    IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"
             />
             <TextBlock Text="Connected Peers"
                        Margin="5"/>

@@ -33,23 +33,6 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
-        bool _microphoneMuted = false;
-        public bool MicrophoneMuted
-        {
-            get
-            {
-                return _microphoneMuted;
-            }
-            set
-            {
-                if(_microphoneMuted != value)
-                { 
-                    _microphoneMuted = value;
-                    ApplyMicrophoneConfiguration();
-                }
-            }
-        }
-
         private static readonly string kCandidateSdpMidName = "sdpMid";
         private static readonly string kCandidateSdpMlineIndexName = "sdpMLineIndex";
         private static readonly string kCandidateSdpName = "candidate";
@@ -94,7 +77,6 @@ namespace PeerConnectionClient.Signalling
 
             Debug.WriteLine("Conductor: Getting user media.");
             _mediaStream = await _media.GetUserMedia();
-            ApplyMicrophoneConfiguration();
             
             Debug.WriteLine("Conductor: Adding local media stream.");
             _peerConnection.AddStream(_mediaStream);
@@ -306,14 +288,25 @@ namespace PeerConnectionClient.Signalling
             _signaller.SendToPeer(_peerId, json);
         }
 
-        private void ApplyMicrophoneConfiguration()
+        public void MuteMicrophone()
         {
             if (_mediaStream != null)
             {
                 var audioTracks = _mediaStream.GetAudioTracks();
                 foreach (MediaAudioTrack audioTrack in _mediaStream.GetAudioTracks())
                 {
-                    audioTrack.Enabled = !_microphoneMuted;
+                    audioTrack.Enabled = false;
+                }
+            }
+        }
+        public void UnmuteMicrophone()
+        {
+            if (_mediaStream != null)
+            {
+                var audioTracks = _mediaStream.GetAudioTracks();
+                foreach (MediaAudioTrack audioTrack in _mediaStream.GetAudioTracks())
+                {
+                    audioTrack.Enabled = true;
                 }
             }
         }
