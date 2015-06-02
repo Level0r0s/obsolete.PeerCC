@@ -9,7 +9,6 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-<<<<<<< HEAD
     <Page.Resources>
         <utilities:BoolToVisConverter x:Key="BoolToVisConverter" />
         <utilities:BoolToVisConverter Negated="True"  x:Key="BoolToVisConverterNegated" />
@@ -79,8 +78,7 @@
                           Grid.Row="2"
                           Grid.Column="1"
                           Grid.ColumnSpan="3"
-                          IsOn="True"
-                          Toggled="MicrophoneSwitch_Toggled"
+                          IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"
                           HorizontalAlignment="Center"/>
             <ToggleSwitch Header="Camera"
                           Grid.Row="3"

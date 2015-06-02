@@ -43,8 +43,7 @@
             <ToggleSwitch Header="Microphone"
                           HorizontalAlignment="Right"
                           VerticalAlignment="Top"
-                          IsOn="True"
-                          Toggled="MicrophoneSwitch_Toggled"/>
+                          IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"/>
             <ToggleSwitch Header="Camera" 
                           HorizontalAlignment="Right"
                           VerticalAlignment="Top"

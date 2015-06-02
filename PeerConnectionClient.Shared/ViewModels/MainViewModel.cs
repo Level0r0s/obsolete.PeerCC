@@ -95,6 +95,10 @@ namespace PeerConnectionClient.ViewModels
                 Conductor.Instance.EnableLocalVideoStream();
             else
                 Conductor.Instance.DisableLocalVideoStream();
+            if (_microphoneIsOn)
+                Conductor.Instance.UnmuteMicrophone();
+            else
+                Conductor.Instance.MuteMicrophone();
         }
 
         #region Bindings
@@ -240,9 +244,25 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private bool _microphoneIsOn = true;
+        public bool MicrophoneIsOn
+        {
+            get { return _microphoneIsOn; }
+            set
+            {
+                if (_microphoneIsOn != value)
+                {
+                    _microphoneIsOn = value;
+                    if (_microphoneIsOn)
+                        Conductor.Instance.UnmuteMicrophone();
+                    else
+                        Conductor.Instance.MuteMicrophone();
+                }
+            }
+        }
+
         private MediaElement SelfVideo;
         private MediaElement PeerVideo;
-
         #endregion
 
         private bool ConnectCommandCanExecute(object obj)
