@@ -220,5 +220,10 @@ namespace PeerConnectionClient.ViewModels
                 Conductor.Instance.ConnectToPeer(SelectedPeer.Id);
             }).Start();
         }
+
+        public void MuteMicrophone(bool mute)
+        {
+            Conductor.Instance.MicrophoneMuted = mute;
+        }
     }
 }

@@ -40,6 +40,13 @@
                     Margin="5"
                     Command="{Binding ConnectCommand}"
                     HorizontalAlignment="Right"/>
+            <ToggleSwitch x:Name="MicrophoneSwitch" 
+                    Header="Microphone"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    IsOn="True"
+                    Toggled="MicrophoneSwitch_Toggled"
+            />
             <TextBlock Text="Connected Peers"
                        Margin="5"/>
             <ListBox Height="320"

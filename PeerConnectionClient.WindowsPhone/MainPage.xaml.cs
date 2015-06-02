@@ -29,7 +29,8 @@ namespace PeerConnectionClient
 
             this.NavigationCacheMode = NavigationCacheMode.Required;
 
-            this.DataContext = new MainViewModel(Dispatcher, null, null);
+            this.DataContext = mainViewModel = new MainViewModel(Dispatcher, null, null);
+            mainViewModel.MuteMicrophone(!MicrophoneSwitch.IsOn);
         }
 
         /// <summary>
@@ -47,5 +48,14 @@ namespace PeerConnectionClient
             // If you are using the NavigationHelper provided by some templates,
             // this event is handled for you.
         }
+
+        private void MicrophoneSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (mainViewModel != null)
+                mainViewModel.MuteMicrophone(!MicrophoneSwitch.IsOn);
+
+        }
+
+        MainViewModel mainViewModel = null;
     }
 }

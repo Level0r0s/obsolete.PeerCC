@@ -113,7 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="webrtc_winrt_api">
-      <HintPath>..\..\..\..\webrtc_vso\src\chromium\src\build\Debug\webrtc_winrt_api.winmd</HintPath>
+      <HintPath>..\..\..\..\webrtc\src\chromium\src\build\Debug\webrtc_winrt_api.winmd</HintPath>
     </Reference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">

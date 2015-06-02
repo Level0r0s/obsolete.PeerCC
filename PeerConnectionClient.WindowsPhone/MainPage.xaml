@@ -18,6 +18,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         
         <TextBlock Text="IP"
@@ -48,6 +49,15 @@
                  Grid.Column="1" 
                  Margin="5"
                  ItemsSource="{Binding Peers}" />
+        <ToggleSwitch x:Name="MicrophoneSwitch"
+                Header="Microphone"
+                Grid.Row="3"
+                Grid.Column="1"
+                Grid.ColumnSpan="3"
+                IsOn="True"
+                Toggled="MicrophoneSwitch_Toggled"
+                HorizontalAlignment="Center"
+                />
         <Button Content="Connect"
                 Command="{Binding ConnectCommand}"
                 Margin="5"                
