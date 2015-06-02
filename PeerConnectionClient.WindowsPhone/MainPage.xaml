@@ -9,6 +9,7 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+<<<<<<< HEAD
     <Page.Resources>
         <utilities:BoolToVisConverter x:Key="BoolToVisConverter" />
         <utilities:BoolToVisConverter Negated="True"  x:Key="BoolToVisConverterNegated" />
@@ -49,6 +50,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
@@ -73,30 +75,37 @@
                      Margin="5"
                      Grid.Row="1"
                      Grid.Column="1"/>
-            <ToggleSwitch Header="Camera"
+            <ToggleSwitch Header="Microphone"
                           Grid.Row="2"
+                          Grid.Column="1"
+                          Grid.ColumnSpan="3"
+                          IsOn="True"
+                          Toggled="MicrophoneSwitch_Toggled"
+                          HorizontalAlignment="Center"/>
+            <ToggleSwitch Header="Camera"
+                          Grid.Row="3"
                           Grid.Column="1"
                           Grid.ColumnSpan="3"
                           IsOn="{Binding CameraEnabled, Mode=TwoWay}"
                           HorizontalAlignment="Center"/>
             <TextBlock Text="Peers"
-                       Margin="5"
-                       Grid.Row="2"
+                       Margin="4"
+                       Grid.Row="5"
                        Grid.Column="0" />
-            <ListBox Grid.Row="2"
+            <ListBox Grid.Row="4"
                      Grid.Column="1" 
                      Margin="5"
                      ItemsSource="{Binding Peers}" 
                      SelectedItem="{Binding SelectedPeer, Mode=TwoWay}" />
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Center"
-                        Grid.Row="3"
+                        Grid.Row="5"
                         Grid.Column="0"
                         Grid.ColumnSpan="2">
                 <Button Content="Connect"
                         Command="{Binding ConnectCommand}"
                         Margin="5"                
-                        Grid.Row="3"
+                        Grid.Row="5"
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
                         HorizontalAlignment="Center"/>

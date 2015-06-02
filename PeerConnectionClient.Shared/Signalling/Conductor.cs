@@ -33,6 +33,23 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
+        bool _microphoneMuted = false;
+        public bool MicrophoneMuted
+        {
+            get
+            {
+                return _microphoneMuted;
+            }
+            set
+            {
+                if(_microphoneMuted != value)
+                { 
+                    _microphoneMuted = value;
+                    ApplyMicrophoneConfiguration();
+                }
+            }
+        }
+
         private static readonly string kCandidateSdpMidName = "sdpMid";
         private static readonly string kCandidateSdpMlineIndexName = "sdpMLineIndex";
         private static readonly string kCandidateSdpName = "candidate";
@@ -42,6 +59,7 @@ namespace PeerConnectionClient.Signalling
         RTCPeerConnection _peerConnection;
         Media _media;
         MediaStream _mediaStream;
+
         private int _peerId = -1;
 
         public event Action<MediaStreamEvent> OnAddLocalStream;
@@ -76,6 +94,9 @@ namespace PeerConnectionClient.Signalling
 
             Debug.WriteLine("Conductor: Getting user media.");
             _mediaStream = await _media.GetUserMedia();
+
+            ApplyMicrophoneConfiguration();
+            
             Debug.WriteLine("Conductor: Adding local media stream.");
             _peerConnection.AddStream(_mediaStream);
             if (OnAddLocalStream != null)
@@ -296,6 +317,7 @@ namespace PeerConnectionClient.Signalling
                 }
             }
         }
+
         public void DisableLocalVideoStream()
         {
             if (_mediaStream != null)
@@ -303,6 +325,18 @@ namespace PeerConnectionClient.Signalling
                 foreach (MediaVideoTrack videoTrack in _mediaStream.GetVideoTracks())
                 {
                     videoTrack.Enabled = false;
+                }
+            }
+        }
+
+        private void ApplyMicrophoneConfiguration()
+        {
+            if (_mediaStream != null)
+            {
+                var audioTracks = _mediaStream.GetAudioTracks();
+                foreach (MediaAudioTrack audioTrack in _mediaStream.GetAudioTracks())
+                {
+                    audioTrack.Enabled = !_microphoneMuted;
                 }
             }
         }

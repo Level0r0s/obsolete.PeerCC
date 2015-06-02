@@ -26,7 +26,18 @@ namespace PeerConnectionClient
         public MainPage()
         {
             this.InitializeComponent();
-            this.DataContext = new MainViewModel(Dispatcher, SelfVideo, PeerVideo);
+            this.DataContext = mainViewModel = new MainViewModel(Dispatcher, SelfVideo, PeerVideo);
+
+            mainViewModel.MuteMicrophone(!MicrophoneSwitch.IsOn);
         }
+
+        private void MicrophoneSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (mainViewModel != null)
+                mainViewModel.MuteMicrophone(!MicrophoneSwitch.IsOn);
+        }
+
+        private
+            MainViewModel mainViewModel = null;
     }
 }
