@@ -37,7 +37,7 @@ namespace PeerConnectionClient
                 mainViewModel.MuteMicrophone(!MicrophoneSwitch.IsOn);
         }
 
-        private
-            MainViewModel mainViewModel = null;
+        
+        MainViewModel mainViewModel = null;
     }
 }
