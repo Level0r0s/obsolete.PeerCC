@@ -47,14 +47,5 @@ namespace PeerConnectionClient
             // If you are using the NavigationHelper provided by some templates,
             // this event is handled for you.
         }
-
-        private void MicrophoneSwitch_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (mainViewModel != null)
-                mainViewModel.MuteMicrophone(!MicrophoneSwitch.IsOn);
-
-        }
-
-        MainViewModel mainViewModel = null;
     }
 }
