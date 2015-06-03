@@ -41,6 +41,7 @@ namespace PeerConnectionClient.Signalling
 
         RTCPeerConnection _peerConnection;
         Media _media;
+        MediaStream _mediaStream;
         private int _peerId = -1;
 
         public event Action<MediaStreamEvent> OnAddLocalStream;
@@ -74,11 +75,11 @@ namespace PeerConnectionClient.Signalling
                 _media = new Media();
 
             Debug.WriteLine("Conductor: Getting user media.");
-            var stream = await _media.GetUserMedia();
+            _mediaStream = await _media.GetUserMedia();
             Debug.WriteLine("Conductor: Adding local media stream.");
-            _peerConnection.AddStream(stream);
+            _peerConnection.AddStream(_mediaStream);
             if (OnAddLocalStream != null)
-                OnAddLocalStream(new MediaStreamEvent() { Stream = stream });
+                OnAddLocalStream(new MediaStreamEvent() { Stream = _mediaStream });
 
             return true;
         }
@@ -283,6 +284,27 @@ namespace PeerConnectionClient.Signalling
         {
             // Don't await, send it async.
             _signaller.SendToPeer(_peerId, json);
+        }
+
+        public void EnableLocalVideoStream()
+        {
+            if (_mediaStream != null)
+            {
+                foreach (MediaVideoTrack videoTrack in _mediaStream.GetVideoTracks())
+                {
+                    videoTrack.Enabled = true;
+                }
+            }
+        }
+        public void DisableLocalVideoStream()
+        {
+            if (_mediaStream != null)
+            {
+                foreach (MediaVideoTrack videoTrack in _mediaStream.GetVideoTracks())
+                {
+                    videoTrack.Enabled = false;
+                }
+            }
         }
     }
 }
