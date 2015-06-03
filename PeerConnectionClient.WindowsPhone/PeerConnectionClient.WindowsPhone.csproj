@@ -112,9 +112,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="webrtc_winrt_api">
-      <HintPath>..\..\..\..\webrtc_vso\src\chromium\src\build\Debug\webrtc_winrt_api.winmd</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\..\..\WebRtc\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api_win_phone.vcxproj">
+      <Project>{ca2f2054-5719-fa3d-1ba4-4e616af26dc9}</Project>
+      <Name>webrtc_winrt_api_win_phone</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>

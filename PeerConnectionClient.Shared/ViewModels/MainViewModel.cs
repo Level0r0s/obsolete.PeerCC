@@ -23,6 +23,7 @@ namespace PeerConnectionClient.ViewModels
         {
             ConnectCommand = new ActionCommand(ConnectCommandExecute, ConnectCommandCanExecute);
             ConnectToPeerCommand = new ActionCommand(ConnectToPeerCommandExecute, ConnectToPeerCommandCanExecute);
+            DisconnectFromServerCommand = new ActionCommand(DisconnectFromServerExecute, DisconnectFromServerCanExecute);
 
             SelfVideo = selfVideo;
             PeerVideo = peerVideo;
@@ -160,8 +161,8 @@ namespace PeerConnectionClient.ViewModels
         public ActionCommand ConnectCommand
         {
             get { return _connectCommand; }
-            set 
-            { 
+            set
+            {
                 _connectCommand = value;
                 NotifyPropertyChanged();
             }
@@ -178,6 +179,17 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private ActionCommand _disconnectFromServerCommand;
+        public ActionCommand DisconnectFromServerCommand
+        {
+            get { return _disconnectFromServerCommand; }
+            set
+            {
+                _disconnectFromServerCommand = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         private bool _isConnected;
         public bool IsConnected
         {
@@ -187,6 +199,18 @@ namespace PeerConnectionClient.ViewModels
                 _isConnected = value;
                 NotifyPropertyChanged();
                 ConnectCommand.RaiseCanExecuteChanged();
+                DisconnectFromServerCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        private bool _isConnectedToPeer;
+        public bool IsConnectedToPeer
+        {
+            get { return _isConnectedToPeer; }
+            set
+            {
+                _isConnectedToPeer = value;
+                NotifyPropertyChanged();
             }
         }
 
@@ -218,7 +242,26 @@ namespace PeerConnectionClient.ViewModels
             new Task(() =>
             {
                 Conductor.Instance.ConnectToPeer(SelectedPeer.Id);
+                IsConnectedToPeer = true;
             }).Start();
+        }
+
+        private bool DisconnectFromServerCanExecute(object obj)
+        {
+            return IsConnected;
+        }
+
+        private void DisconnectFromServerExecute(object obj)
+        {
+            new Task(() =>
+            {
+                Conductor.Instance.DisconnectFromServer();
+                IsConnectedToPeer = false;
+                IsConnected = false;
+            }).Start();
+
+            if (Peers != null)
+                Peers.Clear();
         }
     }
 }

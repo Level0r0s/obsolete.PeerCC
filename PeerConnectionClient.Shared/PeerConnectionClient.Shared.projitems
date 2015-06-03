@@ -18,6 +18,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Signalling\Conductor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Signalling\Signalling.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\ActionCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\BoolToVisConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\BaseViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MainViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\VideoRenderViewModel.cs" />
