@@ -68,6 +68,7 @@ namespace PeerConnectionClient.ViewModels
 
             Conductor.Instance.OnAddRemoteStream += Conductor_OnAddRemoteStream;
             Conductor.Instance.OnRemoveRemoteStream += Conductor_OnRemoveRemoteStream;
+            Conductor.Instance.OnAddLocalStream += Conductor_OnAddLocalStream;
         }
 
         private void Conductor_OnAddRemoteStream(MediaStreamEvent evt)
@@ -86,6 +87,14 @@ namespace PeerConnectionClient.ViewModels
             {
                 PeerVideo.SetMediaStreamSource(null);
             });
+        }
+
+        private void Conductor_OnAddLocalStream(MediaStreamEvent evt)
+        {
+            if (_cameraEnabled)
+                Conductor.Instance.EnableLocalVideoStream();
+            else
+                Conductor.Instance.DisableLocalVideoStream();
         }
 
         #region Bindings
@@ -211,6 +220,23 @@ namespace PeerConnectionClient.ViewModels
             {
                 _isConnectedToPeer = value;
                 NotifyPropertyChanged();
+            }
+        }
+
+        private bool _cameraEnabled = true;
+        public bool CameraEnabled
+        {
+            get { return _cameraEnabled; }
+            set
+            {
+                if (_cameraEnabled != value)
+                {
+                    _cameraEnabled = value;
+                    if (_cameraEnabled)
+                        Conductor.Instance.EnableLocalVideoStream();
+                    else
+                        Conductor.Instance.DisableLocalVideoStream();
+                }
             }
         }
 

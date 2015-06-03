@@ -48,6 +48,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
@@ -72,6 +73,12 @@
                      Margin="5"
                      Grid.Row="1"
                      Grid.Column="1"/>
+            <ToggleSwitch Header="Camera"
+                          Grid.Row="2"
+                          Grid.Column="1"
+                          Grid.ColumnSpan="3"
+                          IsOn="{Binding CameraEnabled, Mode=TwoWay}"
+                          HorizontalAlignment="Center"/>
             <TextBlock Text="Peers"
                        Margin="5"
                        Grid.Row="2"

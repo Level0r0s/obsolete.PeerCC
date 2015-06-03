@@ -40,6 +40,12 @@
                     Margin="5"
                     Command="{Binding ConnectCommand}"
                     HorizontalAlignment="Right"/>
+            <ToggleSwitch x:Name="CameraSwitch" 
+                    Header="Camera"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    IsOn="{Binding CameraEnabled, Mode=TwoWay}"
+            />
             <TextBlock Text="Connected Peers"
                        Margin="5"/>
             <ListBox Height="320"
