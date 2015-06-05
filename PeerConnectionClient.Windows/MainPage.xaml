@@ -48,7 +48,7 @@
             />
             <TextBlock Text="Connected Peers"
                        Margin="5"/>
-            <ListBox Height="320"
+            <ListBox Height="279"
                      Width="200" 
                      Margin="5" 
                      ItemsSource="{Binding Peers}"
