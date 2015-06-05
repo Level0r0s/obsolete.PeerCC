@@ -48,8 +48,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-				<RowDefinition Height="Auto" />
+				        <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
@@ -74,36 +73,36 @@
                      Margin="5"
                      Grid.Row="1"
                      Grid.Column="1"/>
-            <ToggleSwitch Header="Microphone"
-                          Grid.Row="2"
-                          Grid.Column="1"
-                          Grid.ColumnSpan="3"
-                          IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"
-                          HorizontalAlignment="Center"/>
-            <ToggleSwitch Header="Camera"
-                          Grid.Row="3"
-                          Grid.Column="1"
-                          Grid.ColumnSpan="3"
-                          IsOn="{Binding CameraEnabled, Mode=TwoWay}"
-                          HorizontalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2">
+                <ToggleSwitch Header="Microphone"
+                              IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"
+                              Margin="5,0,15,0"/>
+                <ToggleSwitch Header="Camera"
+                              IsOn="{Binding CameraEnabled, Mode=TwoWay}"
+                              Margin="15,0,5,0"/>
+            </StackPanel>
             <TextBlock Text="Peers"
-                       Margin="4"
-                       Grid.Row="5"
+                       Margin="5"
+                       Grid.Row="3"
                        Grid.Column="0" />
-            <ListBox Grid.Row="4"
+            <ListBox Grid.Row="3"
                      Grid.Column="1" 
                      Margin="5"
                      ItemsSource="{Binding Peers}" 
                      SelectedItem="{Binding SelectedPeer, Mode=TwoWay}" />
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Center"
-                        Grid.Row="5"
+                        Grid.Row="4"
                         Grid.Column="0"
                         Grid.ColumnSpan="2">
                 <Button Content="Connect"
                         Command="{Binding ConnectCommand}"
                         Margin="5"                
-                        Grid.Row="5"
+                        Grid.Row="4"
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
                         HorizontalAlignment="Center"/>
