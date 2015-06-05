@@ -52,8 +52,8 @@ namespace PeerConnectionClient.Signalling
 
             var config = new RTCConfiguration()
             {
-                BundlePolicy = RTCBundlePolicy.kBundlePolicyMaxCompat,
-                IceTransportPolicy = RTCIceTransportPolicy.kAll,
+                BundlePolicy = RTCBundlePolicy.MaxCompat,
+                IceTransportPolicy = RTCIceTransportPolicy.All,
                 IceServers = new List<RTCIceServer>() {
                         new RTCIceServer { Url = "stun:stun.l.google.com:19302" },
                         new RTCIceServer { Url = "stun:stun1.l.google.com:19302" },
@@ -188,19 +188,19 @@ namespace PeerConnectionClient.Signalling
                             return;
                         }
 
-                        RTCSdpType sdpType = RTCSdpType.offer;
+                        RTCSdpType sdpType = RTCSdpType.Offer;
                         switch (type)
                         {
-                            case "offer": sdpType = RTCSdpType.offer; break;
-                            case "answer": sdpType = RTCSdpType.answer; break;
-                            case "pranswer": sdpType = RTCSdpType.pranswer; break;
+                            case "offer": sdpType = RTCSdpType.Offer; break;
+                            case "answer": sdpType = RTCSdpType.Answer; break;
+                            case "pranswer": sdpType = RTCSdpType.Pranswer; break;
                             default: Debug.Assert(false, type); break;
                         }
 
                         Debug.WriteLine("Conductor: Received session description: " + message);
                         await _peerConnection.SetRemoteDescription(new RTCSessionDescription(sdpType, sdp));
 
-                        if (sdpType == RTCSdpType.offer)
+                        if (sdpType == RTCSdpType.Offer)
                         {
                             var answer = await _peerConnection.CreateAnswer();
                             await _peerConnection.SetLocalDescription(answer);
@@ -274,7 +274,7 @@ namespace PeerConnectionClient.Signalling
         private void SendSdp(RTCSessionDescription description)
         {
             var json = new JsonObject();
-            json.Add(kSessionDescriptionTypeName, JsonValue.CreateStringValue(description.Type.GetValueOrDefault().ToString()));
+            json.Add(kSessionDescriptionTypeName, JsonValue.CreateStringValue(description.Type.GetValueOrDefault().ToString().ToLower()));
             json.Add(kSessionDescriptionSdpName, JsonValue.CreateStringValue(description.Sdp));
             SendMessage(json);
         }
