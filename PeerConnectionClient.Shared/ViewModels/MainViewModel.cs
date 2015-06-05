@@ -95,6 +95,7 @@ namespace PeerConnectionClient.ViewModels
                 Conductor.Instance.EnableLocalVideoStream();
             else
                 Conductor.Instance.DisableLocalVideoStream();
+
             if (_microphoneIsOn)
                 Conductor.Instance.UnmuteMicrophone();
             else
@@ -240,6 +241,23 @@ namespace PeerConnectionClient.ViewModels
                         Conductor.Instance.EnableLocalVideoStream();
                     else
                         Conductor.Instance.DisableLocalVideoStream();
+                }
+            }
+        }
+
+        private bool _microphoneIsOn = true;
+        public bool MicrophoneIsOn
+        {
+            get { return _microphoneIsOn; }
+            set
+            {
+                if (_microphoneIsOn != value)
+                {
+                    _microphoneIsOn = value;
+                    if (_microphoneIsOn)
+                        Conductor.Instance.UnmuteMicrophone();
+                    else
+                        Conductor.Instance.MuteMicrophone();
                 }
             }
         }
