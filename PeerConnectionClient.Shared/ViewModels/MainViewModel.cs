@@ -240,6 +240,23 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private bool _cameraEnabled = true;
+        public bool CameraEnabled
+        {
+            get { return _cameraEnabled; }
+            set
+            {
+                if (_cameraEnabled != value)
+                {
+                    _cameraEnabled = value;
+                    if (_cameraEnabled)
+                        Conductor.Instance.EnableLocalVideoStream();
+                    else
+                        Conductor.Instance.DisableLocalVideoStream();
+                }
+            }
+        }
+
         private MediaElement SelfVideo;
         private MediaElement PeerVideo;
 
