@@ -48,6 +48,9 @@ namespace PeerConnectionClient.Signalling
         public event Action<MediaStreamEvent> OnAddLocalStream;
         public event Action<MediaStreamEvent> OnRemoveLocalStream;
 
+        public event Action OnPeerConnectionCreated;
+        public event Action OnPeerConnectionClosed;
+
         private async Task<bool> CreatePeerConnection()
         {
             Debug.Assert(_peerConnection == null);
@@ -68,6 +71,9 @@ namespace PeerConnectionClient.Signalling
             Debug.WriteLine("Conductor: Creating peer connection.");
             _peerConnection = new RTCPeerConnection(config);
 
+            if (OnPeerConnectionCreated != null)
+                OnPeerConnectionCreated();
+
             _peerConnection.OnIceCandidate += PeerConnection_OnIceCandidate;
             _peerConnection.OnAddStream += PeerConnection_OnAddStream;
             _peerConnection.OnRemoveStream += PeerConnection_OnRemoveStream;
@@ -84,6 +90,18 @@ namespace PeerConnectionClient.Signalling
                 OnAddLocalStream(new MediaStreamEvent() { Stream = _mediaStream });
 
             return true;
+        }
+
+        private void ClosePeerConnection()
+        {
+            if (_peerConnection != null)
+            {
+                _peerConnection.Close();
+                _peerConnection = null;
+                _mediaStream = null;
+                if (OnPeerConnectionClosed != null)
+                    OnPeerConnectionClosed();
+            }
         }
 
         private void PeerConnection_OnIceCandidate(RTCPeerConnectionIceEvent evt)
@@ -133,6 +151,11 @@ namespace PeerConnectionClient.Signalling
 
         private void Signaller_OnPeerDisconnected(int peer_id)
         {
+            if (peer_id == _peerId)
+            {
+                Debug.WriteLine("Conductor: Our peer disconnected.");
+                ClosePeerConnection();
+            }
         }
 
         private void Signaller_OnPeerConnected(int id, string name)
@@ -231,6 +254,7 @@ namespace PeerConnectionClient.Signalling
 
         private void Signaller_OnDisconnected()
         {
+            ClosePeerConnection();
         }
 
         public void StartLogin(string server, string port)

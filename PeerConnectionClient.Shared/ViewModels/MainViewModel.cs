@@ -69,6 +69,22 @@ namespace PeerConnectionClient.ViewModels
             Conductor.Instance.OnAddRemoteStream += Conductor_OnAddRemoteStream;
             Conductor.Instance.OnRemoveRemoteStream += Conductor_OnRemoveRemoteStream;
             Conductor.Instance.OnAddLocalStream += Conductor_OnAddLocalStream;
+
+            Conductor.Instance.OnPeerConnectionCreated += () =>
+            {
+                RunOnUiThread(() =>
+                {
+                    IsConnectedToPeer = true;
+                });
+            };
+
+            Conductor.Instance.OnPeerConnectionClosed += () =>
+            {
+                RunOnUiThread(() =>
+                {
+                    IsConnectedToPeer = false;
+                });
+            };
         }
 
         private void Conductor_OnAddRemoteStream(MediaStreamEvent evt)
@@ -91,15 +107,21 @@ namespace PeerConnectionClient.ViewModels
 
         private void Conductor_OnAddLocalStream(MediaStreamEvent evt)
         {
-            if (_cameraEnabled)
-                Conductor.Instance.EnableLocalVideoStream();
-            else
-                Conductor.Instance.DisableLocalVideoStream();
+            RunOnUiThread(() =>
+            {
+                if (_cameraEnabled)
+                    Conductor.Instance.EnableLocalVideoStream();
+                else
+                    Conductor.Instance.DisableLocalVideoStream();
 
-            if (_microphoneIsOn)
-                Conductor.Instance.UnmuteMicrophone();
-            else
-                Conductor.Instance.MuteMicrophone();
+                if (_microphoneIsOn)
+                    Conductor.Instance.UnmuteMicrophone();
+                else
+                    Conductor.Instance.MuteMicrophone();
+                var videoTrack = evt.Stream.GetVideoTracks().First();
+                var source = new Media().CreateMediaStreamSource(videoTrack, 640, 480, 30);
+                SelfVideo.SetMediaStreamSource(source);
+            });
         }
 
         #region Bindings
@@ -289,7 +311,6 @@ namespace PeerConnectionClient.ViewModels
             new Task(() =>
             {
                 Conductor.Instance.ConnectToPeer(SelectedPeer.Id);
-                IsConnectedToPeer = true;
             }).Start();
         }
 
@@ -303,7 +324,6 @@ namespace PeerConnectionClient.ViewModels
             new Task(() =>
             {
                 Conductor.Instance.DisconnectFromServer();
-                IsConnectedToPeer = false;
                 IsConnected = false;
             }).Start();
 
