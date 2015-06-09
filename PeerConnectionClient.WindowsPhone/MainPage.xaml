@@ -24,7 +24,7 @@
             <Border BorderBrush="Blue"
                     BorderThickness="1"
                     Margin="5" >
-                <MediaElement Name="PeerVideo" />
+                <MediaElement Name="PeerVideo" RealTimePlayback="True"/>
             </Border>
             <Border BorderBrush="Blue"
                     BorderThickness="1"
@@ -33,7 +33,7 @@
                     Height="150" 
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom" >
-                <MediaElement Name="SelfVideo" />
+                <MediaElement Name="SelfVideo" Width="200" Height="200" RealTimePlayback="True" />
             </Border>
             <Button Content="Disconnect" 
                     Command="{Binding DisconnectFromServerCommand}"
