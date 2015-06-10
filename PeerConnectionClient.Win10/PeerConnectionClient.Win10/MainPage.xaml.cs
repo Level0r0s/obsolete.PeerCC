@@ -27,7 +27,7 @@ namespace PeerConnectionClient.Win10
         {
             this.InitializeComponent();
 
-            this.DataContext = new MainViewModel(Dispatcher);
+            this.DataContext = new MainViewModel(Dispatcher, SelfVideo, PeerVideo);
         }
     }
 }
