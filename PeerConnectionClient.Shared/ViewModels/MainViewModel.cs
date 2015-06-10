@@ -31,6 +31,14 @@ namespace PeerConnectionClient.ViewModels
 
             webrtc_winrt_api.WebRTC.Initialize(uiDispatcher);
 
+            Cameras = new ObservableCollection<MediaDevice>();
+            Conductor.Instance.Media.OnVideoCaptureDeviceFound += (deviceInfo) => {
+				RunOnUiThread(() => {
+					Cameras.Add(new MediaDevice(deviceInfo.Id, deviceInfo.Name));
+				});
+            };
+            Conductor.Instance.Media.EnumerateVideoCaptureDevices();
+
             Conductor.Instance.Signaller.OnPeerConnected += (peerId, peerName) =>
             {
                 RunOnUiThread(() =>
@@ -368,6 +376,27 @@ namespace PeerConnectionClient.ViewModels
                     NotifyPropertyChanged();
                 }
             }
+        }
+
+		private ObservableCollection<MediaDevice> _cameras;
+        public ObservableCollection<MediaDevice> Cameras {
+          get {
+            return _cameras;
+          }
+          set {
+            _cameras = value;
+            NotifyPropertyChanged();
+          }
+        }
+
+        private MediaDevice _selectedCamera;
+        public MediaDevice SelectedCamera {
+          get { return _selectedCamera; }
+          set {
+            _selectedCamera = value;
+            Conductor.Instance.Media.SelectVideoDevice(_selectedCamera);
+            NotifyPropertyChanged();
+          }
         }
 
         private MediaElement SelfVideo;

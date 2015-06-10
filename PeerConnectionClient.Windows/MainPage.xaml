@@ -85,7 +85,7 @@
 
             <TextBlock Text="Connected Peers"
                        Margin="5"/>
-            <ListBox Height="206"
+            <ListBox Height="146"
                      Width="200" 
                      Margin="5" 
                      ItemsSource="{Binding Peers}"
@@ -93,16 +93,23 @@
             <Button Content="Connect To Selected Peer"
                     HorizontalAlignment="Center"
                     Command="{Binding ConnectToPeerCommand}"/>
-            <Border BorderThickness="1"
-                    Margin="5"
-                    BorderBrush="Blue" >
-                <MediaElement Width="200"
-                              Height="200" 
-                              RealTimePlayback="True"
-                              Name="SelfVideo"/>
-            </Border>
+            <ListBox Height="50" Width="200" Margin="5"
+                     ItemsSource="{Binding Cameras}"
+                     SelectedItem="{Binding SelectedCamera, Mode=TwoWay}">
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Name}"/>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+            <Border BorderThickness="1" Margin="5" BorderBrush="Blue" >
+                    <MediaElement Width="200"
+                                  Height="200" 
+                                  RealTimePlayback="True"
+                                  Name="SelfVideo"/>
+            </Border> 
 
-        </StackPanel>
+    </StackPanel>
         <Border BorderThickness="1"
                 BorderBrush="Blue"
                 Margin="5" 

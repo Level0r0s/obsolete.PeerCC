@@ -52,6 +52,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <TextBlock Text="IP"
@@ -129,7 +130,17 @@
                      Margin="5"
                      ItemsSource="{Binding Peers}" 
                      SelectedItem="{Binding SelectedPeer, Mode=TwoWay}" />
-            <StackPanel Orientation="Horizontal"
+            <ListBox Grid.Row="4"
+                     Grid.Column="1"
+                     ItemsSource="{Binding Cameras}"
+                     SelectedItem="{Binding SelectedCamera, Mode=TwoWay}">
+                     <ListBox.ItemTemplate>
+                       <DataTemplate>
+                         <TextBlock Text="{Binding Name}"/>
+                       </DataTemplate>
+                     </ListBox.ItemTemplate>
+            </ListBox>
+      <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Center"
                         Grid.Row="5"
                         Grid.Column="0"
@@ -141,11 +152,11 @@
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
                         HorizontalAlignment="Center"/>
-                <Button Content="Connect to peer"
+        <Button Content="Connect to peer"
                         Command="{Binding ConnectToPeerCommand}"
                         Margin="5"
                         HorizontalAlignment="Center"/>
-            </StackPanel>
+      </StackPanel>
         </Grid>
     </Grid>
 </Page>

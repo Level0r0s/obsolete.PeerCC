@@ -41,6 +41,12 @@ namespace PeerConnectionClient.Signalling
 
         RTCPeerConnection _peerConnection;
         Media _media;
+        public Media Media {
+          get {
+            return _media;
+          }
+        }
+
         MediaStream _mediaStream;
 
         private int _peerId = -1;
@@ -77,9 +83,6 @@ namespace PeerConnectionClient.Signalling
             _peerConnection.OnIceCandidate += PeerConnection_OnIceCandidate;
             _peerConnection.OnAddStream += PeerConnection_OnAddStream;
             _peerConnection.OnRemoveStream += PeerConnection_OnRemoveStream;
-
-            if (_media == null)
-                _media = new Media();
 
             Debug.WriteLine("Conductor: Getting user media.");
             _mediaStream = await _media.GetUserMedia();
@@ -131,6 +134,7 @@ namespace PeerConnectionClient.Signalling
         private Conductor()
         {
             _signaller = new Signaller();
+            _media = new Media();
 
             Signaller.OnDisconnected += Signaller_OnDisconnected;
             Signaller.OnMessageFromPeer += Signaller_OnMessageFromPeer;
