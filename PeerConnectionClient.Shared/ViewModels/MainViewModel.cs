@@ -440,7 +440,7 @@ namespace PeerConnectionClient.ViewModels
 
             if (settings.Values["TraceServerPort"] != null)
             {
-                _traceServerPort = (string)settings.Values["TraceServerIp"];
+                _traceServerPort = (string)settings.Values["TraceServerPort"];
             }
             else
             {
