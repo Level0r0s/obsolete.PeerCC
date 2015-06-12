@@ -24,6 +24,7 @@ namespace PeerConnectionClient.ViewModels
             ConnectCommand = new ActionCommand(ConnectCommandExecute, ConnectCommandCanExecute);
             ConnectToPeerCommand = new ActionCommand(ConnectToPeerCommandExecute, ConnectToPeerCommandCanExecute);
             DisconnectFromServerCommand = new ActionCommand(DisconnectFromServerExecute, DisconnectFromServerCanExecute);
+            SendTracesCommand = new ActionCommand(SendTracesExecute, SendTracesCanExecute);
 
             SelfVideo = selfVideo;
             PeerVideo = peerVideo;
@@ -85,6 +86,7 @@ namespace PeerConnectionClient.ViewModels
                     IsConnectedToPeer = false;
                 });
             };
+            LoadSettings();
         }
 
         private void Conductor_OnAddRemoteStream(MediaStreamEvent evt)
@@ -226,6 +228,17 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private ActionCommand _sendTracesCommand;
+        public ActionCommand SendTracesCommand
+        {
+            get { return _sendTracesCommand; }
+            set
+            {
+                _sendTracesCommand = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         private bool _isConnected;
         public bool IsConnected
         {
@@ -284,6 +297,79 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private bool _tracingEnabled = false;
+        public bool TracingEnabled
+        {
+            get { return _tracingEnabled; }
+            set
+            {
+                if (_tracingEnabled != value)
+                {
+                    _tracingEnabled = value;
+                    if (_tracingEnabled)
+                    {
+                        webrtc_winrt_api.WebRTC.StartTracing();
+                    }
+                    else
+                    {
+                        webrtc_winrt_api.WebRTC.StopTracing();
+                        if(_tracesAutoSendEnabled)
+                        {
+                            SendTracesExecute(null);
+                        }
+                    }
+                    SendTracesCommand.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
+        private bool _tracesAutoSendEnabled = true;
+        public bool TracesAutoSendEnabled
+        {
+            get { return _tracesAutoSendEnabled; }
+            set
+            {
+                if (_tracesAutoSendEnabled != value)
+                {
+                    _tracesAutoSendEnabled = value;
+                    var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+                    localSettings.Values["TracesAutoSendEnabled"] = _tracesAutoSendEnabled;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        private string _traceServerIp = "";
+        public string TraceServerIp
+        {
+            get { return _traceServerIp; }
+            set
+            {
+                if (_traceServerIp != value)
+                {
+                    _traceServerIp = value;
+                    var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+                    localSettings.Values["TraceServerIp"] = _traceServerIp;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+        private string _traceServerPort = "";
+        public string TraceServerPort
+        {
+            get { return _traceServerPort; }
+            set
+            {
+                if (_traceServerPort != value)
+                {
+                    _traceServerPort = value;
+                    var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+                    localSettings.Values["TraceServerPort"] = _traceServerPort;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
         private MediaElement SelfVideo;
         private MediaElement PeerVideo;
         #endregion
@@ -329,6 +415,46 @@ namespace PeerConnectionClient.ViewModels
 
             if (Peers != null)
                 Peers.Clear();
+        }
+
+        private bool SendTracesCanExecute(object obj)
+        {
+            return !webrtc_winrt_api.WebRTC.IsTracing();
+        }
+
+        private void SendTracesExecute(object obj)
+        {
+            webrtc_winrt_api.WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
+        }
+        void LoadSettings()
+        {
+            var settings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            if(settings.Values["TraceServerIp"] != null)
+            {
+                _traceServerIp = (string)settings.Values["TraceServerIp"];
+            }
+            else
+            {
+                _traceServerIp = "127.0.0.1";
+            }
+
+            if (settings.Values["TraceServerPort"] != null)
+            {
+                _traceServerPort = (string)settings.Values["TraceServerIp"];
+            }
+            else
+            {
+                _traceServerPort = "55000";
+            }
+
+            if (settings.Values["TracesAutoSendEnabled"] != null)
+            {
+                _tracesAutoSendEnabled = (bool)settings.Values["TracesAutoSendEnabled"];
+            }
+            else
+            {
+                _tracesAutoSendEnabled = true;
+            }
         }
     }
 }
