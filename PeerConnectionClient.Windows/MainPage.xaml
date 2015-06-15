@@ -83,9 +83,8 @@
                 </Button.Flyout>
             </Button>
 
-            <TextBlock Text="Connected Peers"
-                       Margin="5"/>
-            <ListBox Height="146"
+            <TextBlock Text="Connected Peers"/>
+            <ListBox Height="70"
                      Width="200" 
                      Margin="5" 
                      ItemsSource="{Binding Peers}"
@@ -93,7 +92,9 @@
             <Button Content="Connect To Selected Peer"
                     HorizontalAlignment="Center"
                     Command="{Binding ConnectToPeerCommand}"/>
-            <ListBox Height="50" Width="200" Margin="5"
+            <TextBlock Text="Available cameras"
+                             Margin="5"/>
+            <ListBox Height="70" Width="200"
                      ItemsSource="{Binding Cameras}"
                      SelectedItem="{Binding SelectedCamera, Mode=TwoWay}">
               <ListBox.ItemTemplate>
@@ -102,9 +103,20 @@
                 </DataTemplate>
               </ListBox.ItemTemplate>
             </ListBox>
+            <TextBlock Text="Available Microphones"
+                       Margin="5"/>
+            <ListBox Height="70" Width="200"
+                           ItemsSource="{Binding Microphones}"
+                           SelectedItem="{Binding SelectedMicrophone, Mode=TwoWay}">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Name}"/>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+            </ListBox>
             <Border BorderThickness="1" Margin="5" BorderBrush="Blue" >
                     <MediaElement Width="200"
-                                  Height="200" 
+                                  Height="120" 
                                   RealTimePlayback="True"
                                   Name="SelfVideo"/>
             </Border> 
