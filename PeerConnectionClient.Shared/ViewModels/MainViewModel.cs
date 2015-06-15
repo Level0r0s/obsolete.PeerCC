@@ -33,14 +33,14 @@ namespace PeerConnectionClient.ViewModels
 
             Cameras = new ObservableCollection<MediaDevice>();
             Conductor.Instance.Media.OnVideoCaptureDeviceFound += (deviceInfo) => {
-				RunOnUiThread(() => {
-					Cameras.Add(deviceInfo);
-				});
+               RunOnUiThread(() => {
+                  Cameras.Add(deviceInfo);
+              });
             };
-			Microphones = new ObservableCollection<MediaDevice>();
-			Conductor.Instance.Media.OnAudioCaptureDeviceFound += (deviceInfo) => {
-				Microphones.Add(deviceInfo);
-			};
+            Microphones = new ObservableCollection<MediaDevice>();
+            Conductor.Instance.Media.OnAudioCaptureDeviceFound += (deviceInfo) => {
+              Microphones.Add(deviceInfo);
+            };
 
             Conductor.Instance.Media.EnumerateAudioVideoCaptureDevices();
 
@@ -404,26 +404,26 @@ namespace PeerConnectionClient.ViewModels
           }
         }
 
-		private ObservableCollection<MediaDevice> _microphones;
-		public ObservableCollection<MediaDevice> Microphones {
-			get {
-				return _microphones;
-			}
-			set {
-				_microphones = value;
-				NotifyPropertyChanged();
-			}
-		}
+        private ObservableCollection<MediaDevice> _microphones;
+        public ObservableCollection<MediaDevice> Microphones {
+          get {
+            return _microphones;
+          }
+          set {
+            _microphones = value;
+            NotifyPropertyChanged();
+          }
+        }
 
-		private MediaDevice _selectedMicrophone;
-		public MediaDevice SelectedMicrophone {
-			get { return _selectedMicrophone; }
-			set {
-				_selectedMicrophone = value;
-				Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
-				NotifyPropertyChanged();
-			}
-		}
+        private MediaDevice _selectedMicrophone;
+        public MediaDevice SelectedMicrophone {
+          get { return _selectedMicrophone; }
+          set {
+            _selectedMicrophone = value;
+            Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
+            NotifyPropertyChanged();
+          }
+	      }
 
         private MediaElement SelfVideo;
         private MediaElement PeerVideo;
