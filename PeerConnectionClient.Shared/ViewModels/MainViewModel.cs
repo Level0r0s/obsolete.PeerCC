@@ -120,9 +120,12 @@ namespace PeerConnectionClient.ViewModels
                     Conductor.Instance.UnmuteMicrophone();
                 else
                     Conductor.Instance.MuteMicrophone();
-                var videoTrack = evt.Stream.GetVideoTracks().First();
-                var source = new Media().CreateMediaStreamSource(videoTrack, 640, 480, 30);
-                SelfVideo.SetMediaStreamSource(source);
+                var videoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
+                if (videoTrack != null)
+                {
+                    var source = new Media().CreateMediaStreamSource(videoTrack, 640, 480, 30);
+                    SelfVideo.SetMediaStreamSource(source);
+                }
             });
         }
 

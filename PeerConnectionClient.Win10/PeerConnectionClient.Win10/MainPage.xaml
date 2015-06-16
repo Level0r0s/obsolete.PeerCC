@@ -13,7 +13,7 @@
     </Page.Resources>
     <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel x:Name="ConnectionStackPanel"
-                    Visibility="{Binding Path=IsConnected, Converter={StaticResource BoolToVisNegatedConverter}}"
+                    Visibility="{Binding Path=IsConnectedToPeer, Converter={StaticResource BoolToVisNegatedConverter}}"
                     Grid.Column="0"
                     Orientation="Vertical">
             <StackPanel Orientation="Horizontal"
@@ -47,11 +47,17 @@
             <ListBox Height="320"
                      Width="200" 
                      Margin="5" 
+                     SelectedItem="{Binding SelectedPeer, Mode=TwoWay}"
                      ItemsSource="{Binding Peers}"/>
+            <Button Content="Connect to Peer"
+                    Margin="5"
+                    Command="{Binding ConnectToPeerCommand}"
+                    HorizontalAlignment="Right" />
         </StackPanel>
         <Button x:Name="DisconnectButton"
                 Content="Disconnect"
                 Margin="20"
+                Command="{Binding DisconnectFromServerCommand}"
                 Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"
                 RelativePanel.AlignBottomWithPanel="True"
                 RelativePanel.AlignLeftWithPanel="True">
@@ -62,14 +68,14 @@
                 Grid.Column="1" 
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"
+                Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
                 RelativePanel.RightOf="ConnectionStackPanel">
             <MediaElement Name="PeerVideo" />
         </Border>
         <Border BorderThickness="1"
                 Margin="20"
                 BorderBrush="Blue" 
-                Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"
+                Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
                 RelativePanel.AlignBottomWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True">
             <MediaElement Width="200"
