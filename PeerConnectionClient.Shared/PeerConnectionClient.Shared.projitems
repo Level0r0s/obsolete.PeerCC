@@ -15,12 +15,28 @@
     <Compile Include="$(MSBuildThisFileDirectory)App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Model\IceServer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Signalling\Conductor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Signalling\Signalling.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\ActionCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\BoolToVisConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\InvertedBooleanConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\NullToVisibleConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\UI\ErrorControl.xaml.cs">
+      <DependentUpon>ErrorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\ValidableNonEmptyString.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\ValidableIntegerString.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\ValidableBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\XmlSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\BaseViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MainViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\VideoRenderViewModel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)Utilities\UI\ErrorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 </Project>

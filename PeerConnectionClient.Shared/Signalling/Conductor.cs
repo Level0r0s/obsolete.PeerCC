@@ -8,6 +8,8 @@ using Windows.Data.Json;
 using webrtc_winrt_api;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using PeerConnectionClient.Model;
 
 namespace PeerConnectionClient.Signalling
 {
@@ -48,6 +50,7 @@ namespace PeerConnectionClient.Signalling
         }
 
         MediaStream _mediaStream;
+        List<RTCIceServer> _iceServers;
 
         private int _peerId = -1;
 
@@ -65,13 +68,14 @@ namespace PeerConnectionClient.Signalling
             {
                 BundlePolicy = RTCBundlePolicy.MaxCompat,
                 IceTransportPolicy = RTCIceTransportPolicy.All,
-                IceServers = new List<RTCIceServer>() {
-                        new RTCIceServer { Url = "stun:stun.l.google.com:19302" },
-                        new RTCIceServer { Url = "stun:stun1.l.google.com:19302" },
-                        new RTCIceServer { Url = "stun:stun2.l.google.com:19302" },
-                        new RTCIceServer { Url = "stun:stun3.l.google.com:19302" },
-                        new RTCIceServer { Url = "stun:stun4.l.google.com:19302" },
-                    }
+                IceServers = _iceServers
+                //IceServers = new List<RTCIceServer>() {
+                //        new RTCIceServer { Url = "stun:stun.l.google.com:19302" },
+                //        new RTCIceServer { Url = "stun:stun1.l.google.com:19302" },
+                //        new RTCIceServer { Url = "stun:stun2.l.google.com:19302" },
+                //        new RTCIceServer { Url = "stun:stun3.l.google.com:19302" },
+                //        new RTCIceServer { Url = "stun:stun4.l.google.com:19302" },
+                //    }
             };
 
             Debug.WriteLine("Conductor: Creating peer connection.");
@@ -143,6 +147,8 @@ namespace PeerConnectionClient.Signalling
             Signaller.OnPeerDisconnected += Signaller_OnPeerDisconnected;
             Signaller.OnServerConnectionFailure += Signaller_OnServerConnectionFailure;
             Signaller.OnSignedIn += Signaller_OnSignedIn;
+
+            _iceServers = new List<RTCIceServer>();
         }
 
         private void Signaller_OnSignedIn()
@@ -358,6 +364,25 @@ namespace PeerConnectionClient.Signalling
                 {
                     audioTrack.Enabled = true;
                 }
+            }
+        }
+
+        public void ConfigureIceServers(Collection<IceServer> iceServers)
+        {
+            _iceServers.Clear();
+            foreach(IceServer iceServer in iceServers)
+            {
+                //Format: stun:stun.l.google.com:19302
+                string url = "stun:";
+                if (iceServer.Type == IceServer.ServerType.TURN)
+                    url = "turn:";
+                url += iceServer.Host + ":" + iceServer.Port.Value;
+                RTCIceServer server = new RTCIceServer { Url = url };
+                if(iceServer.Credential != null)
+                    server.Credential = iceServer.Credential;
+                if(iceServer.Username != null)
+                    server.Username = iceServer.Username;
+                _iceServers.Add(server);
             }
         }
     }

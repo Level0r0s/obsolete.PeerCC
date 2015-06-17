@@ -13,7 +13,16 @@
         <utilities:BoolToVisConverter x:Key="BoolToVisConverter" />
         <utilities:BoolToVisConverter Negated="True"  x:Key="BoolToVisConverterNegated" />
     </Page.Resources>
-    
+    <Page.BottomAppBar>
+        <CommandBar>
+            <CommandBar.PrimaryCommands>
+                <AppBarButton Icon="Setting"
+                              IsCompact="False"
+                              Label="Settings"
+                              HorizontalAlignment="Right" Click="AppBarButton_Click"/>
+            </CommandBar.PrimaryCommands>
+    </CommandBar>
+    </Page.BottomAppBar>
     <Grid Name="MainGrid">
         <Grid Name="VideoGrid" 
               Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}">
@@ -48,8 +57,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-				        <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -88,77 +96,15 @@
                               IsOn="{Binding CameraEnabled, Mode=TwoWay}"
                               Margin="15,0,5,0"/>
             </StackPanel>
-            <Button Content="Debug settings"
-                    HorizontalAlignment="Right"
-                    Grid.Row="3"
-                    Grid.Column="1">
-              <Button.Flyout>
-                <Flyout>
-                  <StackPanel>
-                    <ToggleSwitch Header="Tracing"
-                                  HorizontalAlignment="Center"
-                                  VerticalAlignment="Top"
-                                  IsOn="{Binding TracingEnabled, Mode=TwoWay}"/>
-                    <TextBox Header="Trace server IP"
-                             Margin="10,0,0,0"
-                             HorizontalAlignment="Center"
-                             PlaceholderText="IPv4"
-                             Text="{Binding TraceServerIp, Mode=TwoWay}"
-                             Width="155"/>
-                    <TextBox Header="Trace server port"
-                             Margin="10,0,0,0"
-                             Text="{Binding TraceServerPort, Mode=TwoWay}"
-                             HorizontalAlignment="Center"
-                             PlaceholderText="Port"
-                             Width="155"/>
-                    <CheckBox HorizontalAlignment="Center" 
-                              Margin="7,0,0,0" 
-                              Content="Autosend traces" 
-                              IsChecked="{Binding TracesAutoSendEnabled, Mode=TwoWay}"/>
-                    <Button Content="Send traces"
-                            HorizontalAlignment="Center"
-                            Command="{Binding SendTracesCommand}"/>
-                  </StackPanel>
-                </Flyout>
-              </Button.Flyout>
-            </Button>
             <TextBlock Text="Peers"
                        Margin="5"
-                       Grid.Row="4"
+                       Grid.Row="3"
                        Grid.Column="0" />
-            <ListBox Grid.Row="4"
+            <ListBox Grid.Row="3"
                      Grid.Column="1" 
                      Margin="5"
                      ItemsSource="{Binding Peers}" 
                      SelectedItem="{Binding SelectedPeer, Mode=TwoWay}" />
-            <TextBlock Text="Cam"
-                      Margin="5"
-                      Grid.Row="5"
-                      Grid.Column="0" />
-            <ListBox Grid.Row="5"
-                     Grid.Column="1"
-                     ItemsSource="{Binding Cameras}"
-                     SelectedItem="{Binding SelectedCamera, Mode=TwoWay}">
-                     <ListBox.ItemTemplate>
-                       <DataTemplate>
-                         <TextBlock Text="{Binding Name}"/>
-                       </DataTemplate>
-                     </ListBox.ItemTemplate>
-            </ListBox>
-            <TextBlock Text="Mic"
-                      Margin="5"
-                      Grid.Row="6"
-                      Grid.Column="0" />
-            <ListBox Grid.Row="6"
-                      Grid.Column="1"
-                      ItemsSource="{Binding Microphones}"
-                      SelectedItem="{Binding SelectedMicrophone, Mode=TwoWay}">
-              <ListBox.ItemTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Name}"/>
-                </DataTemplate>
-              </ListBox.ItemTemplate>
-            </ListBox>
         <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Center"
                         Grid.Row="7"
@@ -176,3 +122,4 @@
         </Grid>
     </Grid>
 </Page>
+  
