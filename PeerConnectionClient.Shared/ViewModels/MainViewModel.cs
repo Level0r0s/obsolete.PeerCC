@@ -31,6 +31,19 @@ namespace PeerConnectionClient.ViewModels
 
             webrtc_winrt_api.WebRTC.Initialize(uiDispatcher);
 
+            Cameras = new ObservableCollection<MediaDevice>();
+            Conductor.Instance.Media.OnVideoCaptureDeviceFound += (deviceInfo) => {
+               RunOnUiThread(() => {
+                  Cameras.Add(deviceInfo);
+              });
+            };
+            Microphones = new ObservableCollection<MediaDevice>();
+            Conductor.Instance.Media.OnAudioCaptureDeviceFound += (deviceInfo) => {
+              Microphones.Add(deviceInfo);
+            };
+
+            Conductor.Instance.Media.EnumerateAudioVideoCaptureDevices();
+
             Conductor.Instance.Signaller.OnPeerConnected += (peerId, peerName) =>
             {
                 RunOnUiThread(() =>
@@ -369,6 +382,48 @@ namespace PeerConnectionClient.ViewModels
                 }
             }
         }
+
+		private ObservableCollection<MediaDevice> _cameras;
+        public ObservableCollection<MediaDevice> Cameras {
+          get {
+            return _cameras;
+          }
+          set {
+            _cameras = value;
+            NotifyPropertyChanged();
+          }
+        }
+
+        private MediaDevice _selectedCamera;
+        public MediaDevice SelectedCamera {
+          get { return _selectedCamera; }
+          set {
+            _selectedCamera = value;
+            Conductor.Instance.Media.SelectVideoDevice(_selectedCamera);
+            NotifyPropertyChanged();
+          }
+        }
+
+        private ObservableCollection<MediaDevice> _microphones;
+        public ObservableCollection<MediaDevice> Microphones {
+          get {
+            return _microphones;
+          }
+          set {
+            _microphones = value;
+            NotifyPropertyChanged();
+          }
+        }
+
+        private MediaDevice _selectedMicrophone;
+        public MediaDevice SelectedMicrophone {
+          get { return _selectedMicrophone; }
+          set {
+            _selectedMicrophone = value;
+            Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
+            NotifyPropertyChanged();
+          }
+	      }
 
         private MediaElement SelfVideo;
         private MediaElement PeerVideo;
