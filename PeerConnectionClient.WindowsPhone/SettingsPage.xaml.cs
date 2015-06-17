@@ -25,8 +25,8 @@ namespace PeerConnectionClient
   {
     public SettingsPage()
     {
-      this.InitializeComponent();
-      HardwareButtons.BackPressed += HardwareButtons_BackPressed;
+        this.InitializeComponent();
+        HardwareButtons.BackPressed += HardwareButtons_BackPressed;
     }
 
     /// <summary>
@@ -36,12 +36,12 @@ namespace PeerConnectionClient
     /// This parameter is typically used to configure the page.</param>
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-      this.DataContext = e.Parameter;
+        this.DataContext = e.Parameter;
     }
 
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
-      HardwareButtons.BackPressed -= HardwareButtons_BackPressed;
+        HardwareButtons.BackPressed -= HardwareButtons_BackPressed;
     }
 
     void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)

@@ -14,28 +14,6 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0"
                     Orientation="Vertical">
-            <StackPanel Orientation="Horizontal"
-                        HorizontalAlignment="Right" >
-                <TextBlock Text="IP"
-                           VerticalAlignment="Center"
-                           Margin="5"/>
-                <TextBox Text="{Binding Ip, Mode=TwoWay}"
-                         VerticalAlignment="Center"
-                         HorizontalContentAlignment="Center"
-                         Width="120"
-                         Margin="5" />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal"
-                        HorizontalAlignment="Right" >
-                <TextBlock Text="Port"
-                           VerticalAlignment="Center"
-                           Margin="5"/>
-                <TextBox Text="{Binding Port, Mode=TwoWay}"
-                         VerticalAlignment="Center"
-                         HorizontalContentAlignment="Center"
-                         Width="120"
-                         Margin="5" />
-            </StackPanel>
             <Button Content="Connect" 
                     Margin="5"
                     Command="{Binding ConnectCommand}"
@@ -48,43 +26,8 @@
                           HorizontalAlignment="Right"
                           VerticalAlignment="Top"
                           IsOn="{Binding CameraEnabled, Mode=TwoWay}"/>
-            <Button Content="Debug settings"
-                    HorizontalAlignment="Right">
-                <Button.Flyout>
-                    <Flyout>
-                        <StackPanel>
-                            <ToggleSwitch Header="Tracing"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Top"
-                                          IsOn="{Binding TracingEnabled, Mode=TwoWay}"/>
-                            <TextBox Header="Trace server IP"
-                                     Margin="10,0,0,0"
-                                     TextWrapping="Wrap"
-                                     HorizontalAlignment="Right"
-                                     PlaceholderText="IPv4"
-                                     Text="{Binding TraceServerIp, Mode=TwoWay}"
-                                     Width="155"/>
-                            <TextBox Header="Trace server port"
-                                     Margin="10,0,0,0"
-                                     TextWrapping="Wrap"
-                                     Text="{Binding TraceServerPort, Mode=TwoWay}"
-                                     HorizontalAlignment="Right"
-                                     PlaceholderText="Port"
-                                     Width="155"/>
-                            <CheckBox HorizontalAlignment="Left" 
-                                     Margin="7,0,0,0" 
-                                     Content="Autosend traces" 
-                                     IsChecked="{Binding TracesAutoSendEnabled, Mode=TwoWay}"/>
-                            <Button Content="Send traces"
-                                    HorizontalAlignment="Center"
-                                    Command="{Binding SendTracesCommand}"/>
-                        </StackPanel>
-                    </Flyout>
-                </Button.Flyout>
-            </Button>
-
             <TextBlock Text="Connected Peers"/>
-            <ListBox Height="70"
+            <ListBox Height="200"
                      Width="200" 
                      Margin="5" 
                      ItemsSource="{Binding Peers}"
@@ -92,28 +35,6 @@
             <Button Content="Connect To Selected Peer"
                     HorizontalAlignment="Center"
                     Command="{Binding ConnectToPeerCommand}"/>
-            <TextBlock Text="Available cameras"
-                             Margin="5"/>
-            <ListBox Height="70" Width="200"
-                     ItemsSource="{Binding Cameras}"
-                     SelectedItem="{Binding SelectedCamera, Mode=TwoWay}">
-              <ListBox.ItemTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Name}"/>
-                </DataTemplate>
-              </ListBox.ItemTemplate>
-            </ListBox>
-            <TextBlock Text="Available Microphones"
-                       Margin="5"/>
-            <ListBox Height="70" Width="200"
-                           ItemsSource="{Binding Microphones}"
-                           SelectedItem="{Binding SelectedMicrophone, Mode=TwoWay}">
-            <ListBox.ItemTemplate>
-              <DataTemplate>
-                <TextBlock Text="{Binding Name}"/>
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-            </ListBox>
             <Border BorderThickness="1" Margin="5" BorderBrush="Blue" >
                     <MediaElement Width="200"
                                   Height="120" 

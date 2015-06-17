@@ -26,7 +26,6 @@ namespace PeerConnectionClient.ViewModels
             ConnectCommand = new ActionCommand(ConnectCommandExecute, ConnectCommandCanExecute);
             ConnectToPeerCommand = new ActionCommand(ConnectToPeerCommandExecute, ConnectToPeerCommandCanExecute);
             DisconnectFromServerCommand = new ActionCommand(DisconnectFromServerExecute, DisconnectFromServerCanExecute);
-            SendTracesCommand = new ActionCommand(SendTracesExecute, SendTracesCanExecute);
             AddIceServerCommand = new ActionCommand(AddIceServerExecute, AddIceServerCanExecute);
             RemoveSelectedIceServerCommand = new ActionCommand(RemoveSelectedIceServerExecute, RemoveSelectedIceServerCanExecute);
 
@@ -254,17 +253,6 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-        private ActionCommand _sendTracesCommand;
-        public ActionCommand SendTracesCommand
-        {
-            get { return _sendTracesCommand; }
-            set
-            {
-                _sendTracesCommand = value;
-                NotifyPropertyChanged();
-            }
-        }
-
         private ActionCommand _addNewIceServerCommand;
         public ActionCommand AddIceServerCommand
         {
@@ -361,28 +349,8 @@ namespace PeerConnectionClient.ViewModels
                     else
                     {
                         webrtc_winrt_api.WebRTC.StopTracing();
-                        if(_tracesAutoSendEnabled)
-                        {
-                            SendTracesExecute(null);
-                        }
+                        webrtc_winrt_api.WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
                     }
-                    SendTracesCommand.RaiseCanExecuteChanged();
-                    NotifyPropertyChanged();
-                }
-            }
-        }
-
-        private bool _tracesAutoSendEnabled = true;
-        public bool TracesAutoSendEnabled
-        {
-            get { return _tracesAutoSendEnabled; }
-            set
-            {
-                if (_tracesAutoSendEnabled != value)
-                {
-                    _tracesAutoSendEnabled = value;
-                    var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
-                    localSettings.Values["TracesAutoSendEnabled"] = _tracesAutoSendEnabled;
                     NotifyPropertyChanged();
                 }
             }
@@ -419,7 +387,7 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-		private ObservableCollection<MediaDevice> _cameras;
+		    private ObservableCollection<MediaDevice> _cameras;
         public ObservableCollection<MediaDevice> Cameras {
           get {
             return _cameras;
@@ -436,11 +404,11 @@ namespace PeerConnectionClient.ViewModels
           set {
             _selectedCamera = value;
             Conductor.Instance.Media.SelectVideoDevice(_selectedCamera);
-			NotifyPropertyChanged();
+			      NotifyPropertyChanged();
           }
         }
 		
-		private ObservableCollection<MediaDevice> _microphones;
+		    private ObservableCollection<MediaDevice> _microphones;
         public ObservableCollection<MediaDevice> Microphones {
           get {
             return _microphones;
@@ -496,12 +464,13 @@ namespace PeerConnectionClient.ViewModels
         private IceServer _SelectedIceServer;
         public IceServer SelectedIceServer
         {
-          get { return _SelectedIceServer; }
-          set { 
+            get { return _SelectedIceServer; }
+            set
+            { 
               _SelectedIceServer = value;
               NotifyPropertyChanged();
               RemoveSelectedIceServerCommand.RaiseCanExecuteChanged();
-          }
+            }
         }
 
         private IceServer _NewIceServer;
@@ -563,16 +532,6 @@ namespace PeerConnectionClient.ViewModels
                 Peers.Clear();
         }
 
-        private bool SendTracesCanExecute(object obj)
-        {
-            return !webrtc_winrt_api.WebRTC.IsTracing();
-        }
-
-        private void SendTracesExecute(object obj)
-        {
-            webrtc_winrt_api.WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
-        }
-
         private bool AddIceServerCanExecute(object obj)
         {
             return NewIceServer.Valid;
@@ -622,15 +581,6 @@ namespace PeerConnectionClient.ViewModels
                 _traceServerPort = "55000";
             }
 
-            if (settings.Values["TracesAutoSendEnabled"] != null)
-            {
-                _tracesAutoSendEnabled = (bool)settings.Values["TracesAutoSendEnabled"];
-            }
-            else
-            {
-                _tracesAutoSendEnabled = true;
-            }
-
             bool useDefaults = true;
             if(settings.Values["IceServerList"] != null)
             {
@@ -661,20 +611,6 @@ namespace PeerConnectionClient.ViewModels
             var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
             string xmlIceServers = XmlSerializer<ObservableCollection<IceServer>>.ToXml(IceServers);
             localSettings.Values["IceServerList"] = xmlIceServers;
-        }
-
-        private ValidableIntegerString _testStr = new ValidableIntegerString();
-        public ValidableIntegerString TestStr
-        {
-            get
-            {
-                return _testStr;
-            }
-            set
-            {
-                _testStr = value;
-                NotifyPropertyChanged();
-            }
         }
 
         void NewIceServer_PropertyChanged(object sender, PropertyChangedEventArgs e)

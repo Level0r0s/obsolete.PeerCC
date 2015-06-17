@@ -10,28 +10,34 @@
     Title="Audio &amp; Video"
     d:DesignWidth="346">
 
-    <!-- This StackPanel acts as a root panel for vertical layout of the content sections -->
     <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
-
-        <!-- The StackPanel(s) below define individual content sections -->
-
-        <!-- Content Section 1-->
         <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
-
-            <!-- Section 1 header -->
-            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Lorem ipsum" />
-
-            <!-- Section 1 body -->
-            <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
-                <TextBlock.Text>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                </TextBlock.Text>
-            </TextBlock>
-
+            <TextBlock Text="Available cameras"
+                             Margin="5"/>
+            <ListBox MinHeight="200" Width="200"
+                     ItemsSource="{Binding Cameras}"
+                     SelectedItem="{Binding SelectedCamera, Mode=TwoWay}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </StackPanel>
 
-        <!-- Define more Content Sections below as necessary -->
+        <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
+            <TextBlock Text="Available Microphones"
+                       Margin="5"/>
+            <ListBox MinHeight="200" Width="200"
+                     ItemsSource="{Binding Microphones}"
+                     SelectedItem="{Binding SelectedMicrophone, Mode=TwoWay}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
 
     </StackPanel>
 </SettingsFlyout>
