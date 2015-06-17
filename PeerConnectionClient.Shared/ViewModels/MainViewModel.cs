@@ -110,6 +110,8 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     IsConnectedToPeer = false;
+                    PeerVideo.Source = null;
+                    SelfVideo.Source = null;
                 });
             };
 

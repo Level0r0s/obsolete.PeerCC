@@ -105,6 +105,11 @@ namespace PeerConnectionClient.Signalling
             {
                 _peerConnection.Close();
                 _peerConnection = null;
+                _peerId = -1;
+                foreach (var track in _mediaStream.GetTracks())
+                {
+                    track.Stop();
+                }
                 _mediaStream = null;
                 if (OnPeerConnectionClosed != null)
                     OnPeerConnectionClosed();
