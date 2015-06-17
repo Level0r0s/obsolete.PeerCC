@@ -38,8 +38,10 @@ namespace PeerConnectionClient.ViewModels
               });
             };
             Microphones = new ObservableCollection<MediaDevice>();
-            Conductor.Instance.Media.OnAudioCaptureDeviceFound += (deviceInfo) => {
-              Microphones.Add(deviceInfo);
+            Conductor.Instance.Media.OnAudioCaptureDeviceFound += (deviceInfo) =>{
+                RunOnUiThread(() =>{
+                    Microphones.Add(deviceInfo);
+                });
             };
 
             Conductor.Instance.Media.EnumerateAudioVideoCaptureDevices();
