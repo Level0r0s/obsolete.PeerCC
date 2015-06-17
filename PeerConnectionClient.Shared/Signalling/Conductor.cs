@@ -134,8 +134,8 @@ namespace PeerConnectionClient.Signalling
         private Conductor()
         {
             _signaller = new Signaller();
-
             _media = new Media();
+
             Signaller.OnDisconnected += Signaller_OnDisconnected;
             Signaller.OnMessageFromPeer += Signaller_OnMessageFromPeer;
             Signaller.OnMessageSent += Signaller_OnMessageSent;
