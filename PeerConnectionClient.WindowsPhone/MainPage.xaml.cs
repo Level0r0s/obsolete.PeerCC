@@ -50,7 +50,7 @@ namespace PeerConnectionClient
 
         private void AppBarButton_Click(object sender, RoutedEventArgs e)
         {
-          this.Frame.Navigate(typeof(SettingsPage), this.DataContext);
+            this.Frame.Navigate(typeof(SettingsPage), this.DataContext);
         }
     }
 }

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using PeerConnectionClient.Utilities;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
+using PeerConnectionClient.Utilities;
 
 namespace PeerConnectionClient.Model
 {

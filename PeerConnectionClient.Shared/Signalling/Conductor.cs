@@ -8,8 +8,8 @@ using Windows.Data.Json;
 using webrtc_winrt_api;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Collections.ObjectModel;
 using PeerConnectionClient.Model;
+using System.Collections.ObjectModel;
 
 namespace PeerConnectionClient.Signalling
 {
@@ -372,7 +372,7 @@ namespace PeerConnectionClient.Signalling
             _iceServers.Clear();
             foreach(IceServer iceServer in iceServers)
             {
-                //Format: stun:stun.l.google.com:19302
+                //Url format: stun:stun.l.google.com:19302
                 string url = "stun:";
                 if (iceServer.Type == IceServer.ServerType.TURN)
                     url = "turn:";

@@ -387,7 +387,7 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-		    private ObservableCollection<MediaDevice> _cameras;
+        private ObservableCollection<MediaDevice> _cameras;
         public ObservableCollection<MediaDevice> Cameras {
           get {
             return _cameras;
@@ -404,11 +404,11 @@ namespace PeerConnectionClient.ViewModels
           set {
             _selectedCamera = value;
             Conductor.Instance.Media.SelectVideoDevice(_selectedCamera);
-			      NotifyPropertyChanged();
+            NotifyPropertyChanged();
           }
         }
-		
-		    private ObservableCollection<MediaDevice> _microphones;
+
+        private ObservableCollection<MediaDevice> _microphones;
         public ObservableCollection<MediaDevice> Microphones {
           get {
             return _microphones;
@@ -427,7 +427,7 @@ namespace PeerConnectionClient.ViewModels
             Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
             NotifyPropertyChanged();
           }
-	    }
+        }
 
         private bool _loggingEnabled = false;
         public bool LoggingEnabled

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace PeerConnectionClient.Utilities
@@ -30,7 +29,7 @@ namespace PeerConnectionClient.Utilities
                 else
                     Valid = false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Valid = false;
             }

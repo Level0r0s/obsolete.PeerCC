@@ -4,9 +4,9 @@
     xmlns:local="using:PeerConnectionClient"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:Controls="using:PeerConnectionClient.Controls"
     x:Class="PeerConnectionClient.DebugSettingsFlyout"
     xmlns:utilities="using:PeerConnectionClient.Utilities"
+    xmlns:Controls="using:PeerConnectionClient.Controls"
     mc:Ignorable="d"
     IconSource="Assets/SmallLogo.png"
     Title="Debug" Height="637" Width="213.164">
@@ -16,7 +16,7 @@
                 HorizontalAlignment="Stretch" >
         <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
             <ToggleSwitch Header="Tracing"
-				          Margin="-6,0,0,0"
+                          Margin="-6,0,0,0"
                           IsOn="{Binding TracingEnabled, Mode=TwoWay}"
                           HorizontalAlignment="Left"
                           HorizontalContentAlignment="Left"/>

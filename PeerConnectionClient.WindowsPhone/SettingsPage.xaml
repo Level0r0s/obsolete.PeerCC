@@ -20,8 +20,8 @@
             <Setter Property="Foreground" Value="{ThemeResource PhoneMidBrush}" />
             <Setter Property="Margin" Value="{ThemeResource TextControlHeaderMarginThemeThickness}"/>
         </Style>
-        
     </Page.Resources>
+    
     <ScrollViewer>
         <Grid Name="ControlsGrid"
           Margin="20,0,20,0">
@@ -50,17 +50,17 @@
                    Style="{ThemeResource SubheaderTextBlockStyle}"
                    Grid.Row="0"
                    Margin="0,25,0,0"/>
-        <TextBox Text="{Binding Ip}" 
+        <TextBox Text="{Binding Ip, Mode=TwoWay}" 
                  Header="IP"
                  Grid.Row="1"/>
-        <TextBox Text="{Binding Port}" 
+        <TextBox Text="{Binding Port, Mode=TwoWay}" 
                  Header="Port"
                  Grid.Row="2"
                  Grid.Column="0"/>
-            <TextBlock Text="ICE servers"
+        <TextBlock Text="ICE servers"
                    Grid.Row="3"
                    Style="{StaticResource TextBlockHeader}" />
-            <ListBox Grid.Row="4"
+        <ListBox Grid.Row="4"
                  Grid.Column="1"
                  ItemsSource="{Binding IceServers}"
                  SelectedItem="{Binding SelectedIceServer, Mode=TwoWay}"
@@ -134,38 +134,39 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <StackPanel Margin="20,0,0,0" HorizontalAlignment="Center">
+                                    <StackPanel Margin="20,0,0,0"
+                                                HorizontalAlignment="Center">
                                         <Controls:ErrorControl DataContext="{Binding NewIceServer.Host}">
                                             <Controls:ErrorControl.InnerContent>
                                                 <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                     Header="Server"
-    				                                 Width="160"/>
+                                                         Header="Server"
+                                                         Width="160"/>
                                             </Controls:ErrorControl.InnerContent>
                                         </Controls:ErrorControl>
                                         <ComboBox Header="Type"
-                                          ItemsSource="{Binding NewIceServer.Types}"
-                                          SelectedItem="{Binding NewIceServer.Type}"
-                                          Width="160"/>
+                                                  ItemsSource="{Binding NewIceServer.Types}"
+                                                  SelectedItem="{Binding NewIceServer.Type}"
+                                                  Width="160"/>
                                         <Controls:ErrorControl DataContext="{Binding NewIceServer.Port}">
                                             <Controls:ErrorControl.InnerContent>
                                                 <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 Header="Port"
-            				                     Width="160"/>
+                                                         Header="Port"
+                                                         Width="160"/>
                                             </Controls:ErrorControl.InnerContent>
                                         </Controls:ErrorControl>
                                         <TextBox Text="{Binding NewIceServer.Username, Mode=TwoWay}"
-                                         Header="Username"
-    				                     Width="160"/>
+                                                 Header="Username"
+                                                 Width="160"/>
                                         <PasswordBox Password="{Binding NewIceServer.Credential, Mode=TwoWay}"
-                                             Header="Credential"
-    				                         Width="160"/>
+                                                     Header="Credential"
+                                                     Width="160"/>
                                         <Button Content="&#xE105;"
-                                        FontFamily="Segoe UI Symbol"
-                                        Name="ConfirmAddButton"
-                                        Click="ConfirmAddButton_Click"
-                                        HorizontalAlignment="Center"
-                                        Command="{Binding AddIceServerCommand}"
-                                        Margin="10"/>
+                                                FontFamily="Segoe UI Symbol"
+                                                Name="ConfirmAddButton"
+                                                Click="ConfirmAddButton_Click"
+                                                HorizontalAlignment="Center"
+                                                Command="{Binding AddIceServerCommand}"
+                                                Margin="10"/>
                                     </StackPanel>
                                 </Grid>
 

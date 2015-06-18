@@ -17,11 +17,11 @@ using Windows.UI.Xaml.Navigation;
 
 namespace PeerConnectionClient.SettingsFlyouts
 {
-  public sealed partial class AudioVideoSettingsFlyout : SettingsFlyout
-  {
-    public AudioVideoSettingsFlyout()
+    public sealed partial class AudioVideoSettingsFlyout : SettingsFlyout
     {
-      this.InitializeComponent();
+        public AudioVideoSettingsFlyout()
+        {
+            this.InitializeComponent();
+        }
     }
-  }
 }
