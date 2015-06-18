@@ -68,11 +68,11 @@
                        VerticalAlignment="Center"
                        Grid.Row="1"
                        Grid.Column="0" />
-            <TextBox Text="{Binding Ip}" 
+            <TextBox Text="{Binding Ip, Mode=TwoWay}" 
                      Margin="5"
                      Grid.Row="0"
                      Grid.Column="1"/>
-            <TextBox Text="{Binding Port}" 
+            <TextBox Text="{Binding Port, Mode=TwoWay}" 
                      Margin="5"
                      Grid.Row="1"
                      Grid.Column="1"/>
