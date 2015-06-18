@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using Windows.UI.Core;
 using webrtc_winrt_api;
 using Windows.UI.Xaml.Controls;
+using PeerConnectionClient.Model;
+using System.ComponentModel;
 
 namespace PeerConnectionClient.ViewModels
 {
@@ -24,7 +26,8 @@ namespace PeerConnectionClient.ViewModels
             ConnectCommand = new ActionCommand(ConnectCommandExecute, ConnectCommandCanExecute);
             ConnectToPeerCommand = new ActionCommand(ConnectToPeerCommandExecute, ConnectToPeerCommandCanExecute);
             DisconnectFromServerCommand = new ActionCommand(DisconnectFromServerExecute, DisconnectFromServerCanExecute);
-            SendTracesCommand = new ActionCommand(SendTracesExecute, SendTracesCanExecute);
+            AddIceServerCommand = new ActionCommand(AddIceServerExecute, AddIceServerCanExecute);
+            RemoveSelectedIceServerCommand = new ActionCommand(RemoveSelectedIceServerExecute, RemoveSelectedIceServerCanExecute);
 
             SelfVideo = selfVideo;
             PeerVideo = peerVideo;
@@ -109,6 +112,10 @@ namespace PeerConnectionClient.ViewModels
                     IsConnectedToPeer = false;
                 });
             };
+
+            IceServers = new ObservableCollection<IceServer>();
+            NewIceServer = new IceServer();
+            
             LoadSettings();
         }
 
@@ -254,13 +261,24 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-        private ActionCommand _sendTracesCommand;
-        public ActionCommand SendTracesCommand
+        private ActionCommand _addNewIceServerCommand;
+        public ActionCommand AddIceServerCommand
         {
-            get { return _sendTracesCommand; }
+            get { return _addNewIceServerCommand; }
             set
             {
-                _sendTracesCommand = value;
+                _addNewIceServerCommand = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        private ActionCommand _removeSelectedIceServerCommand;
+        public ActionCommand RemoveSelectedIceServerCommand
+        {
+            get { return _removeSelectedIceServerCommand; }
+            set
+            {
+                _removeSelectedIceServerCommand = value;
                 NotifyPropertyChanged();
             }
         }
@@ -339,27 +357,8 @@ namespace PeerConnectionClient.ViewModels
                     else
                     {
                         webrtc_winrt_api.WebRTC.StopTracing();
-                        if(_tracesAutoSendEnabled)
-                        {
-                            SendTracesExecute(null);
-                        }
+                        webrtc_winrt_api.WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
                     }
-                    SendTracesCommand.RaiseCanExecuteChanged();
-                }
-            }
-        }
-
-        private bool _tracesAutoSendEnabled = true;
-        public bool TracesAutoSendEnabled
-        {
-            get { return _tracesAutoSendEnabled; }
-            set
-            {
-                if (_tracesAutoSendEnabled != value)
-                {
-                    _tracesAutoSendEnabled = value;
-                    var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
-                    localSettings.Values["TracesAutoSendEnabled"] = _tracesAutoSendEnabled;
                     NotifyPropertyChanged();
                 }
             }
@@ -396,7 +395,7 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-		private ObservableCollection<MediaDevice> _cameras;
+        private ObservableCollection<MediaDevice> _cameras;
         public ObservableCollection<MediaDevice> Cameras {
           get {
             return _cameras;
@@ -436,7 +435,63 @@ namespace PeerConnectionClient.ViewModels
             Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
             NotifyPropertyChanged();
           }
-	      }
+        }
+
+        private bool _loggingEnabled = false;
+        public bool LoggingEnabled
+        {
+            get { return _loggingEnabled; }
+            set
+            {
+                if (_loggingEnabled != value)
+                {
+                    _loggingEnabled = value;
+                    if (_loggingEnabled)
+                        webrtc_winrt_api.WebRTC.EnableLogging(LogLevel.LOGLVL_INFO);
+                    else
+                        webrtc_winrt_api.WebRTC.DisableLogging();
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        private ObservableCollection<IceServer> _IceServers;
+        public ObservableCollection<IceServer> IceServers
+        {
+          get
+          {
+            return _IceServers;
+          }
+          set
+          {
+            _IceServers = value;
+            NotifyPropertyChanged();
+          }
+        }
+
+        private IceServer _SelectedIceServer;
+        public IceServer SelectedIceServer
+        {
+            get { return _SelectedIceServer; }
+            set
+            { 
+              _SelectedIceServer = value;
+              NotifyPropertyChanged();
+              RemoveSelectedIceServerCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        private IceServer _NewIceServer;
+        public IceServer NewIceServer
+        {
+            get { return _NewIceServer; }
+            set 
+            {
+                _NewIceServer = value;
+                _NewIceServer.PropertyChanged += NewIceServer_PropertyChanged;
+                NotifyPropertyChanged();
+            }
+        }
 
         private MediaElement SelfVideo;
         private MediaElement PeerVideo;
@@ -485,15 +540,34 @@ namespace PeerConnectionClient.ViewModels
                 Peers.Clear();
         }
 
-        private bool SendTracesCanExecute(object obj)
+        private bool AddIceServerCanExecute(object obj)
         {
-            return !webrtc_winrt_api.WebRTC.IsTracing();
+            return NewIceServer.Valid;
         }
 
-        private void SendTracesExecute(object obj)
+        private void AddIceServerExecute(object obj)
         {
-            webrtc_winrt_api.WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
+            _IceServers.Add(_NewIceServer);
+            NotifyPropertyChanged("IceServers");
+            Conductor.Instance.ConfigureIceServers(IceServers);
+            SaveIceServerList();
+            NewIceServer = new IceServer();
         }
+
+        private bool RemoveSelectedIceServerCanExecute(object obj)
+        {
+            return _SelectedIceServer != null;
+        }
+
+        private void RemoveSelectedIceServerExecute(object obj)
+        {
+            _IceServers.Remove(_SelectedIceServer);
+            NotifyPropertyChanged("IceServers");
+            SaveIceServerList();
+            Conductor.Instance.ConfigureIceServers(IceServers);
+        }
+
+
         void LoadSettings()
         {
             var settings = Windows.Storage.ApplicationData.Current.LocalSettings;
@@ -515,13 +589,43 @@ namespace PeerConnectionClient.ViewModels
                 _traceServerPort = "55000";
             }
 
-            if (settings.Values["TracesAutoSendEnabled"] != null)
+            bool useDefaults = true;
+            if(settings.Values["IceServerList"] != null)
             {
-                _tracesAutoSendEnabled = (bool)settings.Values["TracesAutoSendEnabled"];
+                try
+                {
+                    IceServers = XmlSerializer<ObservableCollection<IceServer>>.FromXml((string)settings.Values["IceServerList"]);
+                    useDefaults = false;
+                }
+                catch (Exception ex)
+                {
+
+                }
             }
-            else
+            if(useDefaults)
             {
-                _tracesAutoSendEnabled = true;
+                //Default values
+                IceServers.Add(new IceServer("stun.l.google.com", "19302", IceServer.ServerType.STUN));
+                IceServers.Add(new IceServer("stun1.l.google.com", "19302", IceServer.ServerType.STUN));
+                IceServers.Add(new IceServer("stun2.l.google.com", "19302", IceServer.ServerType.STUN));
+                IceServers.Add(new IceServer("stun3.l.google.com", "19302", IceServer.ServerType.STUN));
+                IceServers.Add(new IceServer("stun4.l.google.com", "19302", IceServer.ServerType.STUN));
+            }
+            Conductor.Instance.ConfigureIceServers(IceServers);
+        }
+
+        void SaveIceServerList()
+        {
+            var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            string xmlIceServers = XmlSerializer<ObservableCollection<IceServer>>.ToXml(IceServers);
+            localSettings.Values["IceServerList"] = xmlIceServers;
+        }
+
+        void NewIceServer_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if(e.PropertyName == "Valid")
+            {
+                AddIceServerCommand.RaiseCanExecuteChanged();
             }
         }
     }

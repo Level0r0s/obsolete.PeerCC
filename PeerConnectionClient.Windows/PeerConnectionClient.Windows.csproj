@@ -103,6 +103,15 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="SettingsFlyouts\AudioVideoSettingsFlyout.xaml.cs">
+      <DependentUpon>AudioVideoSettingsFlyout.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SettingsFlyouts\ConnectionSettingsFlyout.xaml.cs">
+      <DependentUpon>ConnectionSettingsFlyout.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SettingsFlyouts\DebugSettingsFlyout.xaml.cs">
+      <DependentUpon>DebugSettingsFlyout.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -121,6 +130,18 @@
     <Content Include="Assets\StoreLogo.scale-100.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="SettingsFlyouts\AudioVideoSettingsFlyout.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SettingsFlyouts\ConnectionSettingsFlyout.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SettingsFlyouts\DebugSettingsFlyout.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
