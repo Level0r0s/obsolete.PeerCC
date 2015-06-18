@@ -28,7 +28,15 @@ namespace PeerConnectionClient.ViewModels
 
             SelfVideo = selfVideo;
             PeerVideo = peerVideo;
+            webrtc_winrt_api.WebRTC.InitializeMediaEngine().AsTask().ContinueWith((x) =>
+            {
+              this.initialize(uiDispatcher);
+            });
 
+        }
+
+        public void initialize(CoreDispatcher uiDispatcher)
+        {
             webrtc_winrt_api.WebRTC.Initialize(uiDispatcher);
 
             Cameras = new ObservableCollection<MediaDevice>();
