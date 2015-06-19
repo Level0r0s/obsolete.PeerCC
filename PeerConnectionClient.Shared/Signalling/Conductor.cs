@@ -66,7 +66,7 @@ namespace PeerConnectionClient.Signalling
 
             var config = new RTCConfiguration()
             {
-                BundlePolicy = RTCBundlePolicy.MaxCompat,
+                BundlePolicy = RTCBundlePolicy.Balanced,
                 IceTransportPolicy = RTCIceTransportPolicy.All,
                 IceServers = _iceServers
                 //IceServers = new List<RTCIceServer>() {
@@ -376,7 +376,7 @@ namespace PeerConnectionClient.Signalling
                 string url = "stun:";
                 if (iceServer.Type == IceServer.ServerType.TURN)
                     url = "turn:";
-                url += iceServer.Host + ":" + iceServer.Port.Value;
+                url += iceServer.Host.Value + ":" + iceServer.Port.Value;
                 RTCIceServer server = new RTCIceServer { Url = url };
                 if(iceServer.Credential != null)
                     server.Credential = iceServer.Credential;
