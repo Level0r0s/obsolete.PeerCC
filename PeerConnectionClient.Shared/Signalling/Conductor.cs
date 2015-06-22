@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using PeerConnectionClient.Model;
 using System.Collections.ObjectModel;
+using PeerConnectionClient.Utilities;
 
 namespace PeerConnectionClient.Signalling
 {
@@ -34,6 +35,9 @@ namespace PeerConnectionClient.Signalling
                 return _signaller;
             }
         }
+
+        public CodecInfo VideoCodec { get; set; }
+        public CodecInfo AudioCodec { get; set; }
 
         private static readonly string kCandidateSdpMidName = "sdpMid";
         private static readonly string kCandidateSdpMlineIndexName = "sdpMLineIndex";
@@ -296,6 +300,12 @@ namespace PeerConnectionClient.Signalling
             {
                 _peerId = peerId;
                 var offer = await _peerConnection.CreateOffer();
+
+                //Alter sdp to force usage of selected codecs
+                string newSdp = offer.Sdp;
+                SdpUtils.SelectCodecs(ref newSdp, AudioCodec, VideoCodec);
+                offer.Sdp = newSdp;
+
                 await _peerConnection.SetLocalDescription(offer);
                 Debug.WriteLine("Conductor: Sending offer.");
                 SendSdp(offer);
