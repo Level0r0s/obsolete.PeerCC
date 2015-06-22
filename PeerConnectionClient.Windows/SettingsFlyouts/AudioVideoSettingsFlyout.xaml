@@ -6,16 +6,26 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:Controls="using:PeerConnectionClient.Controls" 
+    xmlns:utilities="using:PeerConnectionClient.Utilities"
     mc:Ignorable="d"
     IconSource="Assets/SmallLogo.png"
     Title="Audio &amp; Video"
     d:DesignWidth="346">
+    <SettingsFlyout.Resources>
+        <Style TargetType="TextBlock" x:Name="TextBlockHeader">
+            <Setter Property="FontWeight" Value="{ThemeResource ComboBoxHeaderThemeFontWeight}" />
+            <Setter Property="Margin" Value="{ThemeResource ComboBoxHeaderThemeMargin}" />
+            <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}"/>
+            <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}"/>
+        </Style>
+        <utilities:IntToStringConverter x:Key="IntToStringConverter" />
+    </SettingsFlyout.Resources>
 
     <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
         <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
             <TextBlock Text="Available cameras"
-                             Margin="5"/>
-            <ListBox MinHeight="200" Width="200"
+                       Style="{StaticResource TextBlockHeader}"/>
+            <ListBox MinHeight="200" Width="250"
                      ItemsSource="{Binding Cameras}"
                      SelectedItem="{Binding SelectedCamera, Mode=TwoWay}">
                 <ListBox.ItemTemplate>
@@ -28,8 +38,8 @@
 
         <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
             <TextBlock Text="Available Microphones"
-                       Margin="5"/>
-            <ListBox MinHeight="200" Width="200"
+                       Style="{StaticResource TextBlockHeader}"/>
+            <ListBox MinHeight="200" Width="250"
                      ItemsSource="{Binding Microphones}"
                      SelectedItem="{Binding SelectedMicrophone, Mode=TwoWay}">
                 <ListBox.ItemTemplate>
@@ -38,6 +48,39 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+            <ComboBox Header="Audio codec"
+                      Margin="0,10,0,0"
+                      ItemsSource="{Binding AudioCodecs}"
+                      SelectedItem="{Binding SelectedAudioCodec, Mode=TwoWay}"
+                      Width="200"
+                      HorizontalAlignment="Left">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock Text="|"/>
+                            <TextBlock Text="{Binding Clockrate, Converter={StaticResource IntToStringConverter}}"/>
+                         </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox Header="Video codec"
+                      Margin="0,10,0,0"
+                      ItemsSource="{Binding VideoCodecs}"
+                      SelectedItem="{Binding SelectedVideoCodec, Mode=TwoWay}"
+                      Width="200"
+                      HorizontalAlignment="Left">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock Text="|"/>
+                            <TextBlock Text="{Binding Clockrate, Converter={StaticResource IntToStringConverter}}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+                
         </StackPanel>
 
     </StackPanel>
