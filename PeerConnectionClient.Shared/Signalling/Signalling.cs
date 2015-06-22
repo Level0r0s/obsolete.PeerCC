@@ -369,6 +369,8 @@ namespace PeerConnectionClient.Signalling
                 return true;
             }
 
+            _myId = -1;
+            _state = State.NOT_CONNECTED;
             return true;
         }
 

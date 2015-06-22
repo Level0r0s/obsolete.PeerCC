@@ -5,8 +5,13 @@
     xmlns:local="using:PeerConnectionClient"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:utilities="using:PeerConnectionClient.Utilities"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <utilities:BoolToVisConverter x:Key="BoolToVisConverter" />
+        <utilities:BoolToVisConverter Negated="True"  x:Key="BoolToVisConverterNegated" />
+    </Page.Resources>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -17,7 +22,13 @@
             <Button Content="Connect" 
                     Margin="5"
                     Command="{Binding ConnectCommand}"
-                    HorizontalAlignment="Right"/>
+                    HorizontalAlignment="Right"
+                    Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverterNegated}}"/>
+            <Button Content="Disconnect" 
+                    Margin="5"
+                    Command="{Binding DisconnectFromServerCommand}"
+                    HorizontalAlignment="Right"
+                    Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"/>
             <ToggleSwitch Header="Microphone"
                           HorizontalAlignment="Right"
                           VerticalAlignment="Top"
