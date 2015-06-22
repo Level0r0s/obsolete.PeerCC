@@ -20,6 +20,7 @@
             <Setter Property="Foreground" Value="{ThemeResource PhoneMidBrush}" />
             <Setter Property="Margin" Value="{ThemeResource TextControlHeaderMarginThemeThickness}"/>
         </Style>
+        <utilities:IntToStringConverter x:Key="IntToStringConverter" />
     </Page.Resources>
     
     <ScrollViewer>
@@ -29,6 +30,8 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -205,29 +208,64 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        <ComboBox Header="Audio codec"
+                  Grid.Row="10"
+                  Margin="0,10,0,0"
+                  ItemsSource="{Binding AudioCodecs}"
+                  SelectedItem="{Binding SelectedAudioCodec, Mode=TwoWay}"
+                  Width="200"
+                  HorizontalAlignment="Left">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Name}"/>
+                        <TextBlock Text="|"/>
+                        <TextBlock Text="{Binding Clockrate, Converter={StaticResource IntToStringConverter}}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ComboBox Header="Video codec"
+                  Grid.Row="11"
+                  Margin="0,10,0,0"
+                  ItemsSource="{Binding VideoCodecs}"
+                  SelectedItem="{Binding SelectedVideoCodec, Mode=TwoWay}"
+                  Width="200"
+                  HorizontalAlignment="Left">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Name}"/>
+                        <TextBlock Text="|"/>
+                        <TextBlock Text="{Binding Clockrate, Converter={StaticResource IntToStringConverter}}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
         <ToggleSwitch Header="Tracing"
-                      Grid.Row="10"
+                      Grid.Row="12"
                       IsOn="{Binding TracingEnabled, Mode=TwoWay}"
                       Width="Auto"
                       MinWidth="200"/>
         <TextBlock TextWrapping="Wrap"
-                   Grid.Row="11"
+                   Grid.Row="13"
                    Margin="5,0,5,10"
                    Text="Note: Traces are automatically sent upon the tracing is stopped!" />
         <TextBox Header="Trace server IP"
-                 Grid.Row="12"
+                 Grid.Row="14"
                  Grid.Column="0"
                  IsEnabled="{Binding TracingEnabled, Mode=OneWay}"
                  PlaceholderText="IPv4"
                  Text="{Binding TraceServerIp, Mode=TwoWay}"/>
         <TextBox Header="Trace server port"
-                 Grid.Row="13"
+                 Grid.Row="15"
                  Grid.Column="0"
                  Text="{Binding TraceServerPort, Mode=TwoWay}"
                  IsEnabled="{Binding TracingEnabled, Mode=OneWay}"
                  PlaceholderText="Port"/>
         <ToggleSwitch Header="Logging"
-                      Grid.Row="14"
+                      Grid.Row="16"
                       IsOn="{Binding LoggingEnabled, Mode=TwoWay}"/>
   </Grid>
     </ScrollViewer>

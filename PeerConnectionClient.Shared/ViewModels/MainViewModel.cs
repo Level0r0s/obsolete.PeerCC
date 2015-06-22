@@ -117,6 +117,22 @@ namespace PeerConnectionClient.ViewModels
 
             IceServers = new ObservableCollection<IceServer>();
             NewIceServer = new IceServer();
+
+            AudioCodecs = new ObservableCollection<CodecInfo>();
+            IList<CodecInfo> audioCodecList = new List<webrtc_winrt_api.CodecInfo>();
+            audioCodecList = webrtc_winrt_api.WebRTC.GetAudioCodecs();
+            foreach (var audioCodec in audioCodecList)
+                AudioCodecs.Add(audioCodec);
+            if (AudioCodecs.Count > 0)
+                SelectedAudioCodec = AudioCodecs.First();
+
+            VideoCodecs = new ObservableCollection<CodecInfo>();
+            IList<CodecInfo> videoCodecList = new List<CodecInfo>();
+            videoCodecList = webrtc_winrt_api.WebRTC.GetVideoCodecs();
+            foreach (var videoCodec in videoCodecList)
+                VideoCodecs.Add(videoCodec);
+            if (VideoCodecs.Count > 0)
+                SelectedVideoCodec = VideoCodecs.First();
             
             LoadSettings();
         }
@@ -495,6 +511,56 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private ObservableCollection<CodecInfo> _audioCodecs;
+
+        public ObservableCollection<CodecInfo> AudioCodecs
+        {
+            get { return _audioCodecs; }
+            set
+            {
+                _audioCodecs = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public CodecInfo SelectedAudioCodec
+        {
+            get { return Conductor.Instance.AudioCodec; }
+            set
+            {
+                if (Conductor.Instance.AudioCodec != value)
+                {
+                    Conductor.Instance.AudioCodec = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        private ObservableCollection<CodecInfo> _videoCodecs;
+
+        public ObservableCollection<CodecInfo> VideoCodecs
+        {
+            get { return _videoCodecs; }
+            set
+            {
+                _videoCodecs = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public CodecInfo SelectedVideoCodec
+        {
+            get { return Conductor.Instance.VideoCodec; }
+            set
+            {
+                if (Conductor.Instance.VideoCodec != value)
+                {
+                    Conductor.Instance.VideoCodec = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+        
         private MediaElement SelfVideo;
         private MediaElement PeerVideo;
         #endregion
