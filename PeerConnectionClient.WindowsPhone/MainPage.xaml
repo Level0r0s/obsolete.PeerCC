@@ -44,9 +44,18 @@
                     VerticalAlignment="Bottom" >
                 <MediaElement Name="SelfVideo" Width="200" Height="200" RealTimePlayback="True" />
             </Border>
-            <Button Content="Disconnect" 
-                    Command="{Binding DisconnectFromServerCommand}"
-                    Grid.Row="1" />
+            <StackPanel Orientation="Horizontal"
+                        Grid.Row="1"
+                        HorizontalAlignment="Center">
+                <Button Content="Disconnect" 
+                        Command="{Binding DisconnectFromServerCommand}"
+                        Margin="5" />
+                <Button Content="&#xE137;"
+                        FontFamily="Segoe UI Symbol"
+                        HorizontalAlignment="Center"
+                        Command="{Binding DisconnectFromPeerCommand}"
+                        Margin="5" />
+            </StackPanel>
         </Grid>
         <Grid Name="ControlsGrid"
               Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverterNegated}}">
@@ -93,6 +102,7 @@
                         Command="{Binding ConnectToPeerCommand}"
                         Margin="5"
                         HorizontalAlignment="Center"/>
+                
             </StackPanel>
         </Grid>
     </Grid>
