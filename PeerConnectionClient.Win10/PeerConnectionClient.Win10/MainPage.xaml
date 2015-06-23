@@ -62,6 +62,14 @@
                 RelativePanel.AlignBottomWithPanel="True"
                 RelativePanel.AlignLeftWithPanel="True">
         </Button>
+        <Button Content="&#xE137;"
+                FontFamily="Segoe UI Symbol"
+                HorizontalAlignment="Center"
+                Command="{Binding DisconnectFromPeerCommand}"
+                Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
+                RelativePanel.AlignBottomWithPanel="True"
+                RelativePanel.AlignLeftWithPanel="True"
+                Margin="20,0,0,60"/>
         <Border BorderThickness="1"
                 BorderBrush="Blue"
                 Margin="5" 
