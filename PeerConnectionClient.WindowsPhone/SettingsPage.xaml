@@ -20,7 +20,6 @@
             <Setter Property="Foreground" Value="{ThemeResource PhoneMidBrush}" />
             <Setter Property="Margin" Value="{ThemeResource TextControlHeaderMarginThemeThickness}"/>
         </Style>
-        <utilities:IntToStringConverter x:Key="IntToStringConverter" />
     </Page.Resources>
     
     <ScrollViewer>
@@ -220,7 +219,7 @@
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Name}"/>
                         <TextBlock Text="|"/>
-                        <TextBlock Text="{Binding Clockrate, Converter={StaticResource IntToStringConverter}}"/>
+                        <TextBlock Text="{Binding Clockrate}"/>
                     </StackPanel>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
@@ -237,7 +236,7 @@
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Name}"/>
                         <TextBlock Text="|"/>
-                        <TextBlock Text="{Binding Clockrate, Converter={StaticResource IntToStringConverter}}"/>
+                        <TextBlock Text="{Binding Clockrate}"/>
                     </StackPanel>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
