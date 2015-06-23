@@ -142,7 +142,7 @@ namespace PeerConnectionClient.ViewModels
             RunOnUiThread(() =>
                 {
                     var videoTrack = evt.Stream.GetVideoTracks().First();
-                    var source = new Media().CreateMediaStreamSource(videoTrack, 640, 480, 30);
+                    var source = new Media().CreateMediaStreamSource(videoTrack, 30);
                     PeerVideo.SetMediaStreamSource(source);
                 });
         }
@@ -171,7 +171,7 @@ namespace PeerConnectionClient.ViewModels
                 var videoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
                 if (videoTrack != null)
                 {
-                    var source = new Media().CreateMediaStreamSource(videoTrack, 640, 480, 30);
+                    var source = new Media().CreateMediaStreamSource(videoTrack, 30);
                     SelfVideo.SetMediaStreamSource(source);
                 }
             });
