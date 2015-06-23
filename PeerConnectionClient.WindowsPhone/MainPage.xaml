@@ -100,6 +100,7 @@
                 <Button Content="Disconnect" 
                         Command="{Binding DisconnectFromServerCommand}"
                         Margin="5" 
+                        HorizontalAlignment="Center"
                         Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"/>
                 <Button Content="Connect to peer"
                         Command="{Binding ConnectToPeerCommand}"
