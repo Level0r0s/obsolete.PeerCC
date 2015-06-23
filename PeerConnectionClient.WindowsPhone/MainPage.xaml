@@ -109,7 +109,6 @@
                         Command="{Binding ConnectToPeerCommand}"
                         Margin="5"
                         HorizontalAlignment="Center"/>
-                
             </StackPanel>
         </Grid>
     </Grid>
