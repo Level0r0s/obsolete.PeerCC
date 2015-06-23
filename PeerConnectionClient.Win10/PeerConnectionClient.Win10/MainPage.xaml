@@ -64,7 +64,7 @@
                 Content="Disconnect"
                 Margin="20"
                 Command="{Binding DisconnectFromServerCommand}"
-                Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"
+                Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
                 RelativePanel.AlignBottomWithPanel="True"
                 RelativePanel.AlignLeftWithPanel="True">
         </Button>
