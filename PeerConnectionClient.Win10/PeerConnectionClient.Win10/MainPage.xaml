@@ -8,12 +8,12 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <local:BoolToVisConverter x:Key="BoolToVisNegatedConverter" Negated="true"/>
+        <local:BoolToVisConverter x:Key="BoolToVisConverterNegated" Negated="true"/>
         <local:BoolToVisConverter x:Key="BoolToVisConverter" Negated="false"/>
     </Page.Resources>
     <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel x:Name="ConnectionStackPanel"
-                    Visibility="{Binding Path=IsConnectedToPeer, Converter={StaticResource BoolToVisNegatedConverter}}"
+                    Visibility="{Binding Path=IsConnectedToPeer, Converter={StaticResource BoolToVisConverterNegated}}"
                     Grid.Column="0"
                     Orientation="Vertical">
             <StackPanel Orientation="Horizontal"
@@ -41,7 +41,13 @@
             <Button Content="Connect" 
                     Margin="5"
                     Command="{Binding ConnectCommand}"
-                    HorizontalAlignment="Right"/>
+                    HorizontalAlignment="Right"
+                    Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverterNegated}}"/>
+            <Button Content="Disconnect" 
+                    Margin="5"
+                    Command="{Binding DisconnectFromServerCommand}"
+                    HorizontalAlignment="Right"
+                    Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"/>
             <TextBlock Text="Connected Peers"
                        Margin="5"/>
             <ListBox Height="320"
@@ -58,7 +64,7 @@
                 Content="Disconnect"
                 Margin="20"
                 Command="{Binding DisconnectFromServerCommand}"
-                Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"
+                Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
                 RelativePanel.AlignBottomWithPanel="True"
                 RelativePanel.AlignLeftWithPanel="True">
         </Button>
