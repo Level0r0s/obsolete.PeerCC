@@ -103,9 +103,6 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     IsConnectedToPeer = true;
-                    NotifyPropertyChanged("IsConnectedToPeer");
-                    ConnectToPeerCommand.RaiseCanExecuteChanged();
-                    DisconnectFromPeerCommand.RaiseCanExecuteChanged();
                 });
             };
 
@@ -116,9 +113,6 @@ namespace PeerConnectionClient.ViewModels
                     IsConnectedToPeer = false;
                     PeerVideo.Source = null;
                     SelfVideo.Source = null;
-                    NotifyPropertyChanged("IsConnectedToPeer");
-                    ConnectToPeerCommand.RaiseCanExecuteChanged();
-                    DisconnectFromPeerCommand.RaiseCanExecuteChanged();
                 });
             };
 
@@ -340,6 +334,8 @@ namespace PeerConnectionClient.ViewModels
             {
                 _isConnectedToPeer = value;
                 NotifyPropertyChanged();
+                ConnectToPeerCommand.RaiseCanExecuteChanged();
+                DisconnectFromPeerCommand.RaiseCanExecuteChanged();
             }
         }
 
