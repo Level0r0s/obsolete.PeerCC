@@ -317,6 +317,11 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
+        public void DisconnectFromPeer()
+        {
+            ClosePeerConnection();
+        }
+
         private string GetLocalPeerName()
         {
             var hostname = NetworkInformation.GetHostNames().FirstOrDefault(h => h.Type == HostNameType.DomainName);

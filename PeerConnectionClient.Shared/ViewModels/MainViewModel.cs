@@ -25,6 +25,7 @@ namespace PeerConnectionClient.ViewModels
         {
             ConnectCommand = new ActionCommand(ConnectCommandExecute, ConnectCommandCanExecute);
             ConnectToPeerCommand = new ActionCommand(ConnectToPeerCommandExecute, ConnectToPeerCommandCanExecute);
+            DisconnectFromPeerCommand = new ActionCommand(DisconnectFromPeerCommandExecute, DisconnectFromPeerCommandCanExecute);
             DisconnectFromServerCommand = new ActionCommand(DisconnectFromServerExecute, DisconnectFromServerCanExecute);
             AddIceServerCommand = new ActionCommand(AddIceServerExecute, AddIceServerCanExecute);
             RemoveSelectedIceServerCommand = new ActionCommand(RemoveSelectedIceServerExecute, RemoveSelectedIceServerCanExecute);
@@ -271,6 +272,17 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private ActionCommand _disconnectFromPeerCommand;
+        public ActionCommand DisconnectFromPeerCommand
+        {
+            get { return _disconnectFromPeerCommand; }
+            set
+            {
+                _disconnectFromPeerCommand = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         private ActionCommand _disconnectFromServerCommand;
         public ActionCommand DisconnectFromServerCommand
         {
@@ -325,6 +337,8 @@ namespace PeerConnectionClient.ViewModels
             {
                 _isConnectedToPeer = value;
                 NotifyPropertyChanged();
+                ConnectToPeerCommand.RaiseCanExecuteChanged();
+                DisconnectFromPeerCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -583,7 +597,7 @@ namespace PeerConnectionClient.ViewModels
 
         private bool ConnectToPeerCommandCanExecute(object obj)
         {
-            return SelectedPeer != null && Peers.Contains(SelectedPeer);
+            return SelectedPeer != null && Peers.Contains(SelectedPeer) && !IsConnectedToPeer;
         }
 
         private void ConnectToPeerCommandExecute(object obj)
@@ -591,6 +605,19 @@ namespace PeerConnectionClient.ViewModels
             new Task(() =>
             {
                 Conductor.Instance.ConnectToPeer(SelectedPeer.Id);
+            }).Start();
+        }
+
+        private bool DisconnectFromPeerCommandCanExecute(object obj)
+        {
+            return IsConnectedToPeer;
+        }
+
+        private void DisconnectFromPeerCommandExecute(object obj)
+        {
+            new Task(() =>
+            {
+                Conductor.Instance.DisconnectFromPeer();
             }).Start();
         }
 
