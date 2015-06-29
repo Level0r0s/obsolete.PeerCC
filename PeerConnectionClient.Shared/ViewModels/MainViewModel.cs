@@ -12,6 +12,7 @@ using webrtc_winrt_api;
 using Windows.UI.Xaml.Controls;
 using PeerConnectionClient.Model;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace PeerConnectionClient.ViewModels
 {
@@ -27,7 +28,6 @@ namespace PeerConnectionClient.ViewModels
             ConnectToPeerCommand = new ActionCommand(ConnectToPeerCommandExecute, ConnectToPeerCommandCanExecute);
             DisconnectFromPeerCommand = new ActionCommand(DisconnectFromPeerCommandExecute, DisconnectFromPeerCommandCanExecute);
             DisconnectFromServerCommand = new ActionCommand(DisconnectFromServerExecute, DisconnectFromServerCanExecute);
-            AddIceServerCommand = new ActionCommand(AddIceServerExecute, AddIceServerCanExecute);
             RemoveSelectedIceServerCommand = new ActionCommand(RemoveSelectedIceServerExecute, RemoveSelectedIceServerCanExecute);
 
             Ip = new ValidableNonEmptyString("23.96.124.41");//Temporary: Our Azure server.
@@ -35,7 +35,6 @@ namespace PeerConnectionClient.ViewModels
 
             SelfVideo = selfVideo;
             PeerVideo = peerVideo;
-
 
             webrtc_winrt_api.WebRTC.RequestAccessForMediaCapture().AsTask().ContinueWith(antecedent =>
             {
@@ -54,11 +53,16 @@ namespace PeerConnectionClient.ViewModels
                 }
             });
             
+            Initialize(uiDispatcher);
         }
 
         public void Initialize(CoreDispatcher uiDispatcher)
         {
+            webrtc_winrt_api.WebRTC.OnInitializeSucceeded += WebRTCInitSucceeded;
             webrtc_winrt_api.WebRTC.Initialize(uiDispatcher);
+        public void WebRTCInitSucceeded()
+        {
+            Debug.WriteLine("WebRTC init succeeded");
             Cameras = new ObservableCollection<MediaDevice>();
             Conductor.Instance.Media.OnVideoCaptureDeviceFound += (deviceInfo) => {
                RunOnUiThread(() => {
