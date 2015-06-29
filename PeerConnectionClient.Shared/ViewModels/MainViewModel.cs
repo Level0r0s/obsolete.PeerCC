@@ -12,6 +12,7 @@ using webrtc_winrt_api;
 using Windows.UI.Xaml.Controls;
 using PeerConnectionClient.Model;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace PeerConnectionClient.ViewModels
 {
@@ -27,7 +28,6 @@ namespace PeerConnectionClient.ViewModels
             ConnectToPeerCommand = new ActionCommand(ConnectToPeerCommandExecute, ConnectToPeerCommandCanExecute);
             DisconnectFromPeerCommand = new ActionCommand(DisconnectFromPeerCommandExecute, DisconnectFromPeerCommandCanExecute);
             DisconnectFromServerCommand = new ActionCommand(DisconnectFromServerExecute, DisconnectFromServerCanExecute);
-            AddIceServerCommand = new ActionCommand(AddIceServerExecute, AddIceServerCanExecute);
             RemoveSelectedIceServerCommand = new ActionCommand(RemoveSelectedIceServerExecute, RemoveSelectedIceServerCanExecute);
 
             Ip = new ValidableNonEmptyString("23.96.124.41");//Temporary: Our Azure server.
@@ -35,17 +35,19 @@ namespace PeerConnectionClient.ViewModels
 
             SelfVideo = selfVideo;
             PeerVideo = peerVideo;
-            webrtc_winrt_api.WebRTC.InitializeMediaEngine().AsTask().ContinueWith((x) =>
-            {
-              this.initialize(uiDispatcher);
-            });
 
+            Initialize(uiDispatcher);
         }
 
-        public void initialize(CoreDispatcher uiDispatcher)
+        public void Initialize(CoreDispatcher uiDispatcher)
         {
+            webrtc_winrt_api.WebRTC.OnInitializeSucceeded += WebRTCInitSucceeded;
             webrtc_winrt_api.WebRTC.Initialize(uiDispatcher);
+        }
 
+        public void WebRTCInitSucceeded()
+        {
+            Debug.WriteLine("WebRTC init succeeded");
             Cameras = new ObservableCollection<MediaDevice>();
             Conductor.Instance.Media.OnVideoCaptureDeviceFound += (deviceInfo) => {
                RunOnUiThread(() => {
@@ -125,20 +127,23 @@ namespace PeerConnectionClient.ViewModels
             AudioCodecs = new ObservableCollection<CodecInfo>();
             IList<CodecInfo> audioCodecList = new List<webrtc_winrt_api.CodecInfo>();
             audioCodecList = webrtc_winrt_api.WebRTC.GetAudioCodecs();
-            foreach (var audioCodec in audioCodecList)
-                AudioCodecs.Add(audioCodec);
-            if (AudioCodecs.Count > 0)
-                SelectedAudioCodec = AudioCodecs.First();
 
             VideoCodecs = new ObservableCollection<CodecInfo>();
             IList<CodecInfo> videoCodecList = new List<CodecInfo>();
             videoCodecList = webrtc_winrt_api.WebRTC.GetVideoCodecs();
-            foreach (var videoCodec in videoCodecList)
-                VideoCodecs.Add(videoCodec);
-            if (VideoCodecs.Count > 0)
-                SelectedVideoCodec = VideoCodecs.First();
-            
-            LoadSettings();
+
+            RunOnUiThread(() =>
+            {
+                foreach (var audioCodec in audioCodecList)
+                    AudioCodecs.Add(audioCodec);
+                if (AudioCodecs.Count > 0)
+                    SelectedAudioCodec = AudioCodecs.First();
+                foreach (var videoCodec in videoCodecList)
+                    VideoCodecs.Add(videoCodec);
+                if (VideoCodecs.Count > 0)
+                    SelectedVideoCodec = VideoCodecs.First();
+                 LoadSettings();
+            });
         }
 
         private void Conductor_OnAddRemoteStream(MediaStreamEvent evt)
