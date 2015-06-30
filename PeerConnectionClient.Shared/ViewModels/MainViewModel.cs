@@ -28,6 +28,7 @@ namespace PeerConnectionClient.ViewModels
             ConnectToPeerCommand = new ActionCommand(ConnectToPeerCommandExecute, ConnectToPeerCommandCanExecute);
             DisconnectFromPeerCommand = new ActionCommand(DisconnectFromPeerCommandExecute, DisconnectFromPeerCommandCanExecute);
             DisconnectFromServerCommand = new ActionCommand(DisconnectFromServerExecute, DisconnectFromServerCanExecute);
+            AddIceServerCommand = new ActionCommand(AddIceServerExecute, AddIceServerCanExecute);
             RemoveSelectedIceServerCommand = new ActionCommand(RemoveSelectedIceServerExecute, RemoveSelectedIceServerCanExecute);
 
             SelfVideo = selfVideo;
