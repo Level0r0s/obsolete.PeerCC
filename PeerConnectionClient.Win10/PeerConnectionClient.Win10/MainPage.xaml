@@ -4,13 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:PeerConnectionClient.Win10"
     xmlns:Controls="using:PeerConnectionClient.Controls"
+    xmlns:Utilities="using:PeerConnectionClient.Utilities"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
     <Page.Resources>
-        <local:BoolToVisConverter x:Key="BoolToVisConverterNegated" Negated="true"/>
-        <local:BoolToVisConverter x:Key="BoolToVisConverter" Negated="false"/>
+        <Utilities:BoolToVisConverter x:Key="BoolToVisConverterNegated" Negated="true"/>
+        <Utilities:BoolToVisConverter x:Key="BoolToVisConverter" Negated="false"/>
     </Page.Resources>
     <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel x:Name="ConnectionStackPanel"
