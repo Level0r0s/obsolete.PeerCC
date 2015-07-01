@@ -109,10 +109,18 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="BoolToVisConverter.cs" />
+    <Compile Include="ErrorControl.xaml.cs" />
+    <Compile Include="IceServer.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="NullToVisibleConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SdpUtils.cs" />
+    <Compile Include="ValidableBase.cs" />
+    <Compile Include="ValidableIntegerString.cs" />
+    <Compile Include="ValidableNonEmptyString.cs" />
+    <Compile Include="XmlSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -148,6 +156,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="ErrorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
