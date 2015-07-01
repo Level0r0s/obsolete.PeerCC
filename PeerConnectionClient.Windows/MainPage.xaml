@@ -32,11 +32,13 @@
             <ToggleSwitch Header="Microphone"
                           HorizontalAlignment="Right"
                           VerticalAlignment="Top"
-                          IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"/>
+                          IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"
+                          IsEnabled="{Binding IsMicrophoneEnabled, Mode=TwoWay}"/>
             <ToggleSwitch Header="Camera" 
                           HorizontalAlignment="Right"
                           VerticalAlignment="Top"
-                          IsOn="{Binding CameraEnabled, Mode=TwoWay}"/>
+                          IsOn="{Binding CameraEnabled, Mode=TwoWay}"
+                          IsEnabled="{Binding IsCameraEnabled, Mode=TwoWay}"/>
             <TextBlock Text="Connected Peers"/>
             <ListBox Height="200"
                      Width="200" 

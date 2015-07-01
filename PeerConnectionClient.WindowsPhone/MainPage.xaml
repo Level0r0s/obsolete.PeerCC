@@ -35,9 +35,11 @@
                     HorizontalAlignment="Center">
             <ToggleSwitch Header="Microphone"
                       IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"
+                      IsEnabled="{Binding IsMicrophoneEnabled, Mode=TwoWay}"
                       Margin="5,0,15,0"/>
             <ToggleSwitch Header="Camera"
                       IsOn="{Binding CameraEnabled, Mode=TwoWay}"
+                      IsEnabled="{Binding IsCameraEnabled, Mode=TwoWay}"
                       Margin="0,0,5,0"/>
         </StackPanel>
         <Grid Name="VideoGrid" 

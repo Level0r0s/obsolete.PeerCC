@@ -57,6 +57,8 @@ namespace PeerConnectionClient.Signalling
         List<RTCIceServer> _iceServers;
 
         private int _peerId = -1;
+        bool _videoEnabled = true;
+        bool _audioEnabled = true;
 
         public event Action<MediaStreamEvent> OnAddLocalStream;
         public event Action<MediaStreamEvent> OnRemoveLocalStream;
@@ -93,7 +95,7 @@ namespace PeerConnectionClient.Signalling
             _peerConnection.OnRemoveStream += PeerConnection_OnRemoveStream;
 
             Debug.WriteLine("Conductor: Getting user media.");
-            _mediaStream = await _media.GetUserMedia();
+            _mediaStream = await _media.GetUserMedia(_audioEnabled, _videoEnabled);
 
             Debug.WriteLine("Conductor: Adding local media stream.");
             _peerConnection.AddStream(_mediaStream);
@@ -351,6 +353,7 @@ namespace PeerConnectionClient.Signalling
                     videoTrack.Enabled = true;
                 }
             }
+            _videoEnabled = true;
         }
 
         public void DisableLocalVideoStream()
@@ -362,6 +365,7 @@ namespace PeerConnectionClient.Signalling
                     videoTrack.Enabled = false;
                 }
             }
+            _videoEnabled = false;
         }
 
         public void MuteMicrophone()
@@ -374,6 +378,7 @@ namespace PeerConnectionClient.Signalling
                     audioTrack.Enabled = false;
                 }
             }
+            _audioEnabled = false;
         }
         public void UnmuteMicrophone()
         {
@@ -385,6 +390,7 @@ namespace PeerConnectionClient.Signalling
                     audioTrack.Enabled = true;
                 }
             }
+            _audioEnabled = true;
         }
 
         public void ConfigureIceServers(Collection<IceServer> iceServers)
