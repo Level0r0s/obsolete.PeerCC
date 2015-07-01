@@ -15,10 +15,19 @@ namespace PeerConnectionClient.Utilities
             _minValue = minValue;
             _maxValue = maxValue;
         }
+
+        public ValidableIntegerString(int defaultValue, int minValue = 0, int maxValue = 100)
+        {
+            _minValue = minValue;
+            _maxValue = maxValue;
+            Value = defaultValue.ToString();
+        }
+
         public ValidableIntegerString(string defaultValue)
         {
             Value = defaultValue;
         }
+
         override protected void Validate()
         {
             try

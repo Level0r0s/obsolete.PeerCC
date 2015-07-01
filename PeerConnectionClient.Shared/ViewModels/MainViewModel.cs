@@ -30,6 +30,9 @@ namespace PeerConnectionClient.ViewModels
             AddIceServerCommand = new ActionCommand(AddIceServerExecute, AddIceServerCanExecute);
             RemoveSelectedIceServerCommand = new ActionCommand(RemoveSelectedIceServerExecute, RemoveSelectedIceServerCanExecute);
 
+            Ip = new ValidableNonEmptyString("23.96.124.41");//Temporary: Our Azure server.
+            Port = new ValidableIntegerString(8888, 0, 65535);
+
             SelfVideo = selfVideo;
             PeerVideo = peerVideo;
             webrtc_winrt_api.WebRTC.InitializeMediaEngine().AsTask().ContinueWith((x) =>
@@ -183,32 +186,25 @@ namespace PeerConnectionClient.ViewModels
 
         #region Bindings
 
-        //private string _ip = "localhost";
-        // Temporary: Our Azure server.
-        private string _ip = "23.96.124.41";
-        public string Ip
+        protected ValidableNonEmptyString _ip;
+        public ValidableNonEmptyString Ip
         {
-            get
-            {
-                return _ip;
-            }
-            set
-            {
+            get { return _ip; }
+            set {
                 _ip = value;
+                _ip.PropertyChanged += Ip_PropertyChanged;
                 NotifyPropertyChanged();
             }
         }
 
-        private string _port = "8888";
-        public string Port
+        protected ValidableIntegerString _port;
+        public ValidableIntegerString Port
         {
-            get
-            {
-                return _port;
-            }
+            get { return _port; }
             set
             {
                 _port = value;
+                _port.PropertyChanged += Port_PropertyChanged;
                 NotifyPropertyChanged();
             }
         }
@@ -584,14 +580,14 @@ namespace PeerConnectionClient.ViewModels
 
         private bool ConnectCommandCanExecute(object obj)
         {
-            return !IsConnected;
+            return !IsConnected && Ip.Valid && Port.Valid;
         }
 
         private void ConnectCommandExecute(object obj)
         {
             new Task(() =>
             {
-                Conductor.Instance.StartLogin(Ip, Port);
+                Conductor.Instance.StartLogin(Ip.Value, Port.Value);
             }).Start();
         }
 
@@ -724,6 +720,22 @@ namespace PeerConnectionClient.ViewModels
             if(e.PropertyName == "Valid")
             {
                 AddIceServerCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        void Ip_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Valid")
+            {
+                ConnectCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        void Port_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Valid")
+            {
+                ConnectCommand.RaiseCanExecuteChanged();
             }
         }
     }

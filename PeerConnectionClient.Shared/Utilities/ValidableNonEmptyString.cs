@@ -1,10 +1,15 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Text;
 
 namespace PeerConnectionClient.Utilities
 {
     public class ValidableNonEmptyString : ValidableBase<string>
     {
+        public ValidableNonEmptyString(string value = "")
+        {
+            Value = value;
+        }
         override protected void Validate()
         {
             if (Value == null || Value.Length == 0)
@@ -12,8 +17,5 @@ namespace PeerConnectionClient.Utilities
             else
                 Valid = true;
         }
-
-        protected int _minValue;
-        protected int _maxValue;
     }
 }

@@ -70,22 +70,29 @@ namespace PeerConnectionClient.Signalling
 
         public async void Connect(string server, string port, string client_name)
         {
-            if (_state != State.NOT_CONNECTED)
+            try
             {
-                OnServerConnectionFailure();
-                return;
+                if (_state != State.NOT_CONNECTED)
+                {
+                    OnServerConnectionFailure();
+                    return;
+                }
+
+                _server = new HostName(server);
+                _port = port;
+                _clientName = client_name;
+
+                _state = State.SIGNING_IN;
+                await ControlSocketRequestAsync(string.Format("GET /sign_in?{0} HTTP/1.0\r\n\r\n", client_name));
+                if (_state == State.CONNECTED)
+                {
+                    // Start the long polling loop without await.
+                    HangingGetReadLoopAsync();
+                }
             }
-
-            _server = new HostName(server);
-            _port = port;
-            _clientName = client_name;
-
-            _state = State.SIGNING_IN;
-            await ControlSocketRequestAsync(string.Format("GET /sign_in?{0} HTTP/1.0\r\n\r\n", client_name));
-            if (_state == State.CONNECTED)
+            catch(Exception ex)
             {
-                // Start the long polling loop without await.
-                HangingGetReadLoopAsync();
+                Debug.WriteLine("Failed to connect: " + ex.Message);
             }
         }
 

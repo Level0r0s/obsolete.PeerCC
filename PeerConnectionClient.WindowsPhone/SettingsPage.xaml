@@ -52,13 +52,24 @@
                    Style="{ThemeResource SubheaderTextBlockStyle}"
                    Grid.Row="0"
                    Margin="0,25,0,0"/>
-        <TextBox Text="{Binding Ip, Mode=TwoWay}" 
-                 Header="IP"
-                 Grid.Row="1"/>
-        <TextBox Text="{Binding Port, Mode=TwoWay}" 
-                 Header="Port"
-                 Grid.Row="2"
-                 Grid.Column="0"/>
+        <Controls:ErrorControl DataContext="{Binding Ip}"
+                               Grid.Row="1"
+                               Margin="5">
+            <Controls:ErrorControl.InnerContent>
+                <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         MinWidth="160"
+                         Header="IP"/>
+             </Controls:ErrorControl.InnerContent>
+        </Controls:ErrorControl>
+        <Controls:ErrorControl DataContext="{Binding Port}"
+                               Grid.Row="2"
+                               Margin="5">
+            <Controls:ErrorControl.InnerContent>
+                <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         MinWidth="160"
+                         Header="Port"/>
+            </Controls:ErrorControl.InnerContent>
+        </Controls:ErrorControl>
         <TextBlock Text="ICE servers"
                    Grid.Row="3"
                    Style="{StaticResource TextBlockHeader}" />

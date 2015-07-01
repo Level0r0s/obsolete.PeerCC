@@ -17,11 +17,17 @@
 
     <SettingsFlyout.Resources>
         <utilities:NullToVisibleConverter x:Key="NullToVisibleConverter" />
+        <!-- This style is copy of TextBlock Header Style `HeaderContentPresenterStyle`-->
+        <Style TargetType="TextBlock" x:Name="TextBlockHeader">
+            <Setter Property="FontWeight" Value="{ThemeResource ComboBoxHeaderThemeFontWeight}" />
+            <Setter Property="Margin" Value="{ThemeResource ComboBoxHeaderThemeMargin}" />
+            <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}"/>
+            <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}"/>
+        </Style>
     </SettingsFlyout.Resources>
     <Grid Height="Auto" Width="Auto">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -29,36 +35,31 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Text="IP"
-                   Grid.Column="0"
-                   Grid.Row="0"
-                   VerticalAlignment="Center"
-                   Margin="5"/>
-        <TextBox Text="{Binding Ip, Mode=TwoWay}"
-                 Grid.Column="1"
-                 Grid.Row="0"
-                 MinWidth="160"
-                 Margin="5"/>
-        <TextBlock Text="Port"
-                   Grid.Column="0"
-                   Grid.Row="1"
-                   VerticalAlignment="Center"
-                   Margin="5"/>
-        <TextBox Text="{Binding Port, Mode=TwoWay}"
-                 Grid.Column="1"
-                 Grid.Row="1"
-                 MinWidth="160"
-                 Margin="5"/>
+        <Controls:ErrorControl DataContext="{Binding Ip}"
+                               Grid.Row="0"
+                               Margin="5">
+            <Controls:ErrorControl.InnerContent>
+                <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         MinWidth="160"
+                         Header="IP"/>
+            </Controls:ErrorControl.InnerContent>
+        </Controls:ErrorControl>
+        <Controls:ErrorControl DataContext="{Binding Port}"
+                               Grid.Row="1"
+                               Margin="5">                         
+            <Controls:ErrorControl.InnerContent>
+                <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         MinWidth="160"
+                         Header="Port"/>
+            </Controls:ErrorControl.InnerContent>
+        </Controls:ErrorControl>
         <TextBlock Text="ICE servers"
-                   Grid.Column="0"
-                   Grid.ColumnSpan="2"
                    Grid.Row="2"
                    VerticalAlignment="Center"
-                   Margin="5"/>
+                   Margin="5"
+                   Style="{StaticResource TextBlockHeader}"/>
         <ListBox Grid.Row="3"
-                 Grid.Column="1"
                  ItemsSource="{Binding IceServers}"
                  SelectedItem="{Binding SelectedIceServer, Mode=TwoWay}"
                  MinWidth="160"
@@ -111,7 +112,7 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <StackPanel Grid.Row="4" Grid.Column="1">
+        <StackPanel Grid.Row="4">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>

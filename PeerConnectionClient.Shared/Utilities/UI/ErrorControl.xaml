@@ -16,23 +16,22 @@
     <Grid>
         <ContentPresenter x:Name="MyPresenter" />
         <Button x:Name="LeftButton"
-                Width="32"
-                Height="32"
+                Width="12"
+                Height="12"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
                 IsTabStop="False"
                 Opacity="1"
-                RenderTransformOrigin="0.5,0.5"
                 Style="{StaticResource TextBlockButtonStyle}">
             <Button.RenderTransform>
-                <CompositeTransform TranslateX="-40" />
+                <CompositeTransform TranslateX="-14" TranslateY="-14" />
             </Button.RenderTransform>
             <Button.Flyout>
                 <Flyout Placement="Right">
                     <ItemsControl ItemsSource="{Binding Errors}" />
                 </Flyout>
             </Button.Flyout>
-            <Ellipse Margin="10"
+            <Ellipse Margin="2"
                Fill="Red"
                Visibility="{Binding Valid, Converter={StaticResource BoolToVisConverterNegated}}"
                Stretch="Uniform" />
