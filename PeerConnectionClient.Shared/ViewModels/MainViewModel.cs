@@ -12,6 +12,7 @@ using webrtc_winrt_api;
 using Windows.UI.Xaml.Controls;
 using PeerConnectionClient.Model;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace PeerConnectionClient.ViewModels
 {
@@ -125,19 +126,23 @@ namespace PeerConnectionClient.ViewModels
             AudioCodecs = new ObservableCollection<CodecInfo>();
             IList<CodecInfo> audioCodecList = new List<webrtc_winrt_api.CodecInfo>();
             audioCodecList = webrtc_winrt_api.WebRTC.GetAudioCodecs();
-            foreach (var audioCodec in audioCodecList)
-                AudioCodecs.Add(audioCodec);
-            if (AudioCodecs.Count > 0)
-                SelectedAudioCodec = AudioCodecs.First();
 
             VideoCodecs = new ObservableCollection<CodecInfo>();
             IList<CodecInfo> videoCodecList = new List<CodecInfo>();
             videoCodecList = webrtc_winrt_api.WebRTC.GetVideoCodecs();
-            foreach (var videoCodec in videoCodecList)
-                VideoCodecs.Add(videoCodec);
-            if (VideoCodecs.Count > 0)
-                SelectedVideoCodec = VideoCodecs.First();
-            
+
+            RunOnUiThread(() =>
+            {
+                foreach (var audioCodec in audioCodecList)
+                    AudioCodecs.Add(audioCodec);
+                if (AudioCodecs.Count > 0)
+                    SelectedAudioCodec = AudioCodecs.First();
+
+                foreach (var videoCodec in videoCodecList)
+                    VideoCodecs.Add(videoCodec);
+                if (VideoCodecs.Count > 0)
+                    SelectedVideoCodec = VideoCodecs.First();
+            });
             LoadSettings();
         }
 
@@ -665,46 +670,50 @@ namespace PeerConnectionClient.ViewModels
         void LoadSettings()
         {
             var settings = Windows.Storage.ApplicationData.Current.LocalSettings;
+
+            //Default values:
+            string config_traceServerIp = "127.0.0.1";
+            string config_traceServerPort = "55000";
+
+            ObservableCollection<IceServer> config_iceServers = new ObservableCollection<IceServer>(); ;
+
             if(settings.Values["TraceServerIp"] != null)
             {
-                _traceServerIp = (string)settings.Values["TraceServerIp"];
-            }
-            else
-            {
-                _traceServerIp = "127.0.0.1";
+                config_traceServerIp = (string)settings.Values["TraceServerIp"];
             }
 
             if (settings.Values["TraceServerPort"] != null)
             {
-                _traceServerPort = (string)settings.Values["TraceServerPort"];
-            }
-            else
-            {
-                _traceServerPort = "55000";
+                config_traceServerPort = (string)settings.Values["TraceServerPort"];
             }
 
-            bool useDefaults = true;
             if(settings.Values["IceServerList"] != null)
             {
                 try
                 {
-                    IceServers = XmlSerializer<ObservableCollection<IceServer>>.FromXml((string)settings.Values["IceServerList"]);
-                    useDefaults = false;
+                    config_iceServers = XmlSerializer<ObservableCollection<IceServer>>.FromXml((string)settings.Values["IceServerList"]);
                 }
                 catch (Exception ex)
                 {
+                    Debug.WriteLine("Failed to load IceServer from config, using defaults (ex=" + ex.Message + ")");
+                    config_iceServers.Clear();
 
+                    //Default values:
+                    config_iceServers.Add(new IceServer("stun.l.google.com", "19302", IceServer.ServerType.STUN));
+                    config_iceServers.Add(new IceServer("stun1.l.google.com", "19302", IceServer.ServerType.STUN));
+                    config_iceServers.Add(new IceServer("stun2.l.google.com", "19302", IceServer.ServerType.STUN));
+                    config_iceServers.Add(new IceServer("stun3.l.google.com", "19302", IceServer.ServerType.STUN));
+                    config_iceServers.Add(new IceServer("stun4.l.google.com", "19302", IceServer.ServerType.STUN));
                 }
             }
-            if(useDefaults)
+
+            RunOnUiThread(() =>
             {
-                //Default values
-                IceServers.Add(new IceServer("stun.l.google.com", "19302", IceServer.ServerType.STUN));
-                IceServers.Add(new IceServer("stun1.l.google.com", "19302", IceServer.ServerType.STUN));
-                IceServers.Add(new IceServer("stun2.l.google.com", "19302", IceServer.ServerType.STUN));
-                IceServers.Add(new IceServer("stun3.l.google.com", "19302", IceServer.ServerType.STUN));
-                IceServers.Add(new IceServer("stun4.l.google.com", "19302", IceServer.ServerType.STUN));
-            }
+                IceServers = config_iceServers;
+                TraceServerIp = config_traceServerIp;
+                TraceServerPort = config_traceServerPort;
+            });
+
             Conductor.Instance.ConfigureIceServers(IceServers);
         }
 
