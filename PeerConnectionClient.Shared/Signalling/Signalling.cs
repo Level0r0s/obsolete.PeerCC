@@ -292,62 +292,70 @@ namespace PeerConnectionClient.Signalling
 
         private async Task HangingGetReadLoopAsync()
         {
-            while (true)
+            while (_state != State.NOT_CONNECTED)
             {
                 using (_hangingGetSocket = new StreamSocket())
                 {
-                    // Connect to the server
-                    await _hangingGetSocket.ConnectAsync(_server, _port);
-                    // Send the request
-                    _hangingGetSocket.WriteStringAsync(String.Format("GET /wait?peer_id={0} HTTP/1.0\r\n\r\n", _myId));
-
-                    // Read the response.
-                    var readResult = await ReadIntoBufferAsync(_hangingGetSocket);
-                    if (readResult == null)
-                        return;
-
-                    string buffer = readResult.Item1;
-                    int content_length = readResult.Item2;
-
-                    int peer_id, eoh;
-                    if (!ParseServerResponse(buffer, out peer_id, out eoh))
-                        return;
-
-                    // Store the position where the body begins.
-                    int pos = eoh + 4;
-
-                    if (_myId == peer_id)
+                    try
                     {
-                        // A notification about a new member or a member that just
-                        // disconnected.
-                        int id = 0;
-                        string name = "";
-                        bool connected = false;
-                        if (ParseEntry(buffer.Substring(pos), ref name, ref id, ref connected))
+
+                        // Connect to the server
+                        await _hangingGetSocket.ConnectAsync(_server, _port);
+                        // Send the request
+                        _hangingGetSocket.WriteStringAsync(String.Format("GET /wait?peer_id={0} HTTP/1.0\r\n\r\n", _myId));
+
+                        // Read the response.
+                        var readResult = await ReadIntoBufferAsync(_hangingGetSocket);
+                        if (readResult == null)
+                            return;
+
+                        string buffer = readResult.Item1;
+                        int content_length = readResult.Item2;
+
+                        int peer_id, eoh;
+                        if (!ParseServerResponse(buffer, out peer_id, out eoh))
+                            return;
+
+                        // Store the position where the body begins.
+                        int pos = eoh + 4;
+
+                        if (_myId == peer_id)
                         {
-                            if (connected)
+                            // A notification about a new member or a member that just
+                            // disconnected.
+                            int id = 0;
+                            string name = "";
+                            bool connected = false;
+                            if (ParseEntry(buffer.Substring(pos), ref name, ref id, ref connected))
                             {
-                                _peers[id] = name;
-                                OnPeerConnected(id, name);
+                                if (connected)
+                                {
+                                    _peers[id] = name;
+                                    OnPeerConnected(id, name);
+                                }
+                                else
+                                {
+                                    _peers.Remove(id);
+                                    OnPeerDisconnected(id);
+                                }
                             }
-                            else
-                            {
-                                _peers.Remove(id);
-                                OnPeerDisconnected(id);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        string message = buffer.Substring(pos);
-                        if (message == "BYE")
-                        {
-                            OnPeerDisconnected(peer_id);
                         }
                         else
                         {
-                            OnMessageFromPeer(peer_id, message);
+                            string message = buffer.Substring(pos);
+                            if (message == "BYE")
+                            {
+                                OnPeerDisconnected(peer_id);
+                            }
+                            else
+                            {
+                                OnMessageFromPeer(peer_id, message);
+                            }
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine("SIGNALLING LONG-POLLING EXCEPTION: {0}", e.Message);
                     }
                 }
             }
