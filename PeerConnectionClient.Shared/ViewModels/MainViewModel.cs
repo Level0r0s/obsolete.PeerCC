@@ -125,20 +125,25 @@ namespace PeerConnectionClient.ViewModels
             AudioCodecs = new ObservableCollection<CodecInfo>();
             IList<CodecInfo> audioCodecList = new List<webrtc_winrt_api.CodecInfo>();
             audioCodecList = webrtc_winrt_api.WebRTC.GetAudioCodecs();
-            foreach (var audioCodec in audioCodecList)
-                AudioCodecs.Add(audioCodec);
-            if (AudioCodecs.Count > 0)
-                SelectedAudioCodec = AudioCodecs.First();
 
             VideoCodecs = new ObservableCollection<CodecInfo>();
             IList<CodecInfo> videoCodecList = new List<CodecInfo>();
             videoCodecList = webrtc_winrt_api.WebRTC.GetVideoCodecs();
-            foreach (var videoCodec in videoCodecList)
-                VideoCodecs.Add(videoCodec);
-            if (VideoCodecs.Count > 0)
-                SelectedVideoCodec = VideoCodecs.First();
-            
-            LoadSettings();
+
+            RunOnUiThread(() =>
+            {
+                foreach (var audioCodec in audioCodecList)
+                    AudioCodecs.Add(audioCodec);
+                if (AudioCodecs.Count > 0)
+                    SelectedAudioCodec = AudioCodecs.First();
+
+                foreach (var videoCodec in videoCodecList)
+                    VideoCodecs.Add(videoCodec);
+                if (VideoCodecs.Count > 0)
+                    SelectedVideoCodec = VideoCodecs.First();
+
+                LoadSettings();
+            });
         }
 
         private void Conductor_OnAddRemoteStream(MediaStreamEvent evt)
