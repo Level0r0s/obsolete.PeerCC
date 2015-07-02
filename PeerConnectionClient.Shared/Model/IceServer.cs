@@ -31,6 +31,7 @@ namespace PeerConnectionClient.Model
 
         public enum ServerType { STUN, TURN };
 
+        [XmlIgnoreAttribute]
         public IEnumerable<ServerType> Types
         {
             get
