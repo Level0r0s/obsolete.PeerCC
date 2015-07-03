@@ -37,6 +37,7 @@ namespace PeerConnectionClient.ViewModels
             SelfVideo = selfVideo;
             PeerVideo = peerVideo;
 
+
             webrtc_winrt_api.WebRTC.RequestAccessForMediaCapture().AsTask().ContinueWith(antecedent =>
             {
                 if (antecedent.Result)
@@ -54,15 +55,11 @@ namespace PeerConnectionClient.ViewModels
                 }
             });
             
-            Initialize(uiDispatcher);
         }
 
         public void Initialize(CoreDispatcher uiDispatcher)
         {
-            webrtc_winrt_api.WebRTC.OnInitializeSucceeded += WebRTCInitSucceeded;
             webrtc_winrt_api.WebRTC.Initialize(uiDispatcher);
-        public void WebRTCInitSucceeded()
-        {
             Debug.WriteLine("WebRTC init succeeded");
             Cameras = new ObservableCollection<MediaDevice>();
             Conductor.Instance.Media.OnVideoCaptureDeviceFound += (deviceInfo) => {
