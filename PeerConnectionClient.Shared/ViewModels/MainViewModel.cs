@@ -123,6 +123,8 @@ namespace PeerConnectionClient.ViewModels
                 {
                     IsConnectedToPeer = true;
                     KeepScreenOnRequest.RequestActive();
+                    NotifyPropertyChanged("IsMicrophoneEnabled");
+                    NotifyPropertyChanged("IsCameraEnabled");
                 });
             };
 
@@ -134,6 +136,8 @@ namespace PeerConnectionClient.ViewModels
                     PeerVideo.Source = null;
                     SelfVideo.Source = null;
                     KeepScreenOnRequest.RequestRelease();
+                    NotifyPropertyChanged("IsMicrophoneEnabled");
+                    NotifyPropertyChanged("IsCameraEnabled");
                 });
             };
 
@@ -390,6 +394,18 @@ namespace PeerConnectionClient.ViewModels
                     else
                         Conductor.Instance.MuteMicrophone();
                 }
+            }
+        }
+
+        public bool IsMicrophoneEnabled {
+            get {
+                return IsConnectedToPeer ? _microphoneIsOn : true;
+            }
+        }
+
+        public bool IsCameraEnabled {
+            get {
+                return IsConnectedToPeer ? _cameraEnabled : true;
             }
         }
 
