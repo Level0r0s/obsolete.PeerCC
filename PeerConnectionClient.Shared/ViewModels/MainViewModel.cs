@@ -60,7 +60,6 @@ namespace PeerConnectionClient.ViewModels
         public void Initialize(CoreDispatcher uiDispatcher)
         {
             webrtc_winrt_api.WebRTC.Initialize(uiDispatcher);
-            Debug.WriteLine("WebRTC init succeeded");
             Cameras = new ObservableCollection<MediaDevice>();
             Conductor.Instance.Media.OnVideoCaptureDeviceFound += (deviceInfo) => {
                RunOnUiThread(() => {
