@@ -34,17 +34,29 @@ namespace PeerConnectionClient.ViewModels
             SelfVideo = selfVideo;
             PeerVideo = peerVideo;
 
-            Initialize(uiDispatcher);
+
+            webrtc_winrt_api.WebRTC.RequestAccessForMediaCapture().AsTask().ContinueWith(antecedent =>
+            {
+                if (antecedent.Result)
+                {
+                    Initialize(uiDispatcher);
+                }
+                else
+                {
+                    RunOnUiThread(async () =>
+                    {
+                        Windows.UI.Popups.MessageDialog msgDialog = new Windows.UI.Popups.MessageDialog(
+                            "Failed to obtain access to multimedia devices!");
+                        await msgDialog.ShowAsync();
+                    });
+                }
+            });
+            
         }
 
         public void Initialize(CoreDispatcher uiDispatcher)
         {
-            webrtc_winrt_api.WebRTC.OnInitializeSucceeded += WebRTCInitSucceeded;
             webrtc_winrt_api.WebRTC.Initialize(uiDispatcher);
-        }
-
-        public void WebRTCInitSucceeded()
-        {
             Debug.WriteLine("WebRTC init succeeded");
             Cameras = new ObservableCollection<MediaDevice>();
             Conductor.Instance.Media.OnVideoCaptureDeviceFound += (deviceInfo) => {
