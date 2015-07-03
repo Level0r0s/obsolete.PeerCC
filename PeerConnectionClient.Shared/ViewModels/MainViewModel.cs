@@ -12,7 +12,6 @@ using webrtc_winrt_api;
 using Windows.UI.Xaml.Controls;
 using PeerConnectionClient.Model;
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace PeerConnectionClient.ViewModels
 {
