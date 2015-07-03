@@ -153,8 +153,8 @@ namespace PeerConnectionClient.ViewModels
                     VideoCodecs.Add(videoCodec);
                 if (VideoCodecs.Count > 0)
                     SelectedVideoCodec = VideoCodecs.First();
-                 LoadSettings();
             });
+            LoadSettings();
         }
 
         private void Conductor_OnAddRemoteStream(MediaStreamEvent evt)
