@@ -699,24 +699,28 @@ namespace PeerConnectionClient.ViewModels
                 config_traceServerPort = (string)settings.Values["TraceServerPort"];
             }
 
+            bool useDefaultIceServers = true;
             if(settings.Values["IceServerList"] != null)
             {
                 try
                 {
                     config_iceServers = XmlSerializer<ObservableCollection<IceServer>>.FromXml((string)settings.Values["IceServerList"]);
+                    useDefaultIceServers = false;
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine("Failed to load IceServer from config, using defaults (ex=" + ex.Message + ")");
-                    config_iceServers.Clear();
-
-                    //Default values:
-                    config_iceServers.Add(new IceServer("stun.l.google.com", "19302", IceServer.ServerType.STUN));
-                    config_iceServers.Add(new IceServer("stun1.l.google.com", "19302", IceServer.ServerType.STUN));
-                    config_iceServers.Add(new IceServer("stun2.l.google.com", "19302", IceServer.ServerType.STUN));
-                    config_iceServers.Add(new IceServer("stun3.l.google.com", "19302", IceServer.ServerType.STUN));
-                    config_iceServers.Add(new IceServer("stun4.l.google.com", "19302", IceServer.ServerType.STUN));
                 }
+            }
+            if (useDefaultIceServers)
+            {
+                //Default values:
+                config_iceServers.Clear();
+                config_iceServers.Add(new IceServer("stun.l.google.com", "19302", IceServer.ServerType.STUN));
+                config_iceServers.Add(new IceServer("stun1.l.google.com", "19302", IceServer.ServerType.STUN));
+                config_iceServers.Add(new IceServer("stun2.l.google.com", "19302", IceServer.ServerType.STUN));
+                config_iceServers.Add(new IceServer("stun3.l.google.com", "19302", IceServer.ServerType.STUN));
+                config_iceServers.Add(new IceServer("stun4.l.google.com", "19302", IceServer.ServerType.STUN));
             }
 
             RunOnUiThread(() =>
