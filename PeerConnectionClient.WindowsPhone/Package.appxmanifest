@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest" xmlns:m3="http://schemas.microsoft.com/appx/2014/manifest" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest">
-  <Identity Name="44b19cb7-c12e-45da-b5f4-ea3282011e2d" Publisher="CN=GodAdmin" Version="1.0.0.0" />
-  <mp:PhoneIdentity PhoneProductId="44b19cb7-c12e-45da-b5f4-ea3282011e2d" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Identity Name="MacadamianTechnologies.PeerConnectionClient-Beta" Publisher="CN=0BF51448-0221-4D5C-A9D3-036C6B759273" Version="1.1.0.0" />
+  <mp:PhoneIdentity PhoneProductId="de91174e-f2df-4d1e-b060-4fc6fe152928" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>PeerConnectionClient.WindowsPhone</DisplayName>
-    <PublisherDisplayName>GodAdmin</PublisherDisplayName>
+    <DisplayName>PeerConnectionClient - Beta</DisplayName>
+    <PublisherDisplayName>Macadamian Technologies</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Prerequisites>
@@ -16,7 +16,7 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="PeerConnectionClient.WindowsPhone.App">
-      <m3:VisualElements DisplayName="PeerConnectionClient.WindowsPhone" Square150x150Logo="Assets\Logo.png" Square44x44Logo="Assets\SmallLogo.png" Description="PeerConnectionClient.WindowsPhone" ForegroundText="light" BackgroundColor="transparent">
+      <m3:VisualElements DisplayName="PeerConnectionClient Beta" Square150x150Logo="Assets\Logo.png" Square44x44Logo="Assets\SmallLogo.png" Description="PeerConnectionClient.WindowsPhone" ForegroundText="light" BackgroundColor="transparent">
         <m3:DefaultTile Wide310x150Logo="Assets\WideLogo.png" Square71x71Logo="Assets\Square71x71Logo.png">
         </m3:DefaultTile>
         <m3:SplashScreen Image="Assets\SplashScreen.png" />
