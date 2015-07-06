@@ -158,7 +158,7 @@
                                         </Controls:ErrorControl>
                                         <ComboBox Header="Type"
                                                   ItemsSource="{Binding NewIceServer.Types}"
-                                                  SelectedItem="{Binding NewIceServer.Type}"
+                                                  SelectedItem="{Binding NewIceServer.Type, Mode=TwoWay}"
                                                   Width="160"/>
                                         <Controls:ErrorControl DataContext="{Binding NewIceServer.Port}">
                                             <Controls:ErrorControl.InnerContent>
