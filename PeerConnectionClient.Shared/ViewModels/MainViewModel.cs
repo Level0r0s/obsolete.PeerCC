@@ -57,6 +57,8 @@ namespace PeerConnectionClient.ViewModels
             
         }
 
+        Windows.System.Display.DisplayRequest KeepScreenOnRequest = new Windows.System.Display.DisplayRequest();
+
         public void Initialize(CoreDispatcher uiDispatcher)
         {
             webrtc_winrt_api.WebRTC.Initialize(uiDispatcher);
@@ -120,6 +122,7 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     IsConnectedToPeer = true;
+                    KeepScreenOnRequest.RequestActive();
                 });
             };
 
@@ -130,6 +133,7 @@ namespace PeerConnectionClient.ViewModels
                     IsConnectedToPeer = false;
                     PeerVideo.Source = null;
                     SelfVideo.Source = null;
+                    KeepScreenOnRequest.RequestRelease();
                 });
             };
 
