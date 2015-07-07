@@ -11,9 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeerConnectionClient.Window
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeerConnectionClient.WindowsPhone", "PeerConnectionClient.WindowsPhone\PeerConnectionClient.WindowsPhone.csproj", "{DE05E1E8-58CD-424F-B1FA-B3AA1A1CE637}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "webrtc_winrt_api_win_phone", "..\..\..\WebRtc\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api_win_phone.vcxproj", "{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "webrtc_winrt_api", "..\..\..\WebRtc\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api.vcxproj", "{08A72A31-ED29-591B-A715-7842AD71FD3D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "webrtc_winrt_api", "..\..\..\webrtc_vso\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api.vcxproj", "{08A72A31-ED29-591B-A715-7842AD71FD3D}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -104,26 +102,6 @@ Global
 		{DE05E1E8-58CD-424F-B1FA-B3AA1A1CE637}.Release|x86.ActiveCfg = Release|x86
 		{DE05E1E8-58CD-424F-B1FA-B3AA1A1CE637}.Release|x86.Build.0 = Release|x86
 		{DE05E1E8-58CD-424F-B1FA-B3AA1A1CE637}.Release|x86.Deploy.0 = Release|x86
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Debug|ARM.ActiveCfg = Debug|ARM
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Debug|ARM.Build.0 = Debug|ARM
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Debug|Win32.ActiveCfg = Debug|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Debug|Win32.Build.0 = Debug|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Debug|x64.ActiveCfg = Debug|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Debug|x86.ActiveCfg = Debug|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Debug|x86.Build.0 = Debug|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Release|Any CPU.ActiveCfg = Release|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Release|ARM.ActiveCfg = Release|ARM
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Release|ARM.Build.0 = Release|ARM
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Release|Win32.ActiveCfg = Release|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Release|Win32.Build.0 = Release|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Release|x64.ActiveCfg = Release|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Release|x86.ActiveCfg = Release|Win32
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9}.Release|x86.Build.0 = Release|Win32
 		{08A72A31-ED29-591B-A715-7842AD71FD3D}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{08A72A31-ED29-591B-A715-7842AD71FD3D}.Debug|ARM.ActiveCfg = Debug|ARM
 		{08A72A31-ED29-591B-A715-7842AD71FD3D}.Debug|ARM.Build.0 = Debug|ARM
@@ -154,7 +132,5 @@ Global
 		{1C529FE5-1D52-4BC1-881C-59DC0AFEE4B3} = {577E856E-EB82-4690-A770-61CBDB2C214D}
 		{9667CEE9-74D1-429C-9282-75B85495DC8B} = {577E856E-EB82-4690-A770-61CBDB2C214D}
 		{DE05E1E8-58CD-424F-B1FA-B3AA1A1CE637} = {577E856E-EB82-4690-A770-61CBDB2C214D}
-		{CA2F2054-5719-FA3D-1BA4-4E616AF26DC9} = {577E856E-EB82-4690-A770-61CBDB2C214D}
-		{08A72A31-ED29-591B-A715-7842AD71FD3D} = {577E856E-EB82-4690-A770-61CBDB2C214D}
 	EndGlobalSection
 EndGlobal
