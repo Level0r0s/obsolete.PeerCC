@@ -102,6 +102,8 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     IsConnected = true;
+                    IsMicrophoneEnabled = true;
+                    IsCameraEnabled = true;
                 });
             };
 
@@ -110,6 +112,8 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     IsConnected = false;
+                    IsMicrophoneEnabled = false;
+                    IsCameraEnabled = false;
                 });
             };
 
@@ -123,8 +127,8 @@ namespace PeerConnectionClient.ViewModels
                 {
                     IsConnectedToPeer = true;
                     KeepScreenOnRequest.RequestActive();
-                    NotifyPropertyChanged("IsMicrophoneEnabled");
-                    NotifyPropertyChanged("IsCameraEnabled");
+                    IsMicrophoneEnabled = MicrophoneIsOn;
+                    IsCameraEnabled = CameraEnabled;
                 });
             };
 
@@ -136,8 +140,8 @@ namespace PeerConnectionClient.ViewModels
                     PeerVideo.Source = null;
                     SelfVideo.Source = null;
                     KeepScreenOnRequest.RequestRelease();
-                    NotifyPropertyChanged("IsMicrophoneEnabled");
-                    NotifyPropertyChanged("IsCameraEnabled");
+                    IsMicrophoneEnabled = true;
+                    IsCameraEnabled = true;
                 });
             };
 
@@ -397,15 +401,25 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private bool _isMicrophoneEnabled = true;
         public bool IsMicrophoneEnabled {
             get {
-                return IsConnectedToPeer ? _microphoneIsOn : true;
+                return _isMicrophoneEnabled;
+            }
+            set {
+                _isMicrophoneEnabled = value;
+                NotifyPropertyChanged("IsMicrophoneEnabled");
             }
         }
 
+        private bool _isCameraEnabled = true;
         public bool IsCameraEnabled {
             get {
-                return IsConnectedToPeer ? _cameraEnabled : true;
+                return _isCameraEnabled;
+            }
+            set {
+                _isCameraEnabled = value;
+                NotifyPropertyChanged("IsCameraEnabled");
             }
         }
 

@@ -33,12 +33,12 @@
                           HorizontalAlignment="Right"
                           VerticalAlignment="Top"
                           IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"
-                          IsEnabled="{Binding IsMicrophoneEnabled, Mode=TwoWay}"/>
+                          IsEnabled="{Binding IsMicrophoneEnabled, Mode=OneWay}"/>
             <ToggleSwitch Header="Camera" 
                           HorizontalAlignment="Right"
                           VerticalAlignment="Top"
                           IsOn="{Binding CameraEnabled, Mode=TwoWay}"
-                          IsEnabled="{Binding IsCameraEnabled, Mode=TwoWay}"/>
+                          IsEnabled="{Binding IsCameraEnabled, Mode=OneWay}"/>
             <TextBlock Text="Connected Peers"/>
             <ListBox Height="200"
                      Width="200" 
