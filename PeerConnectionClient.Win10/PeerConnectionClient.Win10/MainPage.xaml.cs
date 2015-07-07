@@ -29,5 +29,9 @@ namespace PeerConnectionClient.Win10
 
             this.DataContext = new MainViewModel(Dispatcher, SelfVideo, PeerVideo);
         }
+        private void ConfirmAddButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.AddButton.Flyout.Hide();
+        }
     }
 }
