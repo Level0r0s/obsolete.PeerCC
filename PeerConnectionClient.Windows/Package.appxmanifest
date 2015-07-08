@@ -16,7 +16,7 @@
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="PeerConnectionClient.Windows.App">
       <m2:VisualElements DisplayName="PeerConnectionClient.Windows" Square150x150Logo="Assets\Logo.png" Square30x30Logo="Assets\SmallLogo.png" Description="PeerConnectionClient.Windows" ForegroundText="light" BackgroundColor="#464646">
-        <m2:SplashScreen Image="Assets\SplashScreen.png" />
+        <m2:SplashScreen Image="Assets\SplashScreen.png" BackgroundColor="#464646" />
       </m2:VisualElements>
       <Extensions>
         <Extension Category="windows.backgroundTasks" EntryPoint="PeerConnectionClient.Windows.App">

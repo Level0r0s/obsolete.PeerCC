@@ -30,11 +30,18 @@ namespace PeerConnectionClient
             debugSettingsFlyout = new DebugSettingsFlyout();
             connectionSettingsFlyout = new ConnectionSettingsFlyout();
             audioVideoSettingsFlyout = new SettingsFlyouts.AudioVideoSettingsFlyout();
+            SettingsPane.GetForCurrentView().CommandsRequested += OnCommandsRequested;
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            MainViewModel mainViewModel = (MainViewModel)e.Parameter;
             this.DataContext = debugSettingsFlyout.DataContext
               = connectionSettingsFlyout.DataContext
               = audioVideoSettingsFlyout.DataContext
-              = new MainViewModel(Dispatcher, SelfVideo, PeerVideo);
-            SettingsPane.GetForCurrentView().CommandsRequested += OnCommandsRequested;
+              = mainViewModel;
+            mainViewModel.PeerVideo = PeerVideo;
+            mainViewModel.SelfVideo = SelfVideo;
         }
 
         private void OnCommandsRequested(SettingsPane sender, SettingsPaneCommandsRequestedEventArgs args)
@@ -45,7 +52,6 @@ namespace PeerConnectionClient
                 "AudioVideo", "Audio & Video", (handler) => ShowAudioVideoSettingsFlyout()));
             args.Request.ApplicationCommands.Add(new SettingsCommand(
                 "DebugSettings", "Debug", (handler) => ShowDebugSettingFlyout()));
-            
         }
 
         public void ShowDebugSettingFlyout()

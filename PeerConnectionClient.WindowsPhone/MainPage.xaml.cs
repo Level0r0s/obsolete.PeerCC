@@ -28,8 +28,6 @@ namespace PeerConnectionClient
             this.InitializeComponent();
 
             this.NavigationCacheMode = NavigationCacheMode.Required;
-
-            this.DataContext = new MainViewModel(Dispatcher, SelfVideo, PeerVideo);            
         }
 
         /// <summary>
@@ -46,6 +44,11 @@ namespace PeerConnectionClient
             // Windows.Phone.UI.Input.HardwareButtons.BackPressed event.
             // If you are using the NavigationHelper provided by some templates,
             // this event is handled for you.
+
+            MainViewModel mainViewModel = (MainViewModel)e.Parameter;
+            this.DataContext = mainViewModel;
+            mainViewModel.PeerVideo = PeerVideo;
+            mainViewModel.SelfVideo = SelfVideo;
         }
 
         private void AppBarButton_Click(object sender, RoutedEventArgs e)
