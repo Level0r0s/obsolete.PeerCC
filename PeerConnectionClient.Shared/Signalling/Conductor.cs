@@ -16,13 +16,19 @@ namespace PeerConnectionClient.Signalling
 {
     class Conductor
     {
+        private static Object _instanceLock = new Object();
         private static Conductor _instance;
         public static Conductor Instance
         {
             get
             {
+                lock (_instanceLock)
+                {
                     if (_instance == null)
+                    {
                         _instance = new Conductor();
+                    }
+                }
                 return _instance;
             }
         }
