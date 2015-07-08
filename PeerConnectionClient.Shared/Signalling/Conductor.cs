@@ -21,8 +21,8 @@ namespace PeerConnectionClient.Signalling
         {
             get
             {
-                if (_instance == null)
-                    _instance = new Conductor();
+                    if (_instance == null)
+                        _instance = new Conductor();
                 return _instance;
             }
         }
@@ -171,6 +171,7 @@ namespace PeerConnectionClient.Signalling
 
         private void Signaller_OnServerConnectionFailure()
         {
+            Debug.WriteLine("ERROR: Connection to server failed!");
         }
 
         private void Signaller_OnPeerDisconnected(int peer_id)
