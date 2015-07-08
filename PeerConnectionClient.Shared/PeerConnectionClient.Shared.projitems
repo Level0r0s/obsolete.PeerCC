@@ -16,6 +16,8 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Model\IceServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MVVM\BindableBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MVVM\DispatcherBindableBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Signalling\Conductor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Signalling\Signalling.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\ActionCommand.cs" />
@@ -30,7 +32,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\ValidableIntegerString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\ValidableBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\XmlSerializer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\BaseViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MainViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\VideoRenderViewModel.cs" />
   </ItemGroup>

@@ -1,16 +1,19 @@
-﻿using PeerConnectionClient.Utilities;
-using PeerConnectionClient.Signalling;
-using System;
-using System.Linq;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections.ObjectModel;
-using System.Text;
-using System.Windows.Input;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using Windows.Storage;
 using Windows.UI.Core;
-using webrtc_winrt_api;
+using Windows.UI.Popups;
 using Windows.UI.Xaml.Controls;
 using PeerConnectionClient.Model;
+using System.ComponentModel;
+using System.Diagnostics;
+using PeerConnectionClient.MVVM;
+using PeerConnectionClient.Signalling;
+using PeerConnectionClient.Utilities;
 using System.ComponentModel;
 using System.Diagnostics;
 using Windows.UI.Xaml;
@@ -18,7 +21,7 @@ using Windows.UI.Xaml;
 namespace PeerConnectionClient.ViewModels
 {
     public delegate void InitializedDelegate();
-    internal class MainViewModel : BaseViewModel
+    internal class MainViewModel : DispatcherBindableBase
     {
         // Take the UI dispatcher because INotifyPropertyChanged doesn't handle
         // that automatically.
@@ -48,7 +51,7 @@ namespace PeerConnectionClient.ViewModels
                 {
                     RunOnUiThread(async () =>
                     {
-                        Windows.UI.Popups.MessageDialog msgDialog = new Windows.UI.Popups.MessageDialog(
+                        var msgDialog = new MessageDialog(
                             "Failed to obtain access to multimedia devices!");
                         await msgDialog.ShowAsync();
                     });
@@ -60,16 +63,20 @@ namespace PeerConnectionClient.ViewModels
 
         public void Initialize(CoreDispatcher uiDispatcher)
         {
-            webrtc_winrt_api.WebRTC.Initialize(uiDispatcher);
+            WebRTC.Initialize(uiDispatcher);
             Cameras = new ObservableCollection<MediaDevice>();
-            Conductor.Instance.Media.OnVideoCaptureDeviceFound += (deviceInfo) => {
-               RunOnUiThread(() => {
-                  Cameras.Add(deviceInfo);
-              });
+            Conductor.Instance.Media.OnVideoCaptureDeviceFound += deviceInfo =>
+            {
+                RunOnUiThread(() =>
+                {
+                    Cameras.Add(deviceInfo);
+                });
             };
             Microphones = new ObservableCollection<MediaDevice>();
-            Conductor.Instance.Media.OnAudioCaptureDeviceFound += (deviceInfo) =>{
-                RunOnUiThread(() =>{
+            Conductor.Instance.Media.OnAudioCaptureDeviceFound += deviceInfo =>
+            {
+                RunOnUiThread(() =>
+                {
                     Microphones.Add(deviceInfo);
                 });
             };
@@ -159,12 +166,10 @@ namespace PeerConnectionClient.ViewModels
             NewIceServer = new IceServer();
 
             AudioCodecs = new ObservableCollection<CodecInfo>();
-            IList<CodecInfo> audioCodecList = new List<webrtc_winrt_api.CodecInfo>();
-            audioCodecList = webrtc_winrt_api.WebRTC.GetAudioCodecs();
+            var audioCodecList = WebRTC.GetAudioCodecs();
 
             VideoCodecs = new ObservableCollection<CodecInfo>();
-            IList<CodecInfo> videoCodecList = new List<CodecInfo>();
-            videoCodecList = webrtc_winrt_api.WebRTC.GetVideoCodecs();
+            var videoCodecList = WebRTC.GetVideoCodecs();
 
             RunOnUiThread(() =>
             {
@@ -193,7 +198,7 @@ namespace PeerConnectionClient.ViewModels
                     if (videoTrack != null)
                     {
                         var source = new Media().CreateMediaStreamSource(videoTrack, 30);
-                        PeerVideo.SetMediaStreamSource(source);
+                        _peerVideo.SetMediaStreamSource(source);
                     }
                 });
         }
@@ -202,7 +207,7 @@ namespace PeerConnectionClient.ViewModels
         {
             RunOnUiThread(() =>
             {
-                PeerVideo.SetMediaStreamSource(null);
+                _peerVideo.SetMediaStreamSource(null);
             });
         }
 
@@ -223,33 +228,33 @@ namespace PeerConnectionClient.ViewModels
                 if (videoTrack != null)
                 {
                     var source = new Media().CreateMediaStreamSource(videoTrack, 30);
-                    SelfVideo.SetMediaStreamSource(source);
+                    _selfVideo.SetMediaStreamSource(source);
                 }
             });
         }
 
         #region Bindings
 
-        protected ValidableNonEmptyString _ip;
+        private ValidableNonEmptyString _ip;
+
         public ValidableNonEmptyString Ip
         {
             get { return _ip; }
-            set {
-                _ip = value;
+            set
+            {
+                SetProperty(ref _ip, value);
                 _ip.PropertyChanged += Ip_PropertyChanged;
-                NotifyPropertyChanged();
             }
         }
 
-        protected ValidableIntegerString _port;
+        private ValidableIntegerString _port;
         public ValidableIntegerString Port
         {
             get { return _port; }
             set
             {
-                _port = value;
+                SetProperty(ref _port, value);
                 _port.PropertyChanged += Port_PropertyChanged;
-                NotifyPropertyChanged();
             }
         }
 
@@ -273,8 +278,8 @@ namespace PeerConnectionClient.ViewModels
             }
             set
             {
-                _peers = value;
-                NotifyPropertyChanged();
+                SetProperty(ref _peers, value);
+
             }
         }
 
@@ -284,8 +289,7 @@ namespace PeerConnectionClient.ViewModels
             get { return _selectedPeer; }
             set
             {
-                _selectedPeer = value;
-                NotifyPropertyChanged();
+                SetProperty(ref _selectedPeer, value);
                 ConnectToPeerCommand.RaiseCanExecuteChanged();
             }
         }
@@ -296,8 +300,7 @@ namespace PeerConnectionClient.ViewModels
             get { return _connectCommand; }
             set
             {
-                _connectCommand = value;
-                NotifyPropertyChanged();
+                SetProperty(ref _connectCommand, value);
             }
         }
 
@@ -307,8 +310,7 @@ namespace PeerConnectionClient.ViewModels
             get { return _connectToPeerCommand; }
             set
             {
-                _connectToPeerCommand = value;
-                NotifyPropertyChanged();
+                SetProperty(ref _connectToPeerCommand, value);
             }
         }
 
@@ -318,8 +320,7 @@ namespace PeerConnectionClient.ViewModels
             get { return _disconnectFromPeerCommand; }
             set
             {
-                _disconnectFromPeerCommand = value;
-                NotifyPropertyChanged();
+                SetProperty(ref _disconnectFromPeerCommand, value);
             }
         }
 
@@ -329,19 +330,17 @@ namespace PeerConnectionClient.ViewModels
             get { return _disconnectFromServerCommand; }
             set
             {
-                _disconnectFromServerCommand = value;
-                NotifyPropertyChanged();
+                SetProperty(ref _disconnectFromServerCommand, value);
             }
         }
 
-        private ActionCommand _addNewIceServerCommand;
+        private ActionCommand _addIceServerCommand;
         public ActionCommand AddIceServerCommand
         {
-            get { return _addNewIceServerCommand; }
+            get { return _addIceServerCommand; }
             set
             {
-                _addNewIceServerCommand = value;
-                NotifyPropertyChanged();
+                SetProperty(ref _addIceServerCommand, value);
             }
         }
 
@@ -351,8 +350,7 @@ namespace PeerConnectionClient.ViewModels
             get { return _removeSelectedIceServerCommand; }
             set
             {
-                _removeSelectedIceServerCommand = value;
-                NotifyPropertyChanged();
+                SetProperty(ref _removeSelectedIceServerCommand, value);
             }
         }
 
@@ -362,8 +360,7 @@ namespace PeerConnectionClient.ViewModels
             get { return _isConnected; }
             set
             {
-                _isConnected = value;
-                NotifyPropertyChanged();
+                SetProperty(ref _isConnected, value);
                 ConnectCommand.RaiseCanExecuteChanged();
                 DisconnectFromServerCommand.RaiseCanExecuteChanged();
             }
@@ -387,8 +384,7 @@ namespace PeerConnectionClient.ViewModels
             get { return _isConnectedToPeer; }
             set
             {
-                _isConnectedToPeer = value;
-                NotifyPropertyChanged();
+                SetProperty(ref _isConnectedToPeer, value);
                 ConnectToPeerCommand.RaiseCanExecuteChanged();
                 DisconnectFromPeerCommand.RaiseCanExecuteChanged();
             }
@@ -400,14 +396,11 @@ namespace PeerConnectionClient.ViewModels
             get { return _cameraEnabled; }
             set
             {
-                if (_cameraEnabled != value)
-                {
-                    _cameraEnabled = value;
-                    if (_cameraEnabled)
-                        Conductor.Instance.EnableLocalVideoStream();
-                    else
-                        Conductor.Instance.DisableLocalVideoStream();
-                }
+                if (!SetProperty(ref _cameraEnabled, value)) return;
+                if (_cameraEnabled)
+                    Conductor.Instance.EnableLocalVideoStream();
+                else
+                    Conductor.Instance.DisableLocalVideoStream();
             }
         }
 
@@ -417,36 +410,11 @@ namespace PeerConnectionClient.ViewModels
             get { return _microphoneIsOn; }
             set
             {
-                if (_microphoneIsOn != value)
-                {
-                    _microphoneIsOn = value;
-                    if (_microphoneIsOn)
-                        Conductor.Instance.UnmuteMicrophone();
-                    else
-                        Conductor.Instance.MuteMicrophone();
-                }
-            }
-        }
-
-        private bool _isMicrophoneEnabled = true;
-        public bool IsMicrophoneEnabled {
-            get {
-                return _isMicrophoneEnabled;
-            }
-            set {
-                _isMicrophoneEnabled = value;
-                NotifyPropertyChanged("IsMicrophoneEnabled");
-            }
-        }
-
-        private bool _isCameraEnabled = true;
-        public bool IsCameraEnabled {
-            get {
-                return _isCameraEnabled;
-            }
-            set {
-                _isCameraEnabled = value;
-                NotifyPropertyChanged("IsCameraEnabled");
+                if (!SetProperty(ref _microphoneIsOn, value)) return;
+                if (_microphoneIsOn)
+                    Conductor.Instance.UnmuteMicrophone();
+                else
+                    Conductor.Instance.MuteMicrophone();
             }
         }
 
@@ -456,149 +424,127 @@ namespace PeerConnectionClient.ViewModels
             get { return _tracingEnabled; }
             set
             {
-                if (_tracingEnabled != value)
+                if (!SetProperty(ref _tracingEnabled, value)) return;
+                if (_tracingEnabled)
                 {
-                    _tracingEnabled = value;
-                    if (_tracingEnabled)
-                    {
-                        webrtc_winrt_api.WebRTC.StartTracing();
-                    }
-                    else
-                    {
-                        webrtc_winrt_api.WebRTC.StopTracing();
-                        webrtc_winrt_api.WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
-                    }
-                    NotifyPropertyChanged();
+                    WebRTC.StartTracing();
                 }
+                else
+                {
+                    WebRTC.StopTracing();
+                    WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
+                }
+
             }
         }
 
-        private string _traceServerIp = "";
+        private string _traceServerIp = string.Empty;
         public string TraceServerIp
         {
             get { return _traceServerIp; }
             set
             {
-                if (_traceServerIp != value)
-                {
-                    _traceServerIp = value;
-                    var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
-                    localSettings.Values["TraceServerIp"] = _traceServerIp;
-                    NotifyPropertyChanged();
-                }
+                if (!SetProperty(ref _traceServerIp, value)) return;
+                var localSettings = ApplicationData.Current.LocalSettings;
+                localSettings.Values["TraceServerIp"] = _traceServerIp;
             }
         }
-        private string _traceServerPort = "";
+        private string _traceServerPort = string.Empty;
         public string TraceServerPort
         {
             get { return _traceServerPort; }
             set
             {
-                if (_traceServerPort != value)
-                {
-                    _traceServerPort = value;
-                    var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
-                    localSettings.Values["TraceServerPort"] = _traceServerPort;
-                    NotifyPropertyChanged();
-                }
+                if (!SetProperty(ref _traceServerPort, value)) return;
+                var localSettings = ApplicationData.Current.LocalSettings;
+                localSettings.Values["TraceServerPort"] = _traceServerPort;
             }
         }
 
         private ObservableCollection<MediaDevice> _cameras;
-        public ObservableCollection<MediaDevice> Cameras {
-          get {
-            return _cameras;
-          }
-          set {
-            _cameras = value;
-            NotifyPropertyChanged();
-          }
+        public ObservableCollection<MediaDevice> Cameras
+        {
+            get { return _cameras; }
+            set
+            {
+                SetProperty(ref _cameras, value);
+            }
         }
 
         private MediaDevice _selectedCamera;
-        public MediaDevice SelectedCamera {
-          get { return _selectedCamera; }
-          set {
-            _selectedCamera = value;
-            Conductor.Instance.Media.SelectVideoDevice(_selectedCamera);
-            NotifyPropertyChanged();
-          }
+        public MediaDevice SelectedCamera
+        {
+            get { return _selectedCamera; }
+            set
+            {
+                SetProperty(ref _selectedCamera, value);
+                Conductor.Instance.Media.SelectVideoDevice(_selectedCamera);
+            }
         }
 
         private ObservableCollection<MediaDevice> _microphones;
-        public ObservableCollection<MediaDevice> Microphones {
-          get {
-            return _microphones;
-          }
-          set {
-            _microphones = value;
-            NotifyPropertyChanged();
-          }
+        public ObservableCollection<MediaDevice> Microphones
+        {
+            get
+            {
+                return _microphones;
+            }
+            set { SetProperty(ref _microphones, value); }
         }
 
         private MediaDevice _selectedMicrophone;
-        public MediaDevice SelectedMicrophone {
-          get { return _selectedMicrophone; }
-          set {
-            _selectedMicrophone = value;
-            Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
-            NotifyPropertyChanged();
-          }
+        public MediaDevice SelectedMicrophone
+        {
+            get { return _selectedMicrophone; }
+            set
+            {
+                SetProperty(ref _selectedMicrophone, value);
+                Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
+            }
         }
 
-        private bool _loggingEnabled = false;
+        private bool _loggingEnabled;
         public bool LoggingEnabled
         {
             get { return _loggingEnabled; }
             set
             {
-                if (_loggingEnabled != value)
-                {
-                    _loggingEnabled = value;
-                    if (_loggingEnabled)
-                        webrtc_winrt_api.WebRTC.EnableLogging(LogLevel.LOGLVL_INFO);
-                    else
-                        webrtc_winrt_api.WebRTC.DisableLogging();
-                    NotifyPropertyChanged();
-                }
+                if (!SetProperty(ref _loggingEnabled, value)) return;
+                if (_loggingEnabled)
+                    WebRTC.EnableLogging(LogLevel.LOGLVL_INFO);
+                else
+                    WebRTC.DisableLogging();
             }
         }
 
-        private ObservableCollection<IceServer> _IceServers;
+        private ObservableCollection<IceServer> _iceServers;
         public ObservableCollection<IceServer> IceServers
         {
-          get
-          {
-            return _IceServers;
-          }
-          set
-          {
-            _IceServers = value;
-            NotifyPropertyChanged();
-          }
+            get { return _iceServers; }
+            set { SetProperty(ref _iceServers, value); }
         }
 
-        private IceServer _SelectedIceServer;
+        private IceServer _selectedIceServer;
         public IceServer SelectedIceServer
         {
-            get { return _SelectedIceServer; }
+            get { return _selectedIceServer; }
             set
-            { 
-              _SelectedIceServer = value;
-              NotifyPropertyChanged();
-              RemoveSelectedIceServerCommand.RaiseCanExecuteChanged();
+            {
+                SetProperty(ref _selectedIceServer, value);
+                RemoveSelectedIceServerCommand.RaiseCanExecuteChanged();
             }
         }
 
-        private IceServer _NewIceServer;
+        private IceServer _newIceServer;
         public IceServer NewIceServer
         {
-            get { return _NewIceServer; }
-            set 
+            get { return _newIceServer; }
+            set
             {
-                _NewIceServer = value;
-                _NewIceServer.PropertyChanged += NewIceServer_PropertyChanged;
-                NotifyPropertyChanged();
+                if (SetProperty(ref _newIceServer, value))
+                {
+                    _newIceServer.PropertyChanged += NewIceServer_PropertyChanged;
+                }
             }
         }
 
@@ -607,11 +553,7 @@ namespace PeerConnectionClient.ViewModels
         public ObservableCollection<CodecInfo> AudioCodecs
         {
             get { return _audioCodecs; }
-            set
-            {
-                _audioCodecs = value;
-                NotifyPropertyChanged();
-            }
+            set { SetProperty(ref _audioCodecs, value); }
         }
 
         public CodecInfo SelectedAudioCodec
@@ -619,11 +561,9 @@ namespace PeerConnectionClient.ViewModels
             get { return Conductor.Instance.AudioCodec; }
             set
             {
-                if (Conductor.Instance.AudioCodec != value)
-                {
-                    Conductor.Instance.AudioCodec = value;
-                    NotifyPropertyChanged();
-                }
+                if (Conductor.Instance.AudioCodec == value) return;
+                Conductor.Instance.AudioCodec = value;
+                OnPropertyChanged(() => SelectedAudioCodec);
             }
         }
 
@@ -632,11 +572,7 @@ namespace PeerConnectionClient.ViewModels
         public ObservableCollection<CodecInfo> VideoCodecs
         {
             get { return _videoCodecs; }
-            set
-            {
-                _videoCodecs = value;
-                NotifyPropertyChanged();
-            }
+            set { SetProperty(ref _videoCodecs, value); }
         }
 
         public CodecInfo SelectedVideoCodec
@@ -644,11 +580,9 @@ namespace PeerConnectionClient.ViewModels
             get { return Conductor.Instance.VideoCodec; }
             set
             {
-                if (Conductor.Instance.VideoCodec != value)
-                {
-                    Conductor.Instance.VideoCodec = value;
-                    NotifyPropertyChanged();
-                }
+                if (Conductor.Instance.VideoCodec == value) return;
+                Conductor.Instance.VideoCodec = value;
+                OnPropertyChanged(() => SelectedVideoCodec);
             }
         }
 
@@ -721,8 +655,8 @@ namespace PeerConnectionClient.ViewModels
 
         private void AddIceServerExecute(object obj)
         {
-            _IceServers.Add(_NewIceServer);
-            NotifyPropertyChanged("IceServers");
+            IceServers.Add(_newIceServer);
+            OnPropertyChanged(() => IceServers);
             Conductor.Instance.ConfigureIceServers(IceServers);
             SaveIceServerList();
             NewIceServer = new IceServer();
@@ -730,13 +664,13 @@ namespace PeerConnectionClient.ViewModels
 
         private bool RemoveSelectedIceServerCanExecute(object obj)
         {
-            return _SelectedIceServer != null;
+            return SelectedIceServer != null;
         }
 
         private void RemoveSelectedIceServerExecute(object obj)
         {
-            _IceServers.Remove(_SelectedIceServer);
-            NotifyPropertyChanged("IceServers");
+            IceServers.Remove(_selectedIceServer);
+            OnPropertyChanged(() => IceServers);
             SaveIceServerList();
             Conductor.Instance.ConfigureIceServers(IceServers);
         }
@@ -744,30 +678,30 @@ namespace PeerConnectionClient.ViewModels
 
         void LoadSettings()
         {
-            var settings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            var settings = ApplicationData.Current.LocalSettings;
 
             //Default values:
-            string config_traceServerIp = "127.0.0.1";
-            string config_traceServerPort = "55000";
+            var configTraceServerIp = "127.0.0.1";
+            var configTraceServerPort = "55000";
 
-            ObservableCollection<IceServer> config_iceServers = new ObservableCollection<IceServer>(); ;
+            var configIceServers = new ObservableCollection<IceServer>();
 
-            if(settings.Values["TraceServerIp"] != null)
+            if (settings.Values["TraceServerIp"] != null)
             {
-                config_traceServerIp = (string)settings.Values["TraceServerIp"];
+                configTraceServerIp = (string)settings.Values["TraceServerIp"];
             }
 
             if (settings.Values["TraceServerPort"] != null)
             {
-                config_traceServerPort = (string)settings.Values["TraceServerPort"];
+                configTraceServerPort = (string)settings.Values["TraceServerPort"];
             }
 
             bool useDefaultIceServers = true;
-            if(settings.Values["IceServerList"] != null)
+            if (settings.Values["IceServerList"] != null)
             {
                 try
                 {
-                    config_iceServers = XmlSerializer<ObservableCollection<IceServer>>.FromXml((string)settings.Values["IceServerList"]);
+                    configIceServers = XmlSerializer<ObservableCollection<IceServer>>.FromXml((string)settings.Values["IceServerList"]);
                     useDefaultIceServers = false;
                 }
                 catch (Exception ex)
@@ -778,19 +712,19 @@ namespace PeerConnectionClient.ViewModels
             if (useDefaultIceServers)
             {
                 //Default values:
-                config_iceServers.Clear();
-                config_iceServers.Add(new IceServer("stun.l.google.com", "19302", IceServer.ServerType.STUN));
-                config_iceServers.Add(new IceServer("stun1.l.google.com", "19302", IceServer.ServerType.STUN));
-                config_iceServers.Add(new IceServer("stun2.l.google.com", "19302", IceServer.ServerType.STUN));
-                config_iceServers.Add(new IceServer("stun3.l.google.com", "19302", IceServer.ServerType.STUN));
-                config_iceServers.Add(new IceServer("stun4.l.google.com", "19302", IceServer.ServerType.STUN));
+                configIceServers.Clear();
+                configIceServers.Add(new IceServer("stun.l.google.com", "19302", IceServer.ServerType.STUN));
+                configIceServers.Add(new IceServer("stun1.l.google.com", "19302", IceServer.ServerType.STUN));
+                configIceServers.Add(new IceServer("stun2.l.google.com", "19302", IceServer.ServerType.STUN));
+                configIceServers.Add(new IceServer("stun3.l.google.com", "19302", IceServer.ServerType.STUN));
+                configIceServers.Add(new IceServer("stun4.l.google.com", "19302", IceServer.ServerType.STUN));
             }
 
             RunOnUiThread(() =>
             {
-                IceServers = config_iceServers;
-                TraceServerIp = config_traceServerIp;
-                TraceServerPort = config_traceServerPort;
+                IceServers = configIceServers;
+                TraceServerIp = configTraceServerIp;
+                TraceServerPort = configTraceServerPort;
             });
 
             Conductor.Instance.ConfigureIceServers(IceServers);
@@ -798,14 +732,14 @@ namespace PeerConnectionClient.ViewModels
 
         void SaveIceServerList()
         {
-            var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            var localSettings = ApplicationData.Current.LocalSettings;
             string xmlIceServers = XmlSerializer<ObservableCollection<IceServer>>.ToXml(IceServers);
             localSettings.Values["IceServerList"] = xmlIceServers;
         }
 
         void NewIceServer_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if(e.PropertyName == "Valid")
+            if (e.PropertyName == "Valid")
             {
                 AddIceServerCommand.RaiseCanExecuteChanged();
             }

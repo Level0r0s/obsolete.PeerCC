@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using Windows.UI.Core;
+using PeerConnectionClient.MVVM;
 
 namespace PeerConnectionClient.ViewModels
 {
-    internal class VideoRenderViewModel : BaseViewModel
+    internal class VideoRenderViewModel : DispatcherBindableBase
     {
         public VideoRenderViewModel(CoreDispatcher uiDispatcher)
             : base(uiDispatcher)
@@ -21,11 +19,7 @@ namespace PeerConnectionClient.ViewModels
             {
                 return _disconnectCommand;
             }
-            set
-            {
-                _disconnectCommand = value;
-                NotifyPropertyChanged();
-            }
+            set { SetProperty(ref _disconnectCommand, value); }
         }
 
 

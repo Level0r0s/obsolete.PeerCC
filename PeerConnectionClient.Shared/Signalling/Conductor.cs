@@ -14,7 +14,7 @@ using PeerConnectionClient.Utilities;
 
 namespace PeerConnectionClient.Signalling
 {
-    class Conductor
+    internal class Conductor
     {
         private static Object _instanceLock = new Object();
         private static Conductor _instance;
@@ -36,7 +36,7 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
-        Signaller _signaller;
+        private readonly Signaller _signaller;
         public Signaller Signaller
         {
             get
@@ -136,10 +136,12 @@ namespace PeerConnectionClient.Signalling
 
         private void PeerConnection_OnIceCandidate(RTCPeerConnectionIceEvent evt)
         {
-            var json = new JsonObject();
-            json.Add(kCandidateSdpMidName, JsonValue.CreateStringValue(evt.Candidate.SdpMid));
-            json.Add(kCandidateSdpMlineIndexName, JsonValue.CreateNumberValue(evt.Candidate.SdpMLineIndex));
-            json.Add(kCandidateSdpName, JsonValue.CreateStringValue(evt.Candidate.Candidate));
+            var json = new JsonObject
+            {
+                {kCandidateSdpMidName, JsonValue.CreateStringValue(evt.Candidate.SdpMid)},
+                {kCandidateSdpMlineIndexName, JsonValue.CreateNumberValue(evt.Candidate.SdpMLineIndex)},
+                {kCandidateSdpName, JsonValue.CreateStringValue(evt.Candidate.Candidate)}
+            };
             Debug.WriteLine("Conductor: Sending ice candidate.\n" + json.Stringify());
             SendMessage(json);
         }
