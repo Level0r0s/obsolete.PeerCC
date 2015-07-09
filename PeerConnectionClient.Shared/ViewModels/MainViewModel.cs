@@ -5,18 +5,15 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
+using Windows.System.Display;
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.Xaml.Controls;
 using PeerConnectionClient.Model;
-using System.ComponentModel;
-using System.Diagnostics;
 using PeerConnectionClient.MVVM;
 using PeerConnectionClient.Signalling;
 using PeerConnectionClient.Utilities;
-using System.ComponentModel;
-using System.Diagnostics;
-using Windows.UI.Xaml;
+using webrtc_winrt_api;
 
 namespace PeerConnectionClient.ViewModels
 {
@@ -41,7 +38,7 @@ namespace PeerConnectionClient.ViewModels
             Ip = new ValidableNonEmptyString("23.96.124.41");//Temporary: Our Azure server.
             Port = new ValidableIntegerString(8888, 0, 65535);
 
-            webrtc_winrt_api.WebRTC.RequestAccessForMediaCapture().AsTask().ContinueWith(antecedent =>
+            WebRTC.RequestAccessForMediaCapture().AsTask().ContinueWith(antecedent =>
             {
                 if (antecedent.Result)
                 {
@@ -59,7 +56,7 @@ namespace PeerConnectionClient.ViewModels
             });
         }
 
-        Windows.System.Display.DisplayRequest KeepScreenOnRequest = new Windows.System.Display.DisplayRequest();
+        readonly DisplayRequest _keepScreenOnRequest = new DisplayRequest();
 
         public void Initialize(CoreDispatcher uiDispatcher)
         {
@@ -108,8 +105,6 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     IsConnected = true;
-                    IsMicrophoneEnabled = true;
-                    IsCameraEnabled = true;
                     IsConnecting = false;
                 });
             };
@@ -118,7 +113,7 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(async() =>
                 {
                     IsConnecting = false;
-                    Windows.UI.Popups.MessageDialog msgDialog = new Windows.UI.Popups.MessageDialog(
+                    MessageDialog msgDialog = new MessageDialog(
                             "Failed to connect to server!");
                     await msgDialog.ShowAsync();
                 });
@@ -129,8 +124,6 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     IsConnected = false;
-                    IsMicrophoneEnabled = false;
-                    IsCameraEnabled = false;
                 });
             };
 
@@ -143,9 +136,7 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     IsConnectedToPeer = true;
-                    KeepScreenOnRequest.RequestActive();
-                    IsMicrophoneEnabled = MicrophoneIsOn;
-                    IsCameraEnabled = CameraEnabled;
+                    _keepScreenOnRequest.RequestActive();
                 });
             };
 
@@ -156,9 +147,7 @@ namespace PeerConnectionClient.ViewModels
                     IsConnectedToPeer = false;
                     PeerVideo.Source = null;
                     SelfVideo.Source = null;
-                    KeepScreenOnRequest.RequestRelease();
-                    IsMicrophoneEnabled = true;
-                    IsCameraEnabled = true;
+                    _keepScreenOnRequest.RequestRelease();
                 });
             };
 
@@ -198,7 +187,7 @@ namespace PeerConnectionClient.ViewModels
                     if (videoTrack != null)
                     {
                         var source = new Media().CreateMediaStreamSource(videoTrack, 30);
-                        _peerVideo.SetMediaStreamSource(source);
+                        PeerVideo.SetMediaStreamSource(source);
                     }
                 });
         }
@@ -207,7 +196,7 @@ namespace PeerConnectionClient.ViewModels
         {
             RunOnUiThread(() =>
             {
-                _peerVideo.SetMediaStreamSource(null);
+                PeerVideo.SetMediaStreamSource(null);
             });
         }
 
@@ -228,7 +217,7 @@ namespace PeerConnectionClient.ViewModels
                 if (videoTrack != null)
                 {
                     var source = new Media().CreateMediaStreamSource(videoTrack, 30);
-                    _selfVideo.SetMediaStreamSource(source);
+                    SelfVideo.SetMediaStreamSource(source);
                 }
             });
         }
@@ -372,8 +361,7 @@ namespace PeerConnectionClient.ViewModels
             get { return _isConnecting; }
             set
             {
-                _isConnecting = value;
-                NotifyPropertyChanged();
+                SetProperty(ref _isConnecting, value);
                 ConnectCommand.RaiseCanExecuteChanged();
             }
         }

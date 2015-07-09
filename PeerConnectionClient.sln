@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeerConnectionClient.Window
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeerConnectionClient.WindowsPhone", "PeerConnectionClient.WindowsPhone\PeerConnectionClient.WindowsPhone.csproj", "{DE05E1E8-58CD-424F-B1FA-B3AA1A1CE637}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "webrtc_winrt_api", "..\..\..\webrtc_vso\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api.vcxproj", "{08A72A31-ED29-591B-A715-7842AD71FD3D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "webrtc_winrt_api", "..\..\..\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api.vcxproj", "{08A72A31-ED29-591B-A715-7842AD71FD3D}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
