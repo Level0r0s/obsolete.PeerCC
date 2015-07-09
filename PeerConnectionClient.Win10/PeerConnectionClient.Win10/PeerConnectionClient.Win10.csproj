@@ -133,6 +133,9 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="ErrorControl.xaml.cs" />
+    <Compile Include="ExtendedSplashScreen.xaml.cs">
+      <DependentUpon>ExtendedSplashScreen.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -176,13 +179,17 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="ExtendedSplashScreen.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MainPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\webrtc\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\WebRTC_for_WinRT\webrtc\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api.vcxproj">
       <Project>{08a72a31-ed29-591b-a715-7842ad71fd3d}</Project>
       <Name>webrtc_winrt_api</Name>
     </ProjectReference>

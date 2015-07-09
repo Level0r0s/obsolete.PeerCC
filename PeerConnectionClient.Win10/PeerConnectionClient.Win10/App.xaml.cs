@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -29,6 +30,8 @@ namespace PeerConnectionClient.Win10
         /// Allows tracking page views, exceptions and other telemetry through the Microsoft Application Insights service.
         /// </summary>
         public TelemetryClient TelemetryClient = new TelemetryClient();
+
+        ViewModels.MainViewModel mainViewModel;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -82,10 +85,24 @@ namespace PeerConnectionClient.Win10
                 // When the navigation stack isn't restored navigate to the first page,
                 // configuring the new page by passing required information as a navigation
                 // parameter
-                rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                //rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                if (!rootFrame.Navigate(typeof(ExtendedSplashScreen), e.SplashScreen))
+                {
+                    throw new Exception("Failed to create extended splashscreen");
+                }
             }
-            // Ensure the current window is active
-            Window.Current.Activate();
+            //Do not activate now, will be activated by ExtendedSplashScreen.
+            //https://msdn.microsoft.com/en-us/library/windows/apps/hh465338.aspx:
+            //"Flicker occurs if you activate the current window (by calling Window.Current.Activate)
+            //before the content of the page finishes rendering. You can reduce the likelihood of seeing
+            //a flicker by making sure your extended splash screen image has been read before you activate
+            //the current window. Additionally, you should use a timer to try to avoid the flicker by
+            //making your application wait briefly, 50ms for example, before you activate the current window.
+            //Unfortunately, there is no guaranteed way to prevent the flicker because XAML renders content
+            //asynchronously and there is no guaranteed way to predict when rendering will be complete."
+            //Window.Current.Activate();
+            mainViewModel = new ViewModels.MainViewModel(CoreApplication.MainView.CoreWindow.Dispatcher);
+            mainViewModel.OnInitialized += OnMainViewModelInitialized;
         }
 
         /// <summary>
@@ -110,6 +127,15 @@ namespace PeerConnectionClient.Win10
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+        }
+
+        private void OnMainViewModelInitialized()
+        {
+            Frame rootFrame = Window.Current.Content as Frame;
+            if (!rootFrame.Navigate(typeof(MainPage), mainViewModel))
+            {
+                throw new Exception("Failed to create initial page");
+            }
         }
     }
 }
