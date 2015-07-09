@@ -22,11 +22,14 @@ namespace PeerConnectionClient.Signalling
         {
             get
             {
-                lock (_instanceLock)
+                if (_instance == null)
                 {
-                    if (_instance == null)
+                    lock (_instanceLock)
                     {
-                        _instance = new Conductor();
+                        if (_instance == null)
+                        {
+                            _instance = new Conductor();
+                        }
                     }
                 }
                 return _instance;
