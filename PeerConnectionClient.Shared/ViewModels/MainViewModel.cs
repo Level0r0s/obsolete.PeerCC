@@ -108,9 +108,12 @@ namespace PeerConnectionClient.ViewModels
             };
             Conductor.Instance.Signaller.OnServerConnectionFailure += () =>
             {
-                RunOnUiThread(() =>
+                RunOnUiThread(async() =>
                 {
                     IsConnecting = false;
+                    Windows.UI.Popups.MessageDialog msgDialog = new Windows.UI.Popups.MessageDialog(
+                            "Failed to connect to server!");
+                    await msgDialog.ShowAsync();
                 });
             };
 
