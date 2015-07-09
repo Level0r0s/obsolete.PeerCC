@@ -20,9 +20,6 @@ namespace PeerConnectionClient.ViewModels
     public delegate void InitializedDelegate();
     internal class MainViewModel : DispatcherBindableBase
     {
-        // Take the UI dispatcher because INotifyPropertyChanged doesn't handle
-        // that automatically.
-        // Also take the media elements as they don't databind easily to a media stream source.
 
         public event InitializedDelegate OnInitialized;
         public MainViewModel(CoreDispatcher uiDispatcher)
@@ -406,7 +403,23 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-        private bool _tracingEnabled = false;
+        private bool _isMicrophoneEnabled = true;
+        public bool IsMicrophoneEnabled
+        {
+            get { return _isMicrophoneEnabled; }
+            set { SetProperty(ref _isMicrophoneEnabled, value); }
+        }
+
+        private bool _isCameraEnabled = true;
+        public bool IsCameraEnabled
+        {
+            get { return _isCameraEnabled; }
+            set { SetProperty(ref _isCameraEnabled, value); }
+        }
+
+
+
+        private bool _tracingEnabled;
         public bool TracingEnabled
         {
             get { return _tracingEnabled; }
