@@ -16,13 +16,22 @@ namespace PeerConnectionClient.Signalling
 {
     class Conductor
     {
+        private static Object _instanceLock = new Object();
         private static Conductor _instance;
         public static Conductor Instance
         {
             get
             {
                 if (_instance == null)
-                    _instance = new Conductor();
+                {
+                    lock (_instanceLock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = new Conductor();
+                        }
+                    }
+                }
                 return _instance;
             }
         }
@@ -171,6 +180,7 @@ namespace PeerConnectionClient.Signalling
 
         private void Signaller_OnServerConnectionFailure()
         {
+            Debug.WriteLine("ERROR: Connection to server failed!");
         }
 
         private void Signaller_OnPeerDisconnected(int peer_id)

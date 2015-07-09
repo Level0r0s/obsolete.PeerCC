@@ -26,8 +26,13 @@ namespace PeerConnectionClient.Win10
         public MainPage()
         {
             this.InitializeComponent();
-
-            this.DataContext = new MainViewModel(Dispatcher, SelfVideo, PeerVideo);
+        }
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            MainViewModel mainViewModel = (MainViewModel)e.Parameter;
+            this.DataContext = mainViewModel;
+            mainViewModel.PeerVideo = PeerVideo;
+            mainViewModel.SelfVideo = SelfVideo;
         }
         private void ConfirmAddButton_Click(object sender, RoutedEventArgs e)
         {

@@ -13,15 +13,19 @@ using Windows.UI.Xaml.Controls;
 using PeerConnectionClient.Model;
 using System.ComponentModel;
 using System.Diagnostics;
+using Windows.UI.Xaml;
 
 namespace PeerConnectionClient.ViewModels
 {
+    public delegate void InitializedDelegate();
     internal class MainViewModel : BaseViewModel
     {
         // Take the UI dispatcher because INotifyPropertyChanged doesn't handle
         // that automatically.
         // Also take the media elements as they don't databind easily to a media stream source.
-        public MainViewModel(CoreDispatcher uiDispatcher, MediaElement selfVideo, MediaElement peerVideo)
+
+        public event InitializedDelegate OnInitialized;
+        public MainViewModel(CoreDispatcher uiDispatcher)
             : base(uiDispatcher)
         {
             ConnectCommand = new ActionCommand(ConnectCommandExecute, ConnectCommandCanExecute);
@@ -33,10 +37,6 @@ namespace PeerConnectionClient.ViewModels
 
             Ip = new ValidableNonEmptyString("23.96.124.41");//Temporary: Our Azure server.
             Port = new ValidableIntegerString(8888, 0, 65535);
-
-            SelfVideo = selfVideo;
-            PeerVideo = peerVideo;
-
 
             webrtc_winrt_api.WebRTC.RequestAccessForMediaCapture().AsTask().ContinueWith(antecedent =>
             {
@@ -54,7 +54,6 @@ namespace PeerConnectionClient.ViewModels
                     });
                 }
             });
-            
         }
 
         Windows.System.Display.DisplayRequest KeepScreenOnRequest = new Windows.System.Display.DisplayRequest();
@@ -104,6 +103,17 @@ namespace PeerConnectionClient.ViewModels
                     IsConnected = true;
                     IsMicrophoneEnabled = true;
                     IsCameraEnabled = true;
+                    IsConnecting = false;
+                });
+            };
+            Conductor.Instance.Signaller.OnServerConnectionFailure += () =>
+            {
+                RunOnUiThread(async() =>
+                {
+                    IsConnecting = false;
+                    Windows.UI.Popups.MessageDialog msgDialog = new Windows.UI.Popups.MessageDialog(
+                            "Failed to connect to server!");
+                    await msgDialog.ShowAsync();
                 });
             };
 
@@ -168,6 +178,11 @@ namespace PeerConnectionClient.ViewModels
                     SelectedVideoCodec = VideoCodecs.First();
             });
             LoadSettings();
+            RunOnUiThread(() =>
+            {
+                if (OnInitialized != null)
+                    OnInitialized();
+            });
         }
 
         private void Conductor_OnAddRemoteStream(MediaStreamEvent evt)
@@ -351,6 +366,18 @@ namespace PeerConnectionClient.ViewModels
                 NotifyPropertyChanged();
                 ConnectCommand.RaiseCanExecuteChanged();
                 DisconnectFromServerCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        private bool _isConnecting;
+        public bool IsConnecting
+        {
+            get { return _isConnecting; }
+            set
+            {
+                _isConnecting = value;
+                NotifyPropertyChanged();
+                ConnectCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -624,20 +651,22 @@ namespace PeerConnectionClient.ViewModels
                 }
             }
         }
-        
-        private MediaElement SelfVideo;
-        private MediaElement PeerVideo;
+
+        public MediaElement SelfVideo;
+        public MediaElement PeerVideo;
+
         #endregion
 
         private bool ConnectCommandCanExecute(object obj)
         {
-            return !IsConnected && Ip.Valid && Port.Valid;
+            return !IsConnected && !IsConnecting && Ip.Valid && Port.Valid;
         }
 
         private void ConnectCommandExecute(object obj)
         {
             new Task(() =>
             {
+                IsConnecting = true;
                 Conductor.Instance.StartLogin(Ip.Value, Port.Value);
             }).Start();
         }

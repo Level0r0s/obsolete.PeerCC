@@ -49,10 +49,10 @@ namespace PeerConnectionClient.Signalling
         public enum State
         {
             NOT_CONNECTED,
-            RESOLVING,
+            RESOLVING, //Note: State not used
             SIGNING_IN,
             CONNECTED,
-            SIGNING_OUT_WAITING,
+            SIGNING_OUT_WAITING, //Note: State not used
             SIGNING_OUT,
         };
         private State _state;
@@ -89,6 +89,11 @@ namespace PeerConnectionClient.Signalling
                     // Start the long polling loop without await.
                     HangingGetReadLoopAsync();
                 }
+                else
+                {
+                    _state = State.NOT_CONNECTED;
+                    OnServerConnectionFailure();
+                }
             }
             catch(Exception ex)
             {
@@ -109,6 +114,7 @@ namespace PeerConnectionClient.Signalling
             }
             catch
             {
+                Debug.WriteLine("[Error] Failed to find header <" + header + "> in buffer(" + buffer.Length + ")=<" + buffer + ">");
                 value = -1;
                 return false;
             }
@@ -147,12 +153,16 @@ namespace PeerConnectionClient.Signalling
 
                 eoh = buffer.IndexOf("\r\n\r\n");
                 if (eoh == -1)
+                {
+                    Debug.WriteLine("[Error] Failed to parse server response (end of header not found)! Buffer(" + buffer.Length + ")=<" + buffer + ">");
                     return false;
+                }
 
                 return GetHeaderValue(buffer, eoh, "\r\nPragma: ", out peer_id);
             }
-            catch
+            catch(Exception ex)
             {
+                Debug.WriteLine("[Error] Failed to parse server response (ex=" + ex.Message + ")! Buffer(" + buffer.Length + ")=<" + buffer + ">");
                 return false;
             }
         }
@@ -192,7 +202,7 @@ namespace PeerConnectionClient.Signalling
             int i = data.IndexOf("\r\n\r\n");
             if (i != -1)
             {
-                Debug.WriteLine("Error: " + "Headers received");
+                Debug.WriteLine("Headers received [i=" + i + " data(" + data.Length + ")"/*=" + data*/ + "]");
                 if (GetHeaderValue(data, i, "\r\nContent-Length: ", out content_length))
                 {
                     int total_response_size = (i + 4) + content_length;
@@ -202,12 +212,14 @@ namespace PeerConnectionClient.Signalling
                     }
                     else
                     {
+                        //TODO: if content length recived, but content is smaller (packet is fragmented), then throw all received data?  
                         // We haven't received everything.  Just continue to accept data.
+                        Debug.WriteLine("Error: incomplete response; expected to receive " + total_response_size + ", received" + data.Length);
                     }
                 }
                 else
                 {
-                    Debug.WriteLine("Error: " + "No content length field specified by the server.");
+                    Debug.WriteLine("Error: No content length field specified by the server.");
                 }
             }
             return ret ? Tuple.Create(data, content_length) : null;
@@ -225,7 +237,7 @@ namespace PeerConnectionClient.Signalling
                 catch (Exception e)
                 {
                     // This could be a connection failure like a timeout.
-                    Debug.WriteLine(e.Message);
+                    Debug.WriteLine("[Error] Failed to connect to " + _server + ":" + _port + " : " + e.Message);
                     return false;
                 }
                 // Send the request
