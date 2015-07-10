@@ -102,6 +102,8 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     IsConnected = true;
+                    IsMicrophoneEnabled = true;
+                    IsCameraEnabled = true;
                     IsConnecting = false;
                 });
             };
@@ -121,6 +123,8 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     IsConnected = false;
+                    IsMicrophoneEnabled = false;
+                    IsCameraEnabled = false;
                 });
             };
 
@@ -134,6 +138,8 @@ namespace PeerConnectionClient.ViewModels
                 {
                     IsConnectedToPeer = true;
                     _keepScreenOnRequest.RequestActive();
+                    IsMicrophoneEnabled = MicrophoneIsOn;
+                    IsCameraEnabled = CameraEnabled;
                 });
             };
 
@@ -144,6 +150,8 @@ namespace PeerConnectionClient.ViewModels
                     IsConnectedToPeer = false;
                     PeerVideo.Source = null;
                     SelfVideo.Source = null;
+                    IsMicrophoneEnabled = true;
+                    IsCameraEnabled = true;
                     _keepScreenOnRequest.RequestRelease();
                 });
             };
