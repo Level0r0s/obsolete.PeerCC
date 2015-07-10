@@ -104,10 +104,7 @@ namespace PeerConnectionClient.Signalling
             _peerConnection.OnRemoveStream += PeerConnection_OnRemoveStream;
 
             Debug.WriteLine("Conductor: Getting user media.");
-            RTCMediaStreamConstraints constraints = new RTCMediaStreamConstraints();
-            constraints.audio = _audioEnabled;
-            constraints.video = _videoEnabled;
-            _mediaStream = await _media.GetUserMedia(constraints);
+            _mediaStream = await _media.GetUserMedia(_audioEnabled, _videoEnabled);
 
             Debug.WriteLine("Conductor: Adding local media stream.");
             _peerConnection.AddStream(_mediaStream);
