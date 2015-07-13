@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Data;
 
 namespace PeerConnectionClient.Utilities
 {
-    class BoolToVisConverter : IValueConverter
+    public class BoolToVisConverter : IValueConverter
     {
         public bool Negated { get; set; }
 
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            bool result = (bool)value;
+            var result = (bool)value;
             result = Negated ? !result : result;
             return result ? Visibility.Visible : Visibility.Collapsed;
         }

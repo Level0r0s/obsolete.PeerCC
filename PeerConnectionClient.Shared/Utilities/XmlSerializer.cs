@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
@@ -13,7 +12,7 @@ namespace PeerConnectionClient.Utilities
         {
             XmlSerializer serializer = new XmlSerializer(typeof(T));
             StringBuilder stringBuilder = new StringBuilder();
-            XmlWriterSettings settings = new XmlWriterSettings()
+            XmlWriterSettings settings = new XmlWriterSettings
             {
                 Indent = true,
                 OmitXmlDeclaration = true,

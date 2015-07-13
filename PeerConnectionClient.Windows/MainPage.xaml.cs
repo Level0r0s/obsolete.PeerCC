@@ -1,19 +1,7 @@
-﻿using PeerConnectionClient.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
+﻿using Windows.UI.ApplicationSettings;
 using Windows.UI.Xaml.Navigation;
-using Windows.UI.ApplicationSettings;
+using PeerConnectionClient.SettingsFlyouts;
+using PeerConnectionClient.ViewModels;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -22,23 +10,28 @@ namespace PeerConnectionClient
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainPage : Page
+    public sealed partial class MainPage
     {
+        private readonly DebugSettingsFlyout _debugSettingsFlyout;
+        private readonly ConnectionSettingsFlyout _connectionSettingsFlyout;
+        private readonly AudioVideoSettingsFlyout _audioVideoSettingsFlyout;
+
+
         public MainPage()
         {
-            this.InitializeComponent();
-            debugSettingsFlyout = new DebugSettingsFlyout();
-            connectionSettingsFlyout = new ConnectionSettingsFlyout();
-            audioVideoSettingsFlyout = new SettingsFlyouts.AudioVideoSettingsFlyout();
+            InitializeComponent();
+            _debugSettingsFlyout = new DebugSettingsFlyout();
+            _connectionSettingsFlyout = new ConnectionSettingsFlyout();
+            _audioVideoSettingsFlyout = new AudioVideoSettingsFlyout();
             SettingsPane.GetForCurrentView().CommandsRequested += OnCommandsRequested;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            MainViewModel mainViewModel = (MainViewModel)e.Parameter;
-            this.DataContext = debugSettingsFlyout.DataContext
-              = connectionSettingsFlyout.DataContext
-              = audioVideoSettingsFlyout.DataContext
+            var mainViewModel = (MainViewModel)e.Parameter;
+            DataContext = _debugSettingsFlyout.DataContext
+              = _connectionSettingsFlyout.DataContext
+              = _audioVideoSettingsFlyout.DataContext
               = mainViewModel;
             mainViewModel.PeerVideo = PeerVideo;
             mainViewModel.SelfVideo = SelfVideo;
@@ -47,28 +40,26 @@ namespace PeerConnectionClient
         private void OnCommandsRequested(SettingsPane sender, SettingsPaneCommandsRequestedEventArgs args)
         {
             args.Request.ApplicationCommands.Add(new SettingsCommand(
-                "ConnectionSettings", "Connection", (handler) => ShowConectionSettingsFlyout()));
+                "ConnectionSettings", "Connection", handler => ShowConectionSettingsFlyout()));
             args.Request.ApplicationCommands.Add(new SettingsCommand(
-                "AudioVideo", "Audio & Video", (handler) => ShowAudioVideoSettingsFlyout()));
+                "AudioVideo", "Audio & Video", handler => ShowAudioVideoSettingsFlyout()));
             args.Request.ApplicationCommands.Add(new SettingsCommand(
-                "DebugSettings", "Debug", (handler) => ShowDebugSettingFlyout()));
+                "DebugSettings", "Debug", handler => ShowDebugSettingFlyout()));
         }
 
         public void ShowDebugSettingFlyout()
         {
-            debugSettingsFlyout.Show();
+            _debugSettingsFlyout.Show();
         }
         public void ShowConectionSettingsFlyout()
         {
-            connectionSettingsFlyout.Show();
+            _connectionSettingsFlyout.Show();
         }
 
         public void ShowAudioVideoSettingsFlyout()
         {
-            audioVideoSettingsFlyout.Show();
+            _audioVideoSettingsFlyout.Show();
         }
-        DebugSettingsFlyout debugSettingsFlyout;
-        ConnectionSettingsFlyout connectionSettingsFlyout;
-        SettingsFlyouts.AudioVideoSettingsFlyout audioVideoSettingsFlyout;
+        
     }
 }

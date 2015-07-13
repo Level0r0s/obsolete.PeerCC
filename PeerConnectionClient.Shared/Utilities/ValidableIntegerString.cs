@@ -1,10 +1,13 @@
 ﻿using System;
-using System.Text;
 
 namespace PeerConnectionClient.Utilities
 {
     public class ValidableIntegerString : ValidableBase<string>
     {
+
+        private readonly int _minValue;
+        private readonly int _maxValue;
+
         public ValidableIntegerString()
         {
             _minValue = 0;
@@ -17,9 +20,8 @@ namespace PeerConnectionClient.Utilities
         }
 
         public ValidableIntegerString(int defaultValue, int minValue = 0, int maxValue = 100)
+            : this(minValue, maxValue)
         {
-            _minValue = minValue;
-            _maxValue = maxValue;
             Value = defaultValue.ToString();
         }
 
@@ -32,11 +34,15 @@ namespace PeerConnectionClient.Utilities
         {
             try
             {
-                int intVal = Convert.ToInt32(Value);
+                var intVal = Convert.ToInt32(Value);
                 if (intVal >= _minValue && intVal <= _maxValue)
+                {
                     Valid = true;
+                }
                 else
+                {
                     Valid = false;
+                }
             }
             catch (Exception)
             {
@@ -44,7 +50,6 @@ namespace PeerConnectionClient.Utilities
             }
         }
 
-        protected int _minValue;
-        protected int _maxValue;
+
     }
 }

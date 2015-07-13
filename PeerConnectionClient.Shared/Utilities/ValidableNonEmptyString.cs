@@ -1,8 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using System.Text;
-
-namespace PeerConnectionClient.Utilities
+﻿namespace PeerConnectionClient.Utilities
 {
     public class ValidableNonEmptyString : ValidableBase<string>
     {
@@ -16,10 +12,7 @@ namespace PeerConnectionClient.Utilities
         }
         override protected void Validate()
         {
-            if (Value == null || Value.Length == 0)
-                Valid = false;
-            else
-                Valid = true;
+            Valid = !string.IsNullOrEmpty(Value);
         }
     }
 }

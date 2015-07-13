@@ -15,18 +15,18 @@ namespace PeerConnectionClient
     /// </summary>
     public sealed partial class ExtendedSplashScreen : Page
     {
-        private SplashScreen splash; // Variable to hold the splash screen object.
-        private DispatcherTimer showWindowTimer;
+        private SplashScreen _splash; // Variable to hold the splash screen object.
+        private DispatcherTimer _showWindowTimer;
 
         public ExtendedSplashScreen()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            this.splash = (SplashScreen)e.Parameter;
-            if (splash != null)
+            _splash = (SplashScreen)e.Parameter;
+            if (_splash != null)
             {
                 PositionImage();
             }
@@ -34,7 +34,7 @@ namespace PeerConnectionClient
 
         void PositionImage()
         {
-            Rect splashImageRect = splash.ImageLocation;
+            var splashImageRect = _splash.ImageLocation;
             extendedSplashImage.SetValue(Canvas.LeftProperty, splashImageRect.X);
             extendedSplashImage.SetValue(Canvas.TopProperty, splashImageRect.Y);
             extendedSplashImage.Height = splashImageRect.Height;
@@ -44,19 +44,14 @@ namespace PeerConnectionClient
         void ExtendedSplash_OnResize(Object sender, WindowSizeChangedEventArgs e)
         {
             // Safely update the extended splash screen image coordinates. This function will be fired in response to snapping, unsnapping, rotation, etc...
-            if (splash != null)
+            if (_splash != null)
             {
                 // Update the coordinates of the splash screen image.
                 PositionImage();
             }
         }
 
-        private void OnShowWindowTimer(object sender, object e)
-        {
-            showWindowTimer.Stop();
-            // Activate/show the window, now that the splash image has rendered
-            Window.Current.Activate();
-        }
+       
 
         //https://msdn.microsoft.com/en-us/library/windows/apps/hh465338.aspx:
         //"Flicker occurs if you activate the current window (by calling Window.Current.Activate)
@@ -71,10 +66,15 @@ namespace PeerConnectionClient
             // ImageOpened means the file has been read, but the image hasn't been painted yet.
             // Start a short timer to give the image a chance to render, before showing the window
             // and starting the animation.
-            showWindowTimer = new DispatcherTimer();
-            showWindowTimer.Interval = TimeSpan.FromMilliseconds(50);
-            showWindowTimer.Tick += OnShowWindowTimer;
-            showWindowTimer.Start();
+            _showWindowTimer = new DispatcherTimer {Interval = TimeSpan.FromMilliseconds(50)};
+            _showWindowTimer.Tick += OnShowWindowTimer;
+            _showWindowTimer.Start();
+        }
+        private void OnShowWindowTimer(object sender, object e)
+        {
+            _showWindowTimer.Stop();
+            // Activate/show the window, now that the splash image has rendered
+            Window.Current.Activate();
         }
     }
 }

@@ -1,32 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
+﻿using Windows.UI.Xaml;
 
 // The Settings Flyout item template is documented at http://go.microsoft.com/fwlink/?LinkId=273769
 
 namespace PeerConnectionClient
 {
-    public sealed partial class ConnectionSettingsFlyout : SettingsFlyout
+    public sealed partial class ConnectionSettingsFlyout
     {
         public ConnectionSettingsFlyout()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         private void ConfirmAddButton_Click(object sender, RoutedEventArgs e)
         {
-            this.AddButton.Flyout.Hide();
+            AddButton.Flyout.Hide();
         }
     }
 }

@@ -10,9 +10,7 @@ namespace PeerConnectionClient.Utilities
 
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            if (value == null)
-                return Visibility.Collapsed;
-            return Visibility.Visible;
+            return value == null ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)

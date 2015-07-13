@@ -1,46 +1,31 @@
-﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
+using PeerConnectionClient.MVVM;
 
 namespace PeerConnectionClient.Utilities
 {
-    public abstract class ValidableBase<T> : INotifyPropertyChanged
+    public abstract class ValidableBase<T> : BindableBase
     {
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        protected void RaisePropertyChanged([CallerMemberName] String propertyName = null)
-        {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-        }
 
-        T _Value = default(T);
+        private T _value;
         public T Value
         {
-            get { return _Value; }
+            get { return _value; }
             set
             {
-                _Value = value;
-                RaisePropertyChanged();
-                Validate();
-                RaisePropertyChanged("Valid");
+                if (SetProperty(ref _value, value))
+                {
+                    Validate();
+                }
             }
         }
 
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         bool _valid = true;
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public bool Valid
         {
             get { return _valid; }
-            protected set
-            {
-                if (_valid != value)
-                {
-                    _valid = value;
-                    RaisePropertyChanged();
-                }
-            }
+            protected set { SetProperty(ref _valid, value); }
         }
 
         abstract protected void Validate();

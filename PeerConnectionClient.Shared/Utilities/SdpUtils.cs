@@ -1,14 +1,13 @@
-﻿using PeerConnectionClient.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
+using webrtc_winrt_api;
 
 namespace PeerConnectionClient.Utilities
 {
     class SdpUtils
     {
-        public static bool SelectCodecs(ref string sdp, webrtc_winrt_api.CodecInfo audioCodec, webrtc_winrt_api.CodecInfo videoCodec)
+        public static bool SelectCodecs(ref string sdp, CodecInfo audioCodec, CodecInfo videoCodec)
         {
             if (audioCodec == null)
                 return false;

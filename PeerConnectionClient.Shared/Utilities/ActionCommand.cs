@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows.Input;
 
 namespace PeerConnectionClient.Utilities
@@ -20,9 +18,7 @@ namespace PeerConnectionClient.Utilities
 
         public bool CanExecute(object parameter)
         {
-            if (_actionCanExecute != null)
-                return _actionCanExecute(parameter);
-            return true;
+            return _actionCanExecute == null || _actionCanExecute(parameter);
         }
 
         public void Execute(object parameter)
