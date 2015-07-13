@@ -75,6 +75,14 @@ namespace PeerConnectionClient.ViewModels
                 });
             };
 
+            FrameCounterHelper.FramesPerSecondChanged += (frameRate) =>
+            {
+              RunOnUiThread(() =>
+              {
+                FrameRate = frameRate;
+              });
+            };
+
             Conductor.Instance.Media.EnumerateAudioVideoCaptureDevices();
 
             Conductor.Instance.Signaller.OnPeerConnected += (peerId, peerName) =>
@@ -346,6 +354,16 @@ namespace PeerConnectionClient.ViewModels
             {
                 SetProperty(ref _removeSelectedIceServerCommand, value);
             }
+        }
+
+        private String _frameRate;
+        public String FrameRate
+        {
+          get { return _frameRate; }
+          set
+          {
+            SetProperty(ref _frameRate, value);
+          }
         }
 
         private bool _isConnected;

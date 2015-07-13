@@ -59,8 +59,17 @@
                                   Height="120" 
                                   RealTimePlayback="True"
                                   Name="SelfVideo"/>
-            </Border> 
-
+            </Border>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="5, 0, 0, 0" Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}">
+        <TextBlock Text="Frames per Second: "
+                     Margin="5, 5, 5, 5"
+                     FontSize="14"/>
+        <TextBlock HorizontalAlignment="Left"
+                     Name="FrameRate"
+                     Margin="5,5,5,5"
+                     FontSize="14"
+                     Text ="{Binding FrameRate}"/>
+      </StackPanel>
     </StackPanel>
         <Border BorderThickness="1"
                 BorderBrush="Blue"
