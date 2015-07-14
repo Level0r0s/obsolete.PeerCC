@@ -55,18 +55,27 @@
                         Command="{Binding DisconnectFromPeerCommand}"/>
             </StackPanel>
             <Border BorderThickness="1" Margin="5" BorderBrush="Blue" >
+                <Grid>
                     <MediaElement Width="200"
-                                  Height="120" 
+                                  Height="120"
                                   RealTimePlayback="True"
                                   Name="SelfVideo"/>
-            </Border> 
-
+                    <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="40">
+                        <TextBlock Text="{Binding SelfVideoFps}" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                </Grid>
+            </Border>
     </StackPanel>
         <Border BorderThickness="1"
                 BorderBrush="Blue"
                 Margin="5" 
                 Grid.Column="1" >
-            <MediaElement Name="PeerVideo" RealTimePlayback="True" />
+            <Grid>
+                <MediaElement Name="PeerVideo" RealTimePlayback="True"/>
+                <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="40">
+                    <TextBlock Text="{Binding PeerVideoFps}" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Border>
+            </Grid>
         </Border>
     </Grid>
 </Page>
