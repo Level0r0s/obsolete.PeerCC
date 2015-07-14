@@ -46,7 +46,9 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
 
         <TextBlock Text="SETTINGS"
                    Style="{ThemeResource SubheaderTextBlockStyle}"
@@ -274,9 +276,27 @@
                  Text="{Binding TraceServerPort, Mode=TwoWay}"
                  IsEnabled="{Binding TracingEnabled, Mode=OneWay}"
                  PlaceholderText="Port"/>
-        <ToggleSwitch Header="Logging"
+      <ToggleSwitch Header="Logging"
                       Grid.Row="16"
                       IsOn="{Binding LoggingEnabled, Mode=TwoWay}"/>
-  </Grid>
+      <ComboBox Width="200"
+                Margin="0,10,0,0"
+                Grid.Row="17"
+                HorizontalAlignment="Left" 
+                Header="Capture resolution:"
+                DisplayMemberPath="ValueCapResString" 
+                SelectedValuePath="ValueCapResEnum"
+                SelectedValue="{Binding SelectedCapRes, Mode=TwoWay}"
+                ItemsSource="{Binding AllCapRes, Mode=TwoWay}"/>
+      <ComboBox Width="200"
+                Grid.Row="18"
+                Margin="0,10,0,0"
+                HorizontalAlignment="Left"
+                Header="Capture frame rate:"
+                DisplayMemberPath="ValueCapFPSString" 
+                SelectedValuePath="ValueCapFPSEnum"
+                SelectedValue="{Binding Path=SelectedCapFPS, Mode=TwoWay}"
+                ItemsSource="{Binding AllCapFPS, Mode=TwoWay}"/>
+    </Grid>
     </ScrollViewer>
 </Page>

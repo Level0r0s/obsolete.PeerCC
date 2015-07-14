@@ -35,6 +35,7 @@ namespace PeerConnectionClient.ViewModels
             Ip = new ValidableNonEmptyString("23.96.124.41");//Temporary: Our Azure server.
             Port = new ValidableIntegerString(8888, 0, 65535);
 
+
             WebRTC.RequestAccessForMediaCapture().AsTask().ContinueWith(antecedent =>
             {
                 if (antecedent.Result)
@@ -576,6 +577,50 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private ObservableCollection<ComboBoxItemCapRes> _allCapRes;
+        public ObservableCollection<ComboBoxItemCapRes> AllCapRes
+        {
+          get { return _allCapRes; }
+          set { SetProperty(ref _allCapRes, value); }
+        }
+
+
+        //selected capture resolution
+        public CapRes SelectedCapRes
+        {
+          get {return Conductor.Instance.VideoCaptureRes;}
+          set {
+            if (Conductor.Instance.VideoCaptureRes == value) {
+              return;
+            }
+            Conductor.Instance.VideoCaptureRes = value;
+            Conductor.Instance.updatePreferredFrameFormat();
+          }
+        }
+
+        private ObservableCollection<ComboBoxItemCapFPS> _allCapFPS;
+        public ObservableCollection<ComboBoxItemCapFPS> AllCapFPS
+        {
+          get { return _allCapFPS; }
+          set { SetProperty(ref _allCapFPS, value); }
+        }
+
+        // selected capture frame rate
+        public CapFPS SelectedCapFPS
+        {
+          get {return Conductor.Instance.VideoCaptureFPS;}
+          set
+          {
+            if (Conductor.Instance.VideoCaptureFPS == value)
+            {
+              return;
+            }
+
+            Conductor.Instance.VideoCaptureFPS = value;
+            Conductor.Instance.updatePreferredFrameFormat();
+          }
+        }
+
         private ObservableCollection<CodecInfo> _videoCodecs;
 
         public ObservableCollection<CodecInfo> VideoCodecs
@@ -737,6 +782,24 @@ namespace PeerConnectionClient.ViewModels
             });
 
             Conductor.Instance.ConfigureIceServers(IceServers);
+
+
+            _allCapRes = new ObservableCollection<ComboBoxItemCapRes>() { 
+                      new ComboBoxItemCapRes(){ ValueCapResEnum = CapRes.Default, ValueCapResString = "default" },
+                      new ComboBoxItemCapRes(){ ValueCapResEnum = CapRes._640_480, ValueCapResString = "640 x 480" },
+                      new ComboBoxItemCapRes(){ ValueCapResEnum = CapRes._320_240, ValueCapResString = "320 x 240" },
+            };
+            SelectedCapRes = CapRes.Default;
+
+            _allCapFPS = new ObservableCollection<ComboBoxItemCapFPS>() { 
+                      new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS.Default, ValueCapFPSString = "default" },
+                      new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._16, ValueCapFPSString = "16" },
+                      new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._18, ValueCapFPSString = "18" },
+                      new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._24, ValueCapFPSString = "24" },
+            };
+
+            SelectedCapFPS = CapFPS.Default;
+
         }
 
         void SaveIceServerList()

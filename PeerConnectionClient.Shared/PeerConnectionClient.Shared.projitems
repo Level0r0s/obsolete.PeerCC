@@ -31,6 +31,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\ValidableNonEmptyString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\ValidableIntegerString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\ValidableBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\VideoCaptureFormat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\XmlSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MainViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\VideoRenderViewModel.cs" />
