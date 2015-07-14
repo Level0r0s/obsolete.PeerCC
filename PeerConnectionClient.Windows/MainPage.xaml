@@ -57,14 +57,17 @@
             <Border BorderThickness="1" Margin="5" BorderBrush="Blue" >
                 <Grid>
                     <MediaElement Width="200"
-                                  Height="120"
-                                  RealTimePlayback="True"
-                                  Name="SelfVideo"/>
-                    <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="40">
-                        <TextBlock Text="{Binding SelfVideoFps}" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    </Border>
+                                 Height="120"
+                                 RealTimePlayback="True"
+                                 Name="SelfVideo"/>
+                   <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="40">
+                       <TextBlock Text="{Binding SelfVideoFps}" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                   </Border>
                 </Grid>
             </Border>
+        <Button Content="Send Feedback"
+                HorizontalAlignment="Center"
+                Command="{Binding SendFeedbackCommand}" />
     </StackPanel>
         <Border BorderThickness="1"
                 BorderBrush="Blue"

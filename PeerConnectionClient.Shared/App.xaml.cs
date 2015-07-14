@@ -7,6 +7,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 using PeerConnectionClient.ViewModels;
+using HockeyApp;
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
 
@@ -30,6 +31,13 @@ namespace PeerConnectionClient
         {
             InitializeComponent();
             Suspending += OnSuspending;
+
+            // configure hockey app SDK with correct app ID for current device
+#if WINDOWS_PHONE_APP
+            HockeyClient.Current.Configure("554a20152df3077b8ffca13f6eedc686");
+#else
+            HockeyClient.Current.Configure("e95ace8ed81020bd1b3c468f59a1f834");
+#endif
         }
 
         /// <summary>
@@ -38,7 +46,7 @@ namespace PeerConnectionClient
         /// search results, and so forth.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        protected async override void OnLaunched(LaunchActivatedEventArgs e)
         {
 #if DEBUG
             //if (System.Diagnostics.Debugger.IsAttached)
@@ -110,6 +118,12 @@ namespace PeerConnectionClient
 
             _mainViewModel = new MainViewModel(CoreApplication.MainView.CoreWindow.Dispatcher);
             _mainViewModel.OnInitialized += OnMainViewModelInitialized;
+
+            await HockeyClient.Current.SendCrashesAsync(true);
+
+#if WINDOWS_PHONE_APP
+            await HockeyClient.Current.CheckForAppUpdateAsync(); // updates only supported for WP apps
+#endif
         }
 
 #if WINDOWS_PHONE_APP
@@ -125,6 +139,14 @@ namespace PeerConnectionClient
             rootFrame.Navigated -= RootFrame_FirstNavigated;
         }
 #endif
+
+        protected override void OnActivated(IActivatedEventArgs e)
+        {
+            base.OnActivated(e);
+#if WINDOWS_PHONE_APP
+            HockeyClient.Current.HandleReactivationOfFeedbackFilePicker(e);
+#endif
+        }
 
         /// <summary>
         /// Invoked when application execution is being suspended.  Application state is saved

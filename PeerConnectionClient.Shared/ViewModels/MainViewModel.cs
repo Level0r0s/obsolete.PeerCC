@@ -14,6 +14,7 @@ using PeerConnectionClient.MVVM;
 using PeerConnectionClient.Signalling;
 using PeerConnectionClient.Utilities;
 using webrtc_winrt_api;
+using HockeyApp;
 
 namespace PeerConnectionClient.ViewModels
 {
@@ -31,6 +32,7 @@ namespace PeerConnectionClient.ViewModels
             DisconnectFromServerCommand = new ActionCommand(DisconnectFromServerExecute, DisconnectFromServerCanExecute);
             AddIceServerCommand = new ActionCommand(AddIceServerExecute, AddIceServerCanExecute);
             RemoveSelectedIceServerCommand = new ActionCommand(RemoveSelectedIceServerExecute, RemoveSelectedIceServerCanExecute);
+            SendFeedbackCommand = new ActionCommand(SendFeedbackExecute, SendFeedbackCanExecute);
 
             Ip = new ValidableNonEmptyString("23.96.124.41");//Temporary: Our Azure server.
             Port = new ValidableIntegerString(8888, 0, 65535);
@@ -384,6 +386,16 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private ActionCommand _sendFeedbackCommand;
+        public ActionCommand SendFeedbackCommand
+        {
+            get { return _sendFeedbackCommand;  }
+            set
+            {
+                SetProperty(ref _sendFeedbackCommand, value);
+            }
+        }
+
         private bool _isConnected;
         public bool IsConnected
         {
@@ -718,6 +730,16 @@ namespace PeerConnectionClient.ViewModels
             OnPropertyChanged(() => IceServers);
             SaveIceServerList();
             Conductor.Instance.ConfigureIceServers(IceServers);
+        }
+
+        private bool SendFeedbackCanExecute(object obj)
+        {
+            return true;
+        }
+
+        private void SendFeedbackExecute(object obj)
+        {
+            HockeyClient.Current.ShowFeedback();
         }
 
 
