@@ -55,27 +55,27 @@
                         Command="{Binding DisconnectFromPeerCommand}"/>
             </StackPanel>
             <Border BorderThickness="1" Margin="5" BorderBrush="Blue" >
+                <Grid>
                     <MediaElement Width="200"
-                                  Height="120" 
+                                  Height="120"
                                   RealTimePlayback="True"
                                   Name="SelfVideo"/>
+                    <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="40">
+                        <TextBlock Text="{Binding SelfVideoFps}" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                </Grid>
             </Border>
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="5, 0, 0, 0" Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}">
-        <TextBlock Text="Frames per Second: "
-                     Margin="5, 5, 5, 5"
-                     FontSize="14"/>
-        <TextBlock HorizontalAlignment="Left"
-                     Name="FrameRate"
-                     Margin="5,5,5,5"
-                     FontSize="14"
-                     Text ="{Binding FrameRate}"/>
-      </StackPanel>
     </StackPanel>
         <Border BorderThickness="1"
                 BorderBrush="Blue"
                 Margin="5" 
                 Grid.Column="1" >
-            <MediaElement Name="PeerVideo" RealTimePlayback="True" />
+            <Grid>
+                <MediaElement Name="PeerVideo" RealTimePlayback="True"/>
+                <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="40">
+                    <TextBlock Text="{Binding PeerVideoFps}" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Border>
+            </Grid>
         </Border>
     </Grid>
 </Page>

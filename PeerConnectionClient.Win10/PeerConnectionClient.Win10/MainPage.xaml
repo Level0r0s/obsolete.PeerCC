@@ -91,7 +91,13 @@
                 VerticalAlignment="Stretch"
                 Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
                 RelativePanel.RightOf="ControlPanel">
-            <MediaElement Name="PeerVideo" />
+            <Grid>
+                <MediaElement Name="PeerVideo"
+                              RealTimePlayback="True"/>
+                <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="40">
+                    <TextBlock Text="{Binding PeerVideoFps}" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Border>
+            </Grid>
         </Border>
         <Border BorderThickness="1"
                 Margin="20"
@@ -99,9 +105,15 @@
                 Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
                 RelativePanel.AlignBottomWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True">
-            <MediaElement Width="200"
-                          Height="200" 
-                          Name="SelfVideo"/>
+            <Grid>
+                <MediaElement Width="200"
+                              Height="200"
+                              RealTimePlayback="True"
+                              Name="SelfVideo"/>
+                <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="40">
+                    <TextBlock Text="{Binding SelfVideoFps}" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Border>
+            </Grid>
         </Border>
         <RelativePanel Name="ConnectionSettingsPanel"
                        BorderThickness="1"

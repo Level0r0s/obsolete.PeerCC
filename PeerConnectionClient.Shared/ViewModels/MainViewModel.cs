@@ -75,12 +75,19 @@ namespace PeerConnectionClient.ViewModels
                 });
             };
 
-            FrameCounterHelper.FramesPerSecondChanged += (frameRate) =>
+            FrameCounterHelper.FramesPerSecondChanged += (id, frameRate) =>
             {
-              RunOnUiThread(() =>
-              {
-                FrameRate = frameRate;
-              });
+                RunOnUiThread(() =>
+                {
+                    if (id == "SELF")
+                    {
+                        SelfVideoFps = frameRate;
+                    }
+                    else if (id == "PEER")
+                    {
+                        PeerVideoFps = frameRate;
+                    }
+                });
             };
 
             Conductor.Instance.Media.EnumerateAudioVideoCaptureDevices();
@@ -160,6 +167,7 @@ namespace PeerConnectionClient.ViewModels
                     SelfVideo.Source = null;
                     IsMicrophoneEnabled = true;
                     IsCameraEnabled = true;
+                    SelfVideoFps = PeerVideoFps = "";
                     _keepScreenOnRequest.RequestRelease();
                 });
             };
@@ -199,7 +207,7 @@ namespace PeerConnectionClient.ViewModels
                     var videoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
                     if (videoTrack != null)
                     {
-                        var source = new Media().CreateMediaStreamSource(videoTrack, 30);
+                        var source = new Media().CreateMediaStreamSource(videoTrack, 30, "PEER");
                         PeerVideo.SetMediaStreamSource(source);
                     }
                 });
@@ -229,7 +237,7 @@ namespace PeerConnectionClient.ViewModels
                 var videoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
                 if (videoTrack != null)
                 {
-                    var source = new Media().CreateMediaStreamSource(videoTrack, 30);
+                    var source = new Media().CreateMediaStreamSource(videoTrack, 30, "SELF");
                     SelfVideo.SetMediaStreamSource(source);
                 }
             });
@@ -356,14 +364,24 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-        private String _frameRate;
-        public String FrameRate
+        private String _peerVideoFps;
+        public String PeerVideoFps
         {
-          get { return _frameRate; }
+          get { return _peerVideoFps; }
           set
           {
-            SetProperty(ref _frameRate, value);
+            SetProperty(ref _peerVideoFps, value);
           }
+        }
+
+        private String _selfVideoFps;
+        public String SelfVideoFps
+        {
+            get { return _selfVideoFps; }
+            set
+            {
+                SetProperty(ref _selfVideoFps, value);
+            }
         }
 
         private bool _isConnected;
