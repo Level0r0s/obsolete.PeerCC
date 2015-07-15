@@ -52,7 +52,12 @@
             <Border BorderBrush="Blue"
                     BorderThickness="1"
                     Margin="5" >
-                <MediaElement Name="PeerVideo" RealTimePlayback="True"/>
+                <Grid>
+                    <MediaElement Name="PeerVideo" RealTimePlayback="True"/>
+                    <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="40">
+                        <TextBlock Text="{Binding PeerVideoFps}" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                </Grid>
             </Border>
             <Border BorderBrush="Blue"
                     BorderThickness="1"
@@ -61,7 +66,15 @@
                     Height="150" 
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom" >
-                <MediaElement Name="SelfVideo" Width="200" Height="200" RealTimePlayback="True" />
+                <Grid>
+                    <MediaElement Width="200"
+                                  Height="200"
+                                  RealTimePlayback="True"
+                                  Name="SelfVideo"/>
+                    <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="40">
+                        <TextBlock Text="{Binding SelfVideoFps}" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                </Grid>
             </Border>
             <StackPanel Orientation="Horizontal"
                         Grid.Row="1"

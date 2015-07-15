@@ -46,8 +46,11 @@ namespace PeerConnectionClient
 
     void HardwareButtons_BackPressed(object sender, BackPressedEventArgs e)
     {
-        this.Frame.Navigate(typeof(MainPage));
-        e.Handled = true;
+        if (this.Frame.CanGoBack)
+        {
+            this.Frame.GoBack();
+            e.Handled = true;
+        }
     }
     private void ConfirmAddButton_Click(object sender, RoutedEventArgs e)
     {
