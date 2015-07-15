@@ -179,14 +179,21 @@ namespace PeerConnectionClient.ViewModels
 
             AudioCodecs = new ObservableCollection<CodecInfo>();
             var audioCodecList = WebRTC.GetAudioCodecs();
+            // these are features added to existing codecs, they can't decode/encode real audio data so ignore them
+            string[] incompatibleAudioCodecs = new string[] { "CN32000", "CN16000", "CN8000", "red8000", "telephone-event8000" };
 
             VideoCodecs = new ObservableCollection<CodecInfo>();
             var videoCodecList = WebRTC.GetVideoCodecs();
 
             RunOnUiThread(() =>
             {
-                foreach (var audioCodec in audioCodecList)
-                    AudioCodecs.Add(audioCodec);
+                foreach (var audioCodec in audioCodecList) 
+                {
+                    if (!incompatibleAudioCodecs.Contains(audioCodec.Name + audioCodec.Clockrate))
+                    {
+                        AudioCodecs.Add(audioCodec);
+                    }
+                }
                 if (AudioCodecs.Count > 0)
                     SelectedAudioCodec = AudioCodecs.First();
                 foreach (var videoCodec in videoCodecList)
