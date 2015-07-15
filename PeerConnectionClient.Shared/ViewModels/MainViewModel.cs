@@ -32,7 +32,7 @@ namespace PeerConnectionClient.ViewModels
             DisconnectFromServerCommand = new ActionCommand(DisconnectFromServerExecute, DisconnectFromServerCanExecute);
             AddIceServerCommand = new ActionCommand(AddIceServerExecute, AddIceServerCanExecute);
             RemoveSelectedIceServerCommand = new ActionCommand(RemoveSelectedIceServerExecute, RemoveSelectedIceServerCanExecute);
-            SendFeedbackCommand = new ActionCommand(SendFeedbackExecute, SendFeedbackCanExecute);
+            SendFeedbackCommand = new ActionCommand(SendFeedbackExecute);
 
             Ip = new ValidableNonEmptyString("23.96.124.41");//Temporary: Our Azure server.
             Port = new ValidableIntegerString(8888, 0, 65535);
@@ -730,11 +730,6 @@ namespace PeerConnectionClient.ViewModels
             OnPropertyChanged(() => IceServers);
             SaveIceServerList();
             Conductor.Instance.ConfigureIceServers(IceServers);
-        }
-
-        private bool SendFeedbackCanExecute(object obj)
-        {
-            return true;
         }
 
         private void SendFeedbackExecute(object obj)
