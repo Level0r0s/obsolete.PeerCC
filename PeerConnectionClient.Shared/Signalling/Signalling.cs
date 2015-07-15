@@ -15,6 +15,7 @@ namespace PeerConnectionClient.Signalling
     public delegate void DisconnectedDelegate();
     public delegate void PeerConnectedDelegate(int id, string name);
     public delegate void PeerDisonnectedDelegate(int peer_id);
+    public delegate void PeerHangupDelegate(int peer_id);
     public delegate void MessageFromPeerDelegate(int peer_id, string message);
     public delegate void MessageSentDelegate(int err);
     public delegate void ServerConnectionFailureDelegate();
@@ -25,6 +26,7 @@ namespace PeerConnectionClient.Signalling
         public event DisconnectedDelegate OnDisconnected;
         public event PeerConnectedDelegate OnPeerConnected;
         public event PeerDisonnectedDelegate OnPeerDisconnected;
+        public event PeerHangupDelegate OnPeerHangup;
         public event MessageFromPeerDelegate OnMessageFromPeer;
         public event MessageSentDelegate OnMessageSent;
         public event ServerConnectionFailureDelegate OnServerConnectionFailure;
@@ -355,9 +357,9 @@ namespace PeerConnectionClient.Signalling
                         else
                         {
                             string message = buffer.Substring(pos);
-                            if (message == "BYE")
+                            if (message == "{\"type\":\"bye\"}")
                             {
-                                OnPeerDisconnected(peer_id);
+                                OnPeerHangup(peer_id);
                             }
                             else
                             {
