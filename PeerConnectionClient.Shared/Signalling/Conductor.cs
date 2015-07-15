@@ -47,6 +47,8 @@ namespace PeerConnectionClient.Signalling
 
         public CodecInfo VideoCodec { get; set; }
         public CodecInfo AudioCodec { get; set; }
+        public CapFPS VideoCaptureFPS = CapFPS.Default;
+        public CapRes VideoCaptureRes = CapRes.Default;
 
         private static readonly string kCandidateSdpMidName = "sdpMid";
         private static readonly string kCandidateSdpMlineIndexName = "sdpMLineIndex";
@@ -74,6 +76,44 @@ namespace PeerConnectionClient.Signalling
 
         public event Action OnPeerConnectionCreated;
         public event Action OnPeerConnectionClosed;
+
+        public void updatePreferredFrameFormat() {
+
+          if (VideoCaptureFPS!= CapFPS.Default || VideoCaptureRes!= CapRes.Default) {
+
+              int width = 0;
+              int height = 0;
+              int fps = 0;
+
+              switch (VideoCaptureFPS)
+              {
+                case CapFPS._16:
+                  fps = 16;
+                  break;
+                case CapFPS._18:
+                  fps = 18;
+                  break;
+                case CapFPS._24:
+                  fps = 24;
+                  break;
+              }
+
+              switch (VideoCaptureRes)
+              {
+                case CapRes._320_240:
+                  width = 320;
+                  height = 240;
+                  break;
+                case CapRes._640_480:
+                  width = 640;
+                  height = 480;
+                  break;
+              }
+
+              webrtc_winrt_api.WebRTC.SetPreferredVideoCaptureFormat(width,height,fps);
+
+            }
+        }
 
         private async Task<bool> CreatePeerConnection()
         {
