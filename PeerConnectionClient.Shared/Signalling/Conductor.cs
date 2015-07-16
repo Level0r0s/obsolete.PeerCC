@@ -372,9 +372,7 @@ namespace PeerConnectionClient.Signalling
 
         private void SendHangupMessage()
         {
-            var json = new JsonObject();
-            json.Add(kSessionDescriptionTypeName, "BYE");
-            _signaller.SendToPeer(_peerId, json);
+            _signaller.SendToPeer(_peerId, "BYE");
         }
 
         public void EnableLocalVideoStream()
