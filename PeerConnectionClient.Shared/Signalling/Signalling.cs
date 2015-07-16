@@ -15,6 +15,7 @@ namespace PeerConnectionClient.Signalling
     public delegate void DisconnectedDelegate();
     public delegate void PeerConnectedDelegate(int id, string name);
     public delegate void PeerDisonnectedDelegate(int peer_id);
+    public delegate void PeerHangupDelegate(int peer_id);
     public delegate void MessageFromPeerDelegate(int peer_id, string message);
     public delegate void MessageSentDelegate(int err);
     public delegate void ServerConnectionFailureDelegate();
@@ -25,6 +26,7 @@ namespace PeerConnectionClient.Signalling
         public event DisconnectedDelegate OnDisconnected;
         public event PeerConnectedDelegate OnPeerConnected;
         public event PeerDisonnectedDelegate OnPeerDisconnected;
+        public event PeerHangupDelegate OnPeerHangup;
         public event MessageFromPeerDelegate OnMessageFromPeer;
         public event MessageSentDelegate OnMessageSent;
         public event ServerConnectionFailureDelegate OnServerConnectionFailure;
@@ -357,7 +359,7 @@ namespace PeerConnectionClient.Signalling
                             string message = buffer.Substring(pos);
                             if (message == "BYE")
                             {
-                                OnPeerDisconnected(peer_id);
+                                OnPeerHangup(peer_id);
                             }
                             else
                             {
@@ -413,17 +415,15 @@ namespace PeerConnectionClient.Signalling
             _state = State.NOT_CONNECTED;
         }
 
-        public async Task<bool> SendToPeer(int peerId, IJsonValue json)
-        {
+        public async Task<bool> SendToPeer(int peerId, string message) {
             if (_state != State.CONNECTED)
-                return false;
+               return false;
 
             Debug.Assert(IsConnected());
 
             if (!IsConnected() || peerId == -1)
                 return false;
 
-            string message = json.Stringify();
             string buffer = String.Format(
                 "POST /message?peer_id={0}&to={1} HTTP/1.0\r\n" +
                 "Content-Length: {2}\r\n" +
@@ -432,6 +432,12 @@ namespace PeerConnectionClient.Signalling
                 "{3}",
                 _myId, peerId, message.Length, message);
             return await ControlSocketRequestAsync(buffer);
+        }
+
+        public async Task<bool> SendToPeer(int peerId, IJsonValue json)
+        {
+            string message = json.Stringify();
+            return await SendToPeer(peerId, message);
         }
     }
 

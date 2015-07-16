@@ -167,6 +167,7 @@ namespace PeerConnectionClient.Signalling
                 foreach (var track in _mediaStream.GetTracks())
                 {
                     track.Stop();
+                    _mediaStream.RemoveTrack(track);
                 }
                 _mediaStream = null;
                 if (OnPeerConnectionClosed != null)
@@ -209,11 +210,20 @@ namespace PeerConnectionClient.Signalling
             Signaller.OnMessageFromPeer += Signaller_OnMessageFromPeer;
             Signaller.OnMessageSent += Signaller_OnMessageSent;
             Signaller.OnPeerConnected += Signaller_OnPeerConnected;
+            Signaller.OnPeerHangup += Signaller_OnPeerHangup;
             Signaller.OnPeerDisconnected += Signaller_OnPeerDisconnected;
             Signaller.OnServerConnectionFailure += Signaller_OnServerConnectionFailure;
             Signaller.OnSignedIn += Signaller_OnSignedIn;
 
             _iceServers = new List<RTCIceServer>();
+        }
+
+        void Signaller_OnPeerHangup(int peer_id)
+        {
+            if (peer_id == _peerId) {
+                Debug.WriteLine("Conductor: Our peer hung up.");
+                ClosePeerConnection();
+            }
         }
 
         private void Signaller_OnSignedIn()
@@ -376,6 +386,7 @@ namespace PeerConnectionClient.Signalling
 
         public void DisconnectFromPeer()
         {
+            SendHangupMessage();
             ClosePeerConnection();
         }
 
@@ -397,6 +408,11 @@ namespace PeerConnectionClient.Signalling
         {
             // Don't await, send it async.
             _signaller.SendToPeer(_peerId, json);
+        }
+
+        private void SendHangupMessage()
+        {
+            _signaller.SendToPeer(_peerId, "BYE");
         }
 
         public void EnableLocalVideoStream()
