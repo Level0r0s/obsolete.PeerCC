@@ -373,7 +373,7 @@ namespace PeerConnectionClient.Signalling
         private void SendHangupMessage()
         {
             var json = new JsonObject();
-            json.Add(kSessionDescriptionTypeName, JsonValue.CreateStringValue("bye"));
+            json.Add(kSessionDescriptionTypeName, "BYE");
             _signaller.SendToPeer(_peerId, json);
         }
 

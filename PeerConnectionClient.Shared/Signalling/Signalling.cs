@@ -357,7 +357,7 @@ namespace PeerConnectionClient.Signalling
                         else
                         {
                             string message = buffer.Substring(pos);
-                            if (message == "{\"type\":\"bye\"}")
+                            if (message == "BYE")
                             {
                                 OnPeerHangup(peer_id);
                             }
@@ -415,17 +415,15 @@ namespace PeerConnectionClient.Signalling
             _state = State.NOT_CONNECTED;
         }
 
-        public async Task<bool> SendToPeer(int peerId, IJsonValue json)
-        {
+        public async Task<bool> SendToPeer(int peerId, string message) {
             if (_state != State.CONNECTED)
-                return false;
+               return false;
 
             Debug.Assert(IsConnected());
 
             if (!IsConnected() || peerId == -1)
                 return false;
 
-            string message = json.Stringify();
             string buffer = String.Format(
                 "POST /message?peer_id={0}&to={1} HTTP/1.0\r\n" +
                 "Content-Length: {2}\r\n" +
@@ -434,6 +432,12 @@ namespace PeerConnectionClient.Signalling
                 "{3}",
                 _myId, peerId, message.Length, message);
             return await ControlSocketRequestAsync(buffer);
+        }
+
+        public async Task<bool> SendToPeer(int peerId, IJsonValue json)
+        {
+            string message = json.Stringify();
+            return await SendToPeer(peerId, message);
         }
     }
 
