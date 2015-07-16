@@ -29,7 +29,8 @@ namespace PeerConnectionClient.Win10
         /// <summary>
         /// Allows tracking page views, exceptions and other telemetry through the Microsoft Application Insights service.
         /// </summary>
-        public TelemetryClient TelemetryClient = new TelemetryClient();
+        // Temporarily disable.  Problems loading Microsoft.Diagnostics.Tracing.EventSource
+        //public TelemetryClient TelemetryClient = new TelemetryClient();
 
         ViewModels.MainViewModel mainViewModel;
 
@@ -80,18 +81,7 @@ namespace PeerConnectionClient.Win10
                 Window.Current.Content = rootFrame;
             }
 
-            if (rootFrame.Content == null)
-            {
-                // When the navigation stack isn't restored navigate to the first page,
-                // configuring the new page by passing required information as a navigation
-                // parameter
-                //rootFrame.Navigate(typeof(MainPage), e.Arguments);
-                if (!rootFrame.Navigate(typeof(ExtendedSplashScreen), e.SplashScreen))
-                {
-                    throw new Exception("Failed to create extended splashscreen");
-                }
-            }
-            //Do not activate now, will be activated by ExtendedSplashScreen.
+            //Do not activate now.
             //https://msdn.microsoft.com/en-us/library/windows/apps/hh465338.aspx:
             //"Flicker occurs if you activate the current window (by calling Window.Current.Activate)
             //before the content of the page finishes rendering. You can reduce the likelihood of seeing
@@ -100,7 +90,6 @@ namespace PeerConnectionClient.Win10
             //making your application wait briefly, 50ms for example, before you activate the current window.
             //Unfortunately, there is no guaranteed way to prevent the flicker because XAML renders content
             //asynchronously and there is no guaranteed way to predict when rendering will be complete."
-            //Window.Current.Activate();
             mainViewModel = new ViewModels.MainViewModel(CoreApplication.MainView.CoreWindow.Dispatcher);
             mainViewModel.OnInitialized += OnMainViewModelInitialized;
         }
@@ -136,6 +125,7 @@ namespace PeerConnectionClient.Win10
             {
                 throw new Exception("Failed to create initial page");
             }
+            Window.Current.Activate();
         }
     }
 }

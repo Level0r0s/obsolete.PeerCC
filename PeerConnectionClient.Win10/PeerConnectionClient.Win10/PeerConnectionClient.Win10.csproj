@@ -17,7 +17,8 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>PeerConnectionClient.Win10_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <NuGetPackageImportStamp>2ac7bc5b</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
@@ -91,50 +92,61 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\PeerConnectionClient.Shared\Model\IceServer.cs">
-      <Link>IceServer.cs</Link>
+      <Link>Links\IceServer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\PeerConnectionClient.Shared\MVVM\BindableBase.cs">
+      <Link>Links\BindableBase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\PeerConnectionClient.Shared\MVVM\DispatcherBindableBase.cs">
+      <Link>Links\DispatcherBindableBase.cs</Link>
     </Compile>
     <Compile Include="..\..\PeerConnectionClient.Shared\Signalling\Conductor.cs">
-      <Link>Signalling\Conductor.cs</Link>
+      <Link>Links\Conductor.cs</Link>
     </Compile>
     <Compile Include="..\..\PeerConnectionClient.Shared\Signalling\Signalling.cs">
-      <Link>Signalling\Signalling.cs</Link>
+      <Link>Links\Signalling.cs</Link>
     </Compile>
     <Compile Include="..\..\PeerConnectionClient.Shared\Utilities\ActionCommand.cs">
-      <Link>ActionCommand.cs</Link>
+      <Link>Links\ActionCommand.cs</Link>
     </Compile>
     <Compile Include="..\..\PeerConnectionClient.Shared\Utilities\BoolToVisConverter.cs">
-      <Link>BoolToVisConverter.cs</Link>
+      <Link>Links\BoolToVisConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\PeerConnectionClient.Shared\Utilities\InvertedBooleanConverter.cs">
+      <Link>Links\InvertedBooleanConverter.cs</Link>
     </Compile>
     <Compile Include="..\..\PeerConnectionClient.Shared\Utilities\NullToVisibleConverter.cs">
-      <Link>NullToVisibleConverter.cs</Link>
+      <Link>Links\NullToVisibleConverter.cs</Link>
     </Compile>
     <Compile Include="..\..\PeerConnectionClient.Shared\Utilities\SdpUtils.cs">
-      <Link>SdpUtils.cs</Link>
+      <Link>Links\SdpUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\..\PeerConnectionClient.Shared\Utilities\UI\ErrorControl.xaml.cs">
+      <Link>Links\ErrorControl.xaml.cs</Link>
     </Compile>
     <Compile Include="..\..\PeerConnectionClient.Shared\Utilities\ValidableBase.cs">
-      <Link>ValidableBase.cs</Link>
+      <Link>Links\ValidableBase.cs</Link>
     </Compile>
     <Compile Include="..\..\PeerConnectionClient.Shared\Utilities\ValidableIntegerString.cs">
-      <Link>ValidableIntegerString.cs</Link>
+      <Link>Links\ValidableIntegerString.cs</Link>
     </Compile>
     <Compile Include="..\..\PeerConnectionClient.Shared\Utilities\ValidableNonEmptyString.cs">
-      <Link>ValidableNonEmptyString.cs</Link>
+      <Link>Links\ValidableNonEmptyString.cs</Link>
+    </Compile>
+    <Compile Include="..\..\PeerConnectionClient.Shared\Utilities\VideoCaptureFormat.cs">
+      <Link>Links\VideoCaptureFormat.cs</Link>
     </Compile>
     <Compile Include="..\..\PeerConnectionClient.Shared\Utilities\XmlSerializer.cs">
-      <Link>XmlSerializer.cs</Link>
-    </Compile>
-    <Compile Include="..\..\PeerConnectionClient.Shared\ViewModels\BaseViewModel.cs">
-      <Link>BaseViewModel.cs</Link>
+      <Link>Links\XmlSerializer.cs</Link>
     </Compile>
     <Compile Include="..\..\PeerConnectionClient.Shared\ViewModels\MainViewModel.cs">
-      <Link>MainViewModel.cs</Link>
+      <Link>Links\MainViewModel.cs</Link>
+    </Compile>
+    <Compile Include="..\..\PeerConnectionClient.Shared\ViewModels\VideoRenderViewModel.cs">
+      <Link>Links\VideoRenderViewModel.cs</Link>
     </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ErrorControl.xaml.cs" />
-    <Compile Include="ExtendedSplashScreen.xaml.cs">
-      <DependentUpon>ExtendedSplashScreen.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -145,6 +157,7 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
+    <None Include="app.config" />
     <None Include="ApplicationInsights.config" />
     <None Include="packages.config" />
     <None Include="PeerConnectionClient.Win10_TemporaryKey.pfx" />
@@ -164,22 +177,14 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.ApplicationInsights">
-      <HintPath>..\packages\Microsoft.ApplicationInsights.0.13.0-build26067\lib\portable-win81+wpa81\Microsoft.ApplicationInsights.winmd</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.ApplicationInsights.Extensibility.RuntimeTelemetry">
-      <HintPath>..\packages\Microsoft.ApplicationInsights.RuntimeTelemetry.0.13.0-build26067\lib\portable-win81+wpa81\Microsoft.ApplicationInsights.Extensibility.RuntimeTelemetry.winmd</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.ApplicationInsights.Extensibility.Windows">
-      <HintPath>..\packages\Microsoft.ApplicationInsights.WindowsStore.0.13.0-build26067\lib\win81\Microsoft.ApplicationInsights.Extensibility.Windows.winmd</HintPath>
+    <Reference Include="Microsoft.ApplicationInsights, Version=0.13.0.26067, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.ApplicationInsights.0.13.0-build26067\lib\portable-win81+wpa81\Microsoft.ApplicationInsights.winmd</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="ErrorControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ExtendedSplashScreen.xaml">
+    <Page Include="..\..\PeerConnectionClient.Shared\Utilities\UI\ErrorControl.xaml">
+      <Link>Links\ErrorControl.xaml</Link>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -189,7 +194,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\webrtc\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\webrtc_vso\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api.vcxproj">
       <Project>{08a72a31-ed29-591b-a715-7842ad71fd3d}</Project>
       <Name>webrtc_winrt_api</Name>
     </ProjectReference>
@@ -198,15 +203,15 @@
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-  <Import Project="..\packages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.14-beta\build\portable-net45+win8+wpa81\Microsoft.Diagnostics.Tracing.EventSource.Redist.targets" Condition="Exists('..\packages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.14-beta\build\portable-net45+win8+wpa81\Microsoft.Diagnostics.Tracing.EventSource.Redist.targets')" />
+  <Import Project="..\..\packages\Microsoft.ApplicationInsights.0.13.0-build26067\build\portable-win81+wpa81\Microsoft.ApplicationInsights.targets" Condition="Exists('..\..\packages\Microsoft.ApplicationInsights.0.13.0-build26067\build\portable-win81+wpa81\Microsoft.ApplicationInsights.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.14-beta\build\portable-net45+win8+wpa81\Microsoft.Diagnostics.Tracing.EventSource.Redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.14-beta\build\portable-net45+win8+wpa81\Microsoft.Diagnostics.Tracing.EventSource.Redist.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.ApplicationInsights.0.13.0-build26067\build\portable-win81+wpa81\Microsoft.ApplicationInsights.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ApplicationInsights.0.13.0-build26067\build\portable-win81+wpa81\Microsoft.ApplicationInsights.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.ApplicationInsights.0.13.0-build26067\build\portable-win81+wpa81\Microsoft.ApplicationInsights.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.ApplicationInsights.0.13.0-build26067\build\portable-win81+wpa81\Microsoft.ApplicationInsights.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.14-beta\build\portable-net45+win8+wpa81\Microsoft.Diagnostics.Tracing.EventSource.Redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.14-beta\build\portable-net45+win8+wpa81\Microsoft.Diagnostics.Tracing.EventSource.Redist.targets'))" />
   </Target>
-  <Import Project="..\packages\Microsoft.ApplicationInsights.0.13.0-build26067\build\portable-win81+wpa81\Microsoft.ApplicationInsights.targets" Condition="Exists('..\packages\Microsoft.ApplicationInsights.0.13.0-build26067\build\portable-win81+wpa81\Microsoft.ApplicationInsights.targets')" />
+  <Import Project="..\..\packages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.14-beta\build\portable-net45+win8+wpa81\Microsoft.Diagnostics.Tracing.EventSource.Redist.targets" Condition="Exists('..\..\packages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.14-beta\build\portable-net45+win8+wpa81\Microsoft.Diagnostics.Tracing.EventSource.Redist.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

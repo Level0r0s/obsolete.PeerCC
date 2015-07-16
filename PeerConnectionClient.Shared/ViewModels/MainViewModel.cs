@@ -14,7 +14,9 @@ using PeerConnectionClient.MVVM;
 using PeerConnectionClient.Signalling;
 using PeerConnectionClient.Utilities;
 using webrtc_winrt_api;
+#if !WINDOWS_UAP // Disable on Win10 for now.
 using HockeyApp;
+#endif
 
 namespace PeerConnectionClient.ViewModels
 {
@@ -786,7 +788,9 @@ namespace PeerConnectionClient.ViewModels
 
         private void SendFeedbackExecute(object obj)
         {
+#if !WINDOWS_UAP // Disable on Win10 for now.
             HockeyClient.Current.ShowFeedback();
+#endif
         }
 
 
