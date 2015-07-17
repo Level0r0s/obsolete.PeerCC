@@ -315,6 +315,9 @@ namespace PeerConnectionClient.Signalling
 
                         // Connect to the server
                         await _hangingGetSocket.ConnectAsync(_server, _port);
+                        if (_hangingGetSocket == null)
+                            return;
+
                         // Send the request
                         _hangingGetSocket.WriteStringAsync(String.Format("GET /wait?peer_id={0} HTTP/1.0\r\n\r\n", _myId));
 
