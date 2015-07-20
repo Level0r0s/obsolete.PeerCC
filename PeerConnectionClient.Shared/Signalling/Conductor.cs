@@ -177,6 +177,9 @@ namespace PeerConnectionClient.Signalling
 
         private void PeerConnection_OnIceCandidate(RTCPeerConnectionIceEvent evt)
         {
+            if (evt.Candidate == null) // relevant: GlobalObserver::OnIceComplete in webrtc_winrt_api
+                return;
+
             var json = new JsonObject
             {
                 {kCandidateSdpMidName, JsonValue.CreateStringValue(evt.Candidate.SdpMid)},
