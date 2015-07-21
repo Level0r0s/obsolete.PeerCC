@@ -643,16 +643,18 @@ namespace PeerConnectionClient.ViewModels
 
 
         //selected capture resolution
-        public CapRes SelectedCapRes
+        private ComboBoxItemCapRes _selectedCapResItem;
+        public ComboBoxItemCapRes SelectedCapResItem
         {
-          get {return Conductor.Instance.VideoCaptureRes;}
-          set {
-            if (Conductor.Instance.VideoCaptureRes == value) {
-              return;
+            get { return _selectedCapResItem; }
+            set
+            {
+                if (SetProperty(ref _selectedCapResItem, value))
+                {
+                    Conductor.Instance.VideoCaptureRes = value.ValueCapResEnum;
+                    Conductor.Instance.updatePreferredFrameFormat();
+                }
             }
-            Conductor.Instance.VideoCaptureRes = value;
-            Conductor.Instance.updatePreferredFrameFormat();
-          }
         }
 
         private ObservableCollection<ComboBoxItemCapFPS> _allCapFPS;
@@ -663,19 +665,18 @@ namespace PeerConnectionClient.ViewModels
         }
 
         // selected capture frame rate
-        public CapFPS SelectedCapFPS
+        private ComboBoxItemCapFPS _selectedCapFPSItem;
+        public ComboBoxItemCapFPS SelectedCapFPSItem
         {
-          get {return Conductor.Instance.VideoCaptureFPS;}
-          set
-          {
-            if (Conductor.Instance.VideoCaptureFPS == value)
+            get { return _selectedCapFPSItem; }
+            set
             {
-              return;
+                if (SetProperty(ref _selectedCapFPSItem, value))
+                {
+                    Conductor.Instance.VideoCaptureFPS = value.ValueCapFPSEnum;
+                    Conductor.Instance.updatePreferredFrameFormat();
+                }
             }
-
-            Conductor.Instance.VideoCaptureFPS = value;
-            Conductor.Instance.updatePreferredFrameFormat();
-          }
         }
 
         private ObservableCollection<CodecInfo> _videoCodecs;
@@ -848,12 +849,14 @@ namespace PeerConnectionClient.ViewModels
             Conductor.Instance.ConfigureIceServers(IceServers);
 
 
+            RunOnUiThread(() =>
+            {
             _allCapRes = new ObservableCollection<ComboBoxItemCapRes>() { 
                       new ComboBoxItemCapRes(){ ValueCapResEnum = CapRes.Default, ValueCapResString = "default" },
                       new ComboBoxItemCapRes(){ ValueCapResEnum = CapRes._640_480, ValueCapResString = "640 x 480" },
                       new ComboBoxItemCapRes(){ ValueCapResEnum = CapRes._320_240, ValueCapResString = "320 x 240" },
             };
-            SelectedCapRes = CapRes.Default;
+            SelectedCapResItem = _allCapRes.First();
 
             _allCapFPS = new ObservableCollection<ComboBoxItemCapFPS>() { 
                       new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS.Default, ValueCapFPSString = "default" },
@@ -861,9 +864,9 @@ namespace PeerConnectionClient.ViewModels
                       new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._18, ValueCapFPSString = "18" },
                       new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._24, ValueCapFPSString = "24" },
             };
+            SelectedCapFPSItem = _allCapFPS.First();
 
-            SelectedCapFPS = CapFPS.Default;
-
+            });
         }
 
         void SaveIceServerList()

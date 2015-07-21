@@ -275,7 +275,7 @@
                        Margin="5"
                        RelativePanel.Below="AudioVideoSettingsPanelHeader"/>
             <ListBox Name="CameraListBox"
-                     MinHeight="180"
+                     MinHeight="120"
                      ItemsSource="{Binding Cameras}"
                      SelectedItem="{Binding SelectedCamera, Mode=TwoWay}"
                      BorderThickness="1"
@@ -297,7 +297,7 @@
                        Margin="5"
                        RelativePanel.Below="CameraListBox"/>
             <ListBox Name="MicrophoneListBox"
-                     MinHeight="180"
+                     MinHeight="120"
                      ItemsSource="{Binding Microphones}"
                      SelectedItem="{Binding SelectedMicrophone, Mode=TwoWay}"
                      BorderThickness="1"
@@ -353,6 +353,28 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
+            <ComboBox Name="VideoResolutionCombo"
+                      Header="Capture resolution:"
+                      Margin="5"
+                      Width="200"
+                      HorizontalAlignment="Left" 
+                      DisplayMemberPath="ValueCapResString" 
+                      ItemsSource="{Binding AllCapRes, Mode=OneWay}"
+                      SelectedItem="{Binding SelectedCapResItem, Mode=TwoWay}"
+                      RelativePanel.Below="VideoCodecCombo"
+                      RelativePanel.AlignRightWithPanel="True"
+                      RelativePanel.AlignLeftWithPanel="True"/>
+            <ComboBox Name="VideoFrameRateCombo"
+                      Header="Capture frame rate:"
+                      Margin="5"
+                      Width="200"
+                      HorizontalAlignment="Left"
+                      DisplayMemberPath="ValueCapFPSString" 
+                      ItemsSource="{Binding AllCapFPS, Mode=OneWay}"
+                      SelectedItem="{Binding SelectedCapFPSItem, Mode=TwoWay}"
+                      RelativePanel.Below="VideoResolutionCombo"
+                      RelativePanel.AlignRightWithPanel="True"
+                      RelativePanel.AlignLeftWithPanel="True"/>
         </RelativePanel>
         <RelativePanel Name="DebugSettingsPanel"
                        BorderThickness="1"
