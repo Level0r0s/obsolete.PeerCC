@@ -39,6 +39,8 @@ namespace PeerConnectionClient.ViewModels
             Ip = new ValidableNonEmptyString("23.96.124.41");//Temporary: Our Azure server.
             Port = new ValidableIntegerString(8888, 0, 65535);
 
+            var version = Windows.ApplicationModel.Package.Current.Id.Version;
+            AppVersion = String.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
 
             WebRTC.RequestAccessForMediaCapture().AsTask().ContinueWith(antecedent =>
             {
@@ -695,6 +697,13 @@ namespace PeerConnectionClient.ViewModels
                 Conductor.Instance.VideoCodec = value;
                 OnPropertyChanged(() => SelectedVideoCodec);
             }
+        }
+
+        private string _appVersion = "N/A";
+        public string AppVersion
+        {
+            get { return _appVersion; }
+            set { SetProperty(ref _appVersion, value); }
         }
 
         public MediaElement SelfVideo;

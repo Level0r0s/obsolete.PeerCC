@@ -49,14 +49,23 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
-
-        <TextBlock Text="SETTINGS"
-                   Style="{ThemeResource SubheaderTextBlockStyle}"
-                   Grid.Row="0"
-                   Margin="0,25,0,0"/>
-        <Controls:ErrorControl DataContext="{Binding Ip}"
-                               Grid.Row="1"
-                               Margin="5">
+            <Grid Grid.Row="0"
+                  Margin="0,25,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="SETTINGS"
+                           Style="{ThemeResource SubheaderTextBlockStyle}"
+                           Grid.Column="0"/>
+                <TextBlock Text="{Binding AppVersion, Mode=OneWay}"
+                           TextAlignment="Right"
+                           VerticalAlignment="Bottom"
+                           Grid.Column="1"/>
+            </Grid>
+            <Controls:ErrorControl DataContext="{Binding Ip}"
+                                   Grid.Row="1"
+                                   Margin="5">
             <Controls:ErrorControl.InnerContent>
                 <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          MinWidth="160"
