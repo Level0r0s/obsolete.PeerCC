@@ -117,7 +117,7 @@
         </Border>
         <RelativePanel Name="ConnectionSettingsPanel"
                        BorderThickness="1"
-                       Margin="10,10,5,10"
+                       Margin="10,10,5,12"
                        BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
                        RelativePanel.RightOf="ControlPanel"
                        RelativePanel.AlignBottomWithPanel="True"
@@ -258,7 +258,7 @@
         <RelativePanel Name="AudioVideoSettingsPanel"
                        BorderThickness="1"
                        BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
-                       Margin="5,10,5,10"
+                       Margin="5,10,5,12"
                        Padding="10,5,5,5"
                        RelativePanel.RightOf="ConnectionSettingsPanel"
                        RelativePanel.LeftOf="DebugSettingsPanel"
@@ -357,7 +357,7 @@
         <RelativePanel Name="DebugSettingsPanel"
                        BorderThickness="1"
                        BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
-                       Margin="5,10,10,10"
+                       Margin="5,10,10,12"
                        Padding="10,5,5,5"
                        RelativePanel.AlignBottomWithPanel="True"
                        RelativePanel.AlignTopWithPanel="True"
@@ -407,5 +407,12 @@
                           RelativePanel.Below="TraceServerPortTextBox"/>
             
         </RelativePanel>
+        <TextBlock Name="AppVersion"
+                   Text="{Binding AppVersion}"
+                   Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}"
+                   FontSize="10"
+                   Padding="0,0,10,0"
+                   RelativePanel.AlignBottomWithPanel="True"
+                   RelativePanel.AlignRightWithPanel="True" />
     </RelativePanel>
 </Page>
