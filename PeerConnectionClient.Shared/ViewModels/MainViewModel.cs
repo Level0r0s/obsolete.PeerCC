@@ -61,6 +61,7 @@ namespace PeerConnectionClient.ViewModels
         }
 
         readonly DisplayRequest _keepScreenOnRequest = new DisplayRequest();
+        private bool _keepOnScreenRequested = false;
 
         public void Initialize(CoreDispatcher uiDispatcher)
         {
@@ -159,7 +160,10 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     IsConnectedToPeer = true;
-                    _keepScreenOnRequest.RequestActive();
+                    if (!_keepOnScreenRequested) {
+                         _keepScreenOnRequest.RequestActive();
+                         _keepOnScreenRequested = true;
+                    }
                     IsMicrophoneEnabled = MicrophoneIsOn;
                     IsCameraEnabled = CameraEnabled;
                 });
@@ -175,7 +179,10 @@ namespace PeerConnectionClient.ViewModels
                     IsMicrophoneEnabled = true;
                     IsCameraEnabled = true;
                     SelfVideoFps = PeerVideoFps = "";
-                    _keepScreenOnRequest.RequestRelease();
+                    if (_keepOnScreenRequested) {
+                        _keepScreenOnRequest.RequestRelease();
+                        _keepOnScreenRequested = false;
+                    }
                 });
             };
 
