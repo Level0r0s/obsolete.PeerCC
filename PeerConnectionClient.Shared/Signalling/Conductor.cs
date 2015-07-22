@@ -162,10 +162,14 @@ namespace PeerConnectionClient.Signalling
             if (_peerConnection != null)
             {
                 _peerId = -1;
-                foreach (var track in _mediaStream.GetTracks())
+
+                if (_mediaStream != null)
                 {
-                    track.Stop();
-                    _mediaStream.RemoveTrack(track);
+                    foreach (var track in _mediaStream.GetTracks())
+                    {
+                        track.Stop();
+                        _mediaStream.RemoveTrack(track);
+                    }
                 }
                 _mediaStream = null;
 
