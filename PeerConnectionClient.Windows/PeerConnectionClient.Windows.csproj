@@ -106,6 +106,9 @@
     <Compile Include="ExtendedSplashScreen.xaml.cs">
       <DependentUpon>ExtendedSplashScreen.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SettingsFlyouts\AboutSettingsFlyout.xaml.cs">
+      <DependentUpon>AboutSettingsFlyout.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SettingsFlyouts\AudioVideoSettingsFlyout.xaml.cs">
       <DependentUpon>AudioVideoSettingsFlyout.xaml</DependentUpon>
     </Compile>
@@ -135,6 +138,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="ExtendedSplashScreen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SettingsFlyouts\AboutSettingsFlyout.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
