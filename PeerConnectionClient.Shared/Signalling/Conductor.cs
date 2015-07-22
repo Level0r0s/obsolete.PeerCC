@@ -161,8 +161,6 @@ namespace PeerConnectionClient.Signalling
         {
             if (_peerConnection != null)
             {
-                _peerConnection.Close();
-                _peerConnection = null;
                 _peerId = -1;
                 foreach (var track in _mediaStream.GetTracks())
                 {
@@ -170,8 +168,12 @@ namespace PeerConnectionClient.Signalling
                     _mediaStream.RemoveTrack(track);
                 }
                 _mediaStream = null;
+
                 if (OnPeerConnectionClosed != null)
                     OnPeerConnectionClosed();
+
+                _peerConnection.Close(); // slow, so do this after UI updated and camera turned off
+                _peerConnection = null;
             }
         }
 
