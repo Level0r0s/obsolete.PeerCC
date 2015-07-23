@@ -60,8 +60,14 @@
                                  Height="120"
                                  RealTimePlayback="True"
                                  Name="SelfVideo"/>
-                   <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="40">
-                       <TextBlock Text="{Binding SelfVideoFps}" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                   <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="80">
+                        <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Run Text="{Binding SelfWidth}"/>
+                            <Run Text="x"/>
+                            <Run Text="{Binding SelfHeight}"/>
+                            <Run Text="@"/>
+                            <Run Text="{Binding SelfVideoFps}"/>
+                        </TextBlock>
                    </Border>
                 </Grid>
             </Border>
@@ -75,8 +81,14 @@
                 Grid.Column="1" >
             <Grid>
                 <MediaElement Name="PeerVideo" RealTimePlayback="True"/>
-                <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="40">
-                    <TextBlock Text="{Binding PeerVideoFps}" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="80">
+                    <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Run Text="{Binding PeerWidth}"/>
+                        <Run Text="x"/>
+                        <Run Text="{Binding PeerHeight}"/>
+                        <Run Text="@"/>
+                        <Run Text="{Binding PeerVideoFps}"/>
+                    </TextBlock>
                 </Border>
             </Grid>
         </Border>

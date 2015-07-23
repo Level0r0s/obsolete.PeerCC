@@ -98,6 +98,19 @@ namespace PeerConnectionClient.ViewModels
                 });
             };
 
+            ResolutionHelper.ResolutionChanged += (id, width, height) => {
+                RunOnUiThread(() => {
+                    if (id == "SELF") {
+                        SelfHeight = height.ToString();
+                        SelfWidth = width.ToString();
+                    }
+                    else if (id == "PEER") {
+                        PeerHeight = height.ToString();
+                        PeerWidth = width.ToString();
+                    }
+                });
+              };
+
             Conductor.Instance.Media.EnumerateAudioVideoCaptureDevices();
 
             Conductor.Instance.Signaller.OnPeerConnected += (peerId, peerName) =>
@@ -385,12 +398,43 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-        private String _peerVideoFps;
-        public String PeerVideoFps
+        private String _peerWidth;
+        public String PeerWidth
         {
+            get { return _peerWidth; }
+            set
+            {
+                SetProperty(ref _peerWidth, value);
+            }
+        }
+
+        private String _peerHeight;
+        public String PeerHeight {
+            get { return _peerHeight; }
+            set {
+                SetProperty(ref _peerHeight, value);
+            }
+        }
+        private String _selfWidth;
+        public String SelfWidth {
+            get { return _selfWidth; }
+            set {
+                SetProperty(ref _selfWidth, value);
+            }
+        }
+
+        private String _selfHeight;
+        public String SelfHeight {
+            get { return _selfHeight; }
+            set {
+                SetProperty(ref _selfHeight, value);
+            }
+        }
+
+        private String _peerVideoFps;
+        public String PeerVideoFps {
           get { return _peerVideoFps; }
-          set
-          {
+          set {
             SetProperty(ref _peerVideoFps, value);
           }
         }
