@@ -194,7 +194,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\webrtc_vso\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api.vcxproj">
       <Project>{08a72a31-ed29-591b-a715-7842ad71fd3d}</Project>
       <Name>webrtc_winrt_api</Name>
     </ProjectReference>
