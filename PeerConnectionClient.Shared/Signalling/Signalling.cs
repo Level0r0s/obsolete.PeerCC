@@ -445,9 +445,16 @@ namespace PeerConnectionClient.Signalling
     {
         public static async void WriteStringAsync(this StreamSocket socket, string str)
         {
+          try
+          {
             var writer = new DataWriter(socket.OutputStream);
             writer.WriteString(str);
             await writer.StoreAsync();
+          }
+          catch (Exception ex)
+          {
+            Debug.WriteLine("Couldn't write to socket : " + ex.Message);
+          }
         }
 
         public static int ParseLeadingInt(this string str)
