@@ -58,10 +58,39 @@ namespace PeerConnectionClient.ViewModels
                     });
                 }
             });
+
+        }
+
+        private void PeerVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
+        {
+          Debug.WriteLine("PeerVideo_MediaFailed");
+          if (_peerVideoTrack != null)
+          {
+            Debug.WriteLine("Re-establishing peer video");
+            var source = new Media().CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
+            PeerVideo.SetMediaStreamSource(source);
+            PeerVideo.Play();
+            Debug.WriteLine("Peer video re-established");
+          }
+        }
+
+        private void SelfVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
+        {
+          Debug.WriteLine("SelfVideo_MediaFailed");
+          if (_selfVideoTrack != null)
+          {
+            Debug.WriteLine("Re-establishing self video");
+            var source = new Media().CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
+            SelfVideo.SetMediaStreamSource(source);
+            SelfVideo.Play();
+            Debug.WriteLine("Self video re-established");
+          }
         }
 
         readonly DisplayRequest _keepScreenOnRequest = new DisplayRequest();
         private bool _keepOnScreenRequested = false;
+        private MediaVideoTrack _peerVideoTrack;
+        private MediaVideoTrack _selfVideoTrack;
 
         public void Initialize(CoreDispatcher uiDispatcher)
         {
@@ -236,15 +265,16 @@ namespace PeerConnectionClient.ViewModels
 
         private void Conductor_OnAddRemoteStream(MediaStreamEvent evt)
         {
-            RunOnUiThread(() =>
+          RunOnUiThread(() =>
+              {
+                _peerVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
+                if (_peerVideoTrack != null)
                 {
-                    var videoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
-                    if (videoTrack != null)
-                    {
-                        var source = new Media().CreateMediaStreamSource(videoTrack, 30, "PEER");
-                        PeerVideo.SetMediaStreamSource(source);
-                    }
-                });
+                  var source = new Media().CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
+                  PeerVideo.MediaFailed += PeerVideo_MediaFailed;
+                  PeerVideo.SetMediaStreamSource(source);
+                }
+              });
         }
 
         private void Conductor_OnRemoveRemoteStream(MediaStreamEvent evt)
@@ -268,11 +298,12 @@ namespace PeerConnectionClient.ViewModels
                     Conductor.Instance.UnmuteMicrophone();
                 else
                     Conductor.Instance.MuteMicrophone();
-                var videoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
-                if (videoTrack != null)
+                _selfVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
+                if (_selfVideoTrack != null)
                 {
-                    var source = new Media().CreateMediaStreamSource(videoTrack, 30, "SELF");
-                    SelfVideo.SetMediaStreamSource(source);
+                  var source = new Media().CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
+                  SelfVideo.SetMediaStreamSource(source);
+                  SelfVideo.MediaFailed += SelfVideo_MediaFailed;
                 }
             });
         }
