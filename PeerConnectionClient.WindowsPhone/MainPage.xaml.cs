@@ -45,15 +45,33 @@ namespace PeerConnectionClient
             // If you are using the NavigationHelper provided by some templates,
             // this event is handled for you.
 
-            MainViewModel mainViewModel = (MainViewModel)e.Parameter;
-            this.DataContext = mainViewModel;
-            mainViewModel.PeerVideo = PeerVideo;
-            mainViewModel.SelfVideo = SelfVideo;
+            _mainViewModel = (MainViewModel)e.Parameter;
+            this.DataContext = _mainViewModel;
+            _mainViewModel.PeerVideo = PeerVideo;
+            _mainViewModel.SelfVideo = SelfVideo;
         }
 
         private void AppBarButton_Click(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(SettingsPage), this.DataContext);
         }
+
+        private void PeerVideo_MediaFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+          if (_mainViewModel != null)
+          {
+            _mainViewModel.PeerVideo_MediaFailed(sender, e);
+          }
+        }
+        private void SelfVideo_MediaFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+          if (_mainViewModel != null)
+          {
+            _mainViewModel.SelfVideo_MediaFailed(sender, e);
+          }
+        }
+
+        private MainViewModel _mainViewModel;
+
     }
 }

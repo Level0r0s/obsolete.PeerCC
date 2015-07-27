@@ -61,7 +61,7 @@ namespace PeerConnectionClient.ViewModels
 
         }
 
-        private void PeerVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
+        public void PeerVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
         {
           Debug.WriteLine("PeerVideo_MediaFailed");
           if (_peerVideoTrack != null)
@@ -74,7 +74,7 @@ namespace PeerConnectionClient.ViewModels
           }
         }
 
-        private void SelfVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
+        public void SelfVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
         {
           Debug.WriteLine("SelfVideo_MediaFailed");
           if (_selfVideoTrack != null)
@@ -271,7 +271,6 @@ namespace PeerConnectionClient.ViewModels
                 if (_peerVideoTrack != null)
                 {
                   var source = new Media().CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
-                  PeerVideo.MediaFailed += PeerVideo_MediaFailed;
                   PeerVideo.SetMediaStreamSource(source);
                 }
               });
@@ -303,7 +302,6 @@ namespace PeerConnectionClient.ViewModels
                 {
                   var source = new Media().CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
                   SelfVideo.SetMediaStreamSource(source);
-                  SelfVideo.MediaFailed += SelfVideo_MediaFailed;
                 }
             });
         }
