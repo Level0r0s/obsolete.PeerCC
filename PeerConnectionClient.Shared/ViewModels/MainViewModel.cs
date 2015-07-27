@@ -935,7 +935,7 @@ namespace PeerConnectionClient.ViewModels
                 TraceServerPort = configTraceServerPort;
             });
 
-            Conductor.Instance.ConfigureIceServers(IceServers);
+            Conductor.Instance.ConfigureIceServers(configIceServers);
 
 
             RunOnUiThread(() =>
