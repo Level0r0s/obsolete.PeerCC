@@ -94,7 +94,7 @@
             <Grid>
                 <MediaElement Name="PeerVideo"
                               RealTimePlayback="True"/>
-                <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="80">
+                <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="110">
                     <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
                         <Run Text="{Binding PeerWidth}"/>
                         <Run Text="x"/>
@@ -116,7 +116,7 @@
                               Height="200"
                               RealTimePlayback="True"
                               Name="SelfVideo"/>
-                <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="80">
+                <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="110">
                     <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
                           <Run Text="{Binding SelfWidth}"/>
                           <Run Text="x"/>
