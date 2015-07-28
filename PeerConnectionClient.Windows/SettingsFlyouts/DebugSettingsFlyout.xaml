@@ -45,5 +45,10 @@
                           HorizontalAlignment="Left"
                           HorizontalContentAlignment="Left"/>
         </StackPanel>
+        <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
+            <TextBox Header="Crash report user info"
+                     Text="{Binding CrashReportUserInfo, Mode=TwoWay}"
+                     PlaceholderText="User info"/>
+        </StackPanel>
     </StackPanel>
 </SettingsFlyout>

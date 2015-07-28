@@ -48,6 +48,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
             <Grid Grid.Row="0"
                   Margin="0,25,0,0">
@@ -304,6 +305,11 @@
                 DisplayMemberPath="ValueCapFPSString" 
                 ItemsSource="{Binding AllCapFPS, Mode=TwoWay}"
                 SelectedItem="{Binding SelectedCapFPSItem, Mode=TwoWay}" />
+        <TextBox Header="Crash report user info"
+                 Grid.Row="19"
+                 Grid.Column="0"
+                 Text="{Binding CrashReportUserInfo, Mode=TwoWay}"
+                 PlaceholderText="User info"/>
     </Grid>
     </ScrollViewer>
 </Page>
