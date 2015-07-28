@@ -17,6 +17,8 @@ namespace PeerConnectionClient
         private readonly AudioVideoSettingsFlyout _audioVideoSettingsFlyout;
         private readonly AboutSettingsFlyout _aboutSettingsFlyout;
 
+        private MainViewModel _mainViewModel;
+
         public MainPage()
         {
             InitializeComponent();
@@ -29,14 +31,14 @@ namespace PeerConnectionClient
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            var mainViewModel = (MainViewModel)e.Parameter;
+            _mainViewModel = (MainViewModel)e.Parameter;
             DataContext = _debugSettingsFlyout.DataContext
               = _connectionSettingsFlyout.DataContext
               = _audioVideoSettingsFlyout.DataContext
               = _aboutSettingsFlyout.DataContext
-              = mainViewModel;
-            mainViewModel.PeerVideo = PeerVideo;
-            mainViewModel.SelfVideo = SelfVideo;
+              = _mainViewModel;
+            _mainViewModel.PeerVideo = PeerVideo;
+            _mainViewModel.SelfVideo = SelfVideo;
         }
 
         private void OnCommandsRequested(SettingsPane sender, SettingsPaneCommandsRequestedEventArgs args)
@@ -69,6 +71,22 @@ namespace PeerConnectionClient
         public void ShowAboutSettingsFlyout()
         {
             _aboutSettingsFlyout.Show();
+        }
+
+        private void PeerVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
+        {
+          if(_mainViewModel!=null)
+          {
+            _mainViewModel.PeerVideo_MediaFailed(sender, e);
+          }
+        }
+
+        private void SelfVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
+        {
+          if (_mainViewModel != null)
+          {
+            _mainViewModel.SelfVideo_MediaFailed(sender, e);
+          }
         }
         
     }
