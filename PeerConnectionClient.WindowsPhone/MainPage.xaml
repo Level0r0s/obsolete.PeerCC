@@ -53,7 +53,7 @@
                     BorderThickness="1"
                     Margin="5" >
                 <Grid>
-          <MediaElement Name="PeerVideo" RealTimePlayback="True" MediaFailed="PeerVideo_MediaFailed"/>
+          <MediaElement Name="PeerVideo" RealTimePlayback="True" MediaFailed="PeerVideo_MediaFailed" Stretch="Uniform"/>
                     <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="80">
                         <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <Run Text="{Binding PeerWidth}"/>
@@ -73,10 +73,8 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom" >
                 <Grid>
-                    <MediaElement Width="200"
-                                  Height="200"
-                                  RealTimePlayback="True"
-                                  Name="SelfVideo" MediaFailed="SelfVideo_MediaFailed"/>
+                    <MediaElement RealTimePlayback="True"
+                                  Name="SelfVideo" MediaFailed="SelfVideo_MediaFailed" Stretch="Uniform"/>
                     <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="80">
                         <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <Run Text="{Binding SelfWidth}"/>
@@ -105,29 +103,25 @@
               Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverterNegated}}"
               Grid.Row="1"
               Grid.ColumnSpan="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
            
-            <TextBlock Text="Peers"
-                       Margin="5"
+            <TextBlock Text="Available Peers"
+                       Margin="7"
                        Grid.Row="0"
-                       Grid.Column="0" />
-            <ListBox Grid.Row="0"
-                     Grid.Column="1" 
+                       Style="{StaticResource BaseTextBlockStyle}"/>
+            <ListBox Grid.Row="1" 
                      Margin="5"
                      ItemsSource="{Binding Peers}" 
-                     SelectedItem="{Binding SelectedPeer, Mode=TwoWay}" />
+                     SelectedItem="{Binding SelectedPeer, Mode=TwoWay}"
+                     FontSize="18"/>
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Center"
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="2">
+                        Grid.Row="2">
                 <Button Content="Connect"
                         Command="{Binding ConnectCommand}"
                         Margin="5"                
@@ -141,8 +135,7 @@
                 <Button Content="Connect to peer"
                         Command="{Binding ConnectToPeerCommand}"
                         Margin="5"
-                        HorizontalAlignment="Center"/>
-                
+                        HorizontalAlignment="Center"/>              
             </StackPanel>
         </Grid>
     </Grid>
