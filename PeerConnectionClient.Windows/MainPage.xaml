@@ -59,7 +59,7 @@
                     <MediaElement Width="200"
                                  Height="120"
                                  RealTimePlayback="True"
-                                 Name="SelfVideo"/>
+                                 Name="SelfVideo" MediaFailed="SelfVideo_MediaFailed"/>
                    <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="80">
                         <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <Run Text="{Binding SelfWidth}"/>
@@ -80,7 +80,7 @@
                 Margin="5" 
                 Grid.Column="1" >
             <Grid>
-                <MediaElement Name="PeerVideo" RealTimePlayback="True"/>
+                <MediaElement Name="PeerVideo" RealTimePlayback="True" MediaFailed="PeerVideo_MediaFailed"/>
                 <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="80">
                     <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
                         <Run Text="{Binding PeerWidth}"/>
