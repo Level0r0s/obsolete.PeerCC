@@ -93,7 +93,8 @@
                 RelativePanel.RightOf="ControlPanel">
             <Grid>
                 <MediaElement Name="PeerVideo"
-                              RealTimePlayback="True"/>
+                              RealTimePlayback="True"
+                              MediaFailed="PeerVideo_MediaFailed"/>
                 <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="110">
                     <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
                         <Run Text="{Binding PeerWidth}"/>
@@ -115,7 +116,8 @@
                 <MediaElement Width="200"
                               Height="200"
                               RealTimePlayback="True"
-                              Name="SelfVideo"/>
+                              Name="SelfVideo"
+                              MediaFailed="SelfVideo_MediaFailed"/>
                 <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="110">
                     <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
                           <Run Text="{Binding SelfWidth}"/>
