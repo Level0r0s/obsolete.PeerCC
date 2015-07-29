@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest" xmlns:m3="http://schemas.microsoft.com/appx/2014/manifest" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest">
-  <Identity Name="MacadamianTechnologies.PeerConnectionClient-Beta" Publisher="CN=0BF51448-0221-4D5C-A9D3-036C6B759273" Version="1.1.0.14" />
+  <Identity Name="MacadamianTechnologies.PeerConnectionClient-Beta" Publisher="CN=0BF51448-0221-4D5C-A9D3-036C6B759273" Version="1.1.0.16" />
   <mp:PhoneIdentity PhoneProductId="de91174e-f2df-4d1e-b060-4fc6fe152928" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>PeerConnectionClient - Beta</DisplayName>
