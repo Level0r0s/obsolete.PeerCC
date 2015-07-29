@@ -193,7 +193,16 @@ namespace PeerConnectionClient.Signalling
             // set the DataReader to only wait for available data
             reader.InputStreamOptions = InputStreamOptions.Partial;
 
-            var count = await reader.LoadAsync(0xffff);
+            var loadTask = reader.LoadAsync(0xffff);
+            bool succeeded = loadTask.AsTask().Wait(20000);
+
+            if (!succeeded)
+            {
+                loadTask.Cancel();
+                Debug.WriteLine("Timed out long polling, re-trying.");
+                return null;
+            }
+            var count = loadTask.GetResults();
             if (count == 0)
                 return null;
 
@@ -324,14 +333,14 @@ namespace PeerConnectionClient.Signalling
                         // Read the response.
                         var readResult = await ReadIntoBufferAsync(_hangingGetSocket);
                         if (readResult == null)
-                            return;
+                            continue;
 
                         string buffer = readResult.Item1;
                         int content_length = readResult.Item2;
 
                         int peer_id, eoh;
                         if (!ParseServerResponse(buffer, out peer_id, out eoh))
-                            return;
+                            continue;
 
                         // Store the position where the body begins.
                         int pos = eoh + 4;
