@@ -16,6 +16,8 @@ using PeerConnectionClient.Utilities;
 using webrtc_winrt_api;
 #if !WINDOWS_UAP // Disable on Win10 for now.
 using HockeyApp;
+using Windows.Networking.Connectivity;
+using Windows.Networking;
 #endif
 
 namespace PeerConnectionClient.ViewModels
@@ -41,6 +43,9 @@ namespace PeerConnectionClient.ViewModels
 
             var version = Windows.ApplicationModel.Package.Current.Id.Version;
             AppVersion = String.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
+
+
+            LoadHockeyAppSettings();
 
             WebRTC.RequestAccessForMediaCapture().AsTask().ContinueWith(antecedent =>
             {
@@ -787,6 +792,21 @@ namespace PeerConnectionClient.ViewModels
             set { SetProperty(ref _appVersion, value); }
         }
 
+        private string _crashReportUserInfo = "";
+        public string CrashReportUserInfo
+        {
+            get { return _crashReportUserInfo; }
+            set
+            {
+                if (SetProperty(ref _crashReportUserInfo, value))
+                {
+                    var localSettings = ApplicationData.Current.LocalSettings;
+                    localSettings.Values["CrashReportUserInfo"] = _crashReportUserInfo;
+                    HockeyClient.Current.UpdateContactInfo(_crashReportUserInfo, "");
+                }
+            }
+        }
+
         public MediaElement SelfVideo;
         public MediaElement PeerVideo;
 
@@ -955,6 +975,30 @@ namespace PeerConnectionClient.ViewModels
             };
             SelectedCapFPSItem = _allCapFPS.First();
 
+            });
+        }
+
+        void LoadHockeyAppSettings()
+        {
+            var settings = ApplicationData.Current.LocalSettings;
+
+            //Default values:
+            var configCrashReportUserInfo = "";
+
+            if (settings.Values["CrashReportUserInfo"] != null)
+            {
+                configCrashReportUserInfo = (string)settings.Values["CrashReportUserInfo"];
+            }
+            if (configCrashReportUserInfo == "")
+            {
+                var hostname = NetworkInformation.GetHostNames().FirstOrDefault(
+                    h => h.Type == HostNameType.DomainName);
+                configCrashReportUserInfo = hostname != null ? hostname.CanonicalName : "<unknown host>";
+            }
+
+            RunOnUiThread(() =>
+            {
+                CrashReportUserInfo = configCrashReportUserInfo;
             });
         }
 
