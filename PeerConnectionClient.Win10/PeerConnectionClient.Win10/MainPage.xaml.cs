@@ -23,20 +23,38 @@ namespace PeerConnectionClient.Win10
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private MainViewModel _mainViewModel;
+
         public MainPage()
         {
             this.InitializeComponent();
         }
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            MainViewModel mainViewModel = (MainViewModel)e.Parameter;
-            this.DataContext = mainViewModel;
-            mainViewModel.PeerVideo = PeerVideo;
-            mainViewModel.SelfVideo = SelfVideo;
+            _mainViewModel = (MainViewModel)e.Parameter;
+            this.DataContext = _mainViewModel;
+            _mainViewModel.PeerVideo = PeerVideo;
+            _mainViewModel.SelfVideo = SelfVideo;
         }
         private void ConfirmAddButton_Click(object sender, RoutedEventArgs e)
         {
             this.AddButton.Flyout.Hide();
+        }
+
+        private void PeerVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
+        {
+          if(_mainViewModel!=null)
+          {
+            _mainViewModel.PeerVideo_MediaFailed(sender, e);
+          }
+        }
+
+        private void SelfVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
+        {
+          if (_mainViewModel != null)
+          {
+            _mainViewModel.SelfVideo_MediaFailed(sender, e);
+          }
         }
     }
 }
