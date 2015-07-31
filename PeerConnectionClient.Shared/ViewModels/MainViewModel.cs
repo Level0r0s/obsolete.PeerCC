@@ -242,7 +242,10 @@ namespace PeerConnectionClient.ViewModels
             string[] incompatibleAudioCodecs = new string[] { "CN32000", "CN16000", "CN8000", "red8000", "telephone-event8000" };
 
             VideoCodecs = new ObservableCollection<CodecInfo>();
-            var videoCodecList = WebRTC.GetVideoCodecs();
+            //Right now, The WebRTC reports the trial codecs before the officially supported one.
+            //reverse the list, so that the official ones will  be default.
+            var videoCodecList = WebRTC.GetVideoCodecs().Reverse();
+
 
             RunOnUiThread(() =>
             {
