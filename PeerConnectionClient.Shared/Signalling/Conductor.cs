@@ -159,26 +159,29 @@ namespace PeerConnectionClient.Signalling
 
         private void ClosePeerConnection()
         {
+          lock (this)
+          {
             if (_peerConnection != null)
             {
-                _peerId = -1;
+              _peerId = -1;
 
-                if (_mediaStream != null)
+              if (_mediaStream != null)
+              {
+                foreach (var track in _mediaStream.GetTracks())
                 {
-                    foreach (var track in _mediaStream.GetTracks())
-                    {
-                        track.Stop();
-                        _mediaStream.RemoveTrack(track);
-                    }
+                  track.Stop();
+                  _mediaStream.RemoveTrack(track);
                 }
-                _mediaStream = null;
+              }
+              _mediaStream = null;
 
-                if (OnPeerConnectionClosed != null)
-                    OnPeerConnectionClosed();
+              if (OnPeerConnectionClosed != null)
+                OnPeerConnectionClosed();
 
-                _peerConnection.Close(); // slow, so do this after UI updated and camera turned off
-                _peerConnection = null;
+              _peerConnection.Close(); // slow, so do this after UI updated and camera turned off
+              _peerConnection = null;
             }
+          }
         }
 
         private void PeerConnection_OnIceCandidate(RTCPeerConnectionIceEvent evt)
