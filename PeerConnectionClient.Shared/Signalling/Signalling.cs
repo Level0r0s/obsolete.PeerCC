@@ -189,19 +189,31 @@ namespace PeerConnectionClient.Signalling
 
         private async Task<Tuple<string, int>> ReadIntoBufferAsync(StreamSocket socket)
         {
-            var reader = new DataReader(socket.InputStream);
-            // set the DataReader to only wait for available data
-            reader.InputStreamOptions = InputStreamOptions.Partial;
+            DataReaderLoadOperation loadTask = null;
+            DataReader reader = null;
+            try
+            {
+                reader = new DataReader(socket.InputStream);
+                // set the DataReader to only wait for available data
+                reader.InputStreamOptions = InputStreamOptions.Partial;
+                loadTask = reader.LoadAsync(0xffff);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Couldn't read from socket: " + ex.Message);
+                return null;
+            }
 
-            var loadTask = reader.LoadAsync(0xffff);
-            bool succeeded = loadTask.AsTask().Wait(20000);
+            Debug.Assert(reader != null && loadTask != null); // failure to init should be caught by try-catch
 
+            bool succeeded = loadTask.AsTask().Wait(20000);    
             if (!succeeded)
             {
                 loadTask.Cancel();
                 Debug.WriteLine("Timed out long polling, re-trying.");
                 return null;
             }
+
             var count = loadTask.GetResults();
             if (count == 0)
                 return null;
