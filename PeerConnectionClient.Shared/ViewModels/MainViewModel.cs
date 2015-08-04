@@ -972,9 +972,9 @@ namespace PeerConnectionClient.ViewModels
 
             _allCapFPS = new ObservableCollection<ComboBoxItemCapFPS>() { 
                       new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS.Default, ValueCapFPSString = "default" },
-                      new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._16, ValueCapFPSString = "16" },
-                      new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._18, ValueCapFPSString = "18" },
-                      new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._24, ValueCapFPSString = "24" },
+                      new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._5, ValueCapFPSString = "5" },
+                      new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._15, ValueCapFPSString = "15" },
+                      new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._30, ValueCapFPSString = "30" },
             };
             SelectedCapFPSItem = _allCapFPS.First();
 

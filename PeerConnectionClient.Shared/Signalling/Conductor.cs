@@ -87,14 +87,14 @@ namespace PeerConnectionClient.Signalling
 
               switch (VideoCaptureFPS)
               {
-                case CapFPS._16:
-                  fps = 16;
+                case CapFPS._5:
+                  fps = 5;
                   break;
-                case CapFPS._18:
-                  fps = 18;
+                case CapFPS._15:
+                  fps = 15;
                   break;
-                case CapFPS._24:
-                  fps = 24;
+                case CapFPS._30:
+                  fps = 30;
                   break;
               }
 
