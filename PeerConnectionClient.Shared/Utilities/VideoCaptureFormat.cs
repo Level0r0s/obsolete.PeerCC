@@ -10,9 +10,9 @@ namespace PeerConnectionClient.Utilities
   public enum CapFPS
   {
     Default = 0,
-    _16 = 1,
-    _18 = 2,
-    _24 = 3
+    _5 = 1,
+    _15 = 2,
+    _30 = 3
   };
 
   public class ComboBoxItemCapRes
