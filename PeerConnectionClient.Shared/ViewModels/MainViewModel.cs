@@ -195,6 +195,7 @@ namespace PeerConnectionClient.ViewModels
                     IsConnected = false;
                     IsMicrophoneEnabled = false;
                     IsCameraEnabled = false;
+                    IsDisconnecting = false;
                 });
             };
 
@@ -517,6 +518,17 @@ namespace PeerConnectionClient.ViewModels
                 SetProperty(ref _isConnecting, value);
                 ConnectCommand.RaiseCanExecuteChanged();
             }
+        }
+
+        private bool _isDisconnecting;
+        public bool IsDisconnecting
+        {
+          get { return _isDisconnecting; }
+          set
+          {
+              SetProperty(ref _isDisconnecting, value);
+              DisconnectFromServerCommand.RaiseCanExecuteChanged();
+          }
         }
 
         private bool _isConnectedToPeer;
@@ -857,15 +869,19 @@ namespace PeerConnectionClient.ViewModels
 
         private bool DisconnectFromServerCanExecute(object obj)
         {
-            return IsConnected;
+          if (IsDisconnecting)
+              return false;
+
+          return IsConnected;
         }
 
         private void DisconnectFromServerExecute(object obj)
         {
+
             new Task(() =>
             {
+                IsDisconnecting = true;
                 Conductor.Instance.DisconnectFromServer();
-                IsConnected = false;
             }).Start();
 
             if (Peers != null)
