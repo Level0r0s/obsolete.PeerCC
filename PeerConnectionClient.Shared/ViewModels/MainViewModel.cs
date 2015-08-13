@@ -33,6 +33,7 @@ namespace PeerConnectionClient.ViewModels
             ConnectCommand = new ActionCommand(ConnectCommandExecute, ConnectCommandCanExecute);
             ConnectToPeerCommand = new ActionCommand(ConnectToPeerCommandExecute, ConnectToPeerCommandCanExecute);
             DisconnectFromPeerCommand = new ActionCommand(DisconnectFromPeerCommandExecute, DisconnectFromPeerCommandCanExecute);
+            TestDataCommand = new ActionCommand(TestDataCommandExecute, TestDataCommandCanExecute);
             DisconnectFromServerCommand = new ActionCommand(DisconnectFromServerExecute, DisconnectFromServerCanExecute);
             AddIceServerCommand = new ActionCommand(AddIceServerExecute, AddIceServerCanExecute);
             RemoveSelectedIceServerCommand = new ActionCommand(RemoveSelectedIceServerExecute, RemoveSelectedIceServerCanExecute);
@@ -416,6 +417,15 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private ActionCommand _testDataCommand;
+        public ActionCommand TestDataCommand
+        {
+            get { return _testDataCommand; }
+            set
+            {
+                SetProperty(ref _testDataCommand, value);
+            }
+        }
         private ActionCommand _disconnectFromServerCommand;
         public ActionCommand DisconnectFromServerCommand
         {
@@ -516,6 +526,7 @@ namespace PeerConnectionClient.ViewModels
                 SetProperty(ref _isConnected, value);
                 ConnectCommand.RaiseCanExecuteChanged();
                 DisconnectFromServerCommand.RaiseCanExecuteChanged();
+                TestDataCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -550,6 +561,7 @@ namespace PeerConnectionClient.ViewModels
                 SetProperty(ref _isConnectedToPeer, value);
                 ConnectToPeerCommand.RaiseCanExecuteChanged();
                 DisconnectFromPeerCommand.RaiseCanExecuteChanged();
+                TestDataCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -889,6 +901,18 @@ namespace PeerConnectionClient.ViewModels
             }).Start();
         }
 
+        private bool TestDataCommandCanExecute(object obj)
+        {
+            return IsConnectedToPeer;
+        }
+        private void TestDataCommandExecute(object obj)
+        {
+            new Task(() =>
+            {
+                Conductor.Instance.TestData();
+            }).Start();
+        }
+
         private bool DisconnectFromServerCanExecute(object obj)
         {
           if (IsDisconnecting)
@@ -939,9 +963,10 @@ namespace PeerConnectionClient.ViewModels
 
         private void SendFeedbackExecute(object obj)
         {
-#if !WINDOWS_UAP // Disable on Win10 for now.
-            HockeyClient.Current.ShowFeedback();
-#endif
+//#if !WINDOWS_UAP // Disable on Win10 for now.
+//            HockeyClient.Current.ShowFeedback();
+//#endif
+            Conductor.Instance.SendData();
         }
 
 
