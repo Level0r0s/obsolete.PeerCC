@@ -76,6 +76,7 @@ namespace PeerConnectionClient.Signalling
 
         public event Action OnPeerConnectionCreated;
         public event Action OnPeerConnectionClosed;
+        public event Action OnReadyToConnect;
 
         public void updatePreferredFrameFormat() {
 
@@ -180,6 +181,9 @@ namespace PeerConnectionClient.Signalling
 
               _peerConnection.Close(); // slow, so do this after UI updated and camera turned off
               _peerConnection = null;
+
+              if (OnReadyToConnect != null)
+                OnReadyToConnect();
             }
           }
         }
