@@ -63,7 +63,7 @@ namespace PeerConnectionClient.Signalling
         private string _port;
         private string _clientName;
         private int _myId;
-        private Dictionary<int, string> _peers = new Dictionary<int,string>();
+        private Dictionary<int, string> _peers = new Dictionary<int, string>();
 
         public bool IsConnected()
         {
@@ -97,7 +97,7 @@ namespace PeerConnectionClient.Signalling
                     OnServerConnectionFailure();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.WriteLine("Failed to connect: " + ex.Message);
             }
@@ -162,7 +162,7 @@ namespace PeerConnectionClient.Signalling
 
                 return GetHeaderValue(buffer, eoh, "\r\nPragma: ", out peer_id);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.WriteLine("[Error] Failed to parse server response (ex=" + ex.Message + ")! Buffer(" + buffer.Length + ")=<" + buffer + ">");
                 return false;
@@ -190,38 +190,33 @@ namespace PeerConnectionClient.Signalling
         private async Task<Tuple<string, int>> ReadIntoBufferAsync(StreamSocket socket)
         {
             DataReaderLoadOperation loadTask = null;
-            DataReader reader = null;
-            bool succeeded = false;
+            string data;
             try
             {
-                reader = new DataReader(socket.InputStream);
+                var reader = new DataReader(socket.InputStream);
                 // set the DataReader to only wait for available data
                 reader.InputStreamOptions = InputStreamOptions.Partial;
+
                 loadTask = reader.LoadAsync(0xffff);
-                succeeded = loadTask.AsTask().Wait(20000);
+                bool succeeded = loadTask.AsTask().Wait(20000);
+                if (!succeeded)
+                    throw new Exception("Timed out long polling, re-trying.");
+
+                var count = loadTask.GetResults();
+                if (count == 0)
+                    throw new Exception("No results loaded from reader.");
+
+                data = reader.ReadString(count);
+                if (data == null)
+                    throw new Exception("ReadString operation failed.");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Couldn't read from socket: " + ex.Message);
-                if (loadTask != null)
+                Debug.WriteLine("Couldn't read from socket. " + ex.Message);
+                if (loadTask != null && loadTask.Status == Windows.Foundation.AsyncStatus.Started)
                     loadTask.Cancel();
                 return null;
             }
-
-            Debug.Assert(reader != null && loadTask != null); // failure to init should be caught by try-catch
-            
-            if (!succeeded)
-            {
-                loadTask.Cancel();
-                Debug.WriteLine("Timed out long polling, re-trying.");
-                return null;
-            }
-
-            var count = loadTask.GetResults();
-            if (count == 0)
-                return null;
-
-            string data = reader.ReadString(count);
 
             int content_length = 0;
             bool ret = false;
@@ -442,9 +437,10 @@ namespace PeerConnectionClient.Signalling
             _state = State.NOT_CONNECTED;
         }
 
-        public async Task<bool> SendToPeer(int peerId, string message) {
+        public async Task<bool> SendToPeer(int peerId, string message)
+        {
             if (_state != State.CONNECTED)
-               return false;
+                return false;
 
             Debug.Assert(IsConnected());
 
@@ -472,16 +468,16 @@ namespace PeerConnectionClient.Signalling
     {
         public static async void WriteStringAsync(this StreamSocket socket, string str)
         {
-          try
-          {
-            var writer = new DataWriter(socket.OutputStream);
-            writer.WriteString(str);
-            await writer.StoreAsync();
-          }
-          catch (Exception ex)
-          {
-            Debug.WriteLine("Couldn't write to socket : " + ex.Message);
-          }
+            try
+            {
+                var writer = new DataWriter(socket.OutputStream);
+                writer.WriteString(str);
+                await writer.StoreAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Couldn't write to socket : " + ex.Message);
+            }
         }
 
         public static int ParseLeadingInt(this string str)
