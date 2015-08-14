@@ -44,6 +44,7 @@ namespace PeerConnectionClient.ViewModels
             var version = Windows.ApplicationModel.Package.Current.Id.Version;
             AppVersion = String.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
 
+            IsReadyToConnect = true;
 
             LoadHockeyAppSettings();
 
@@ -206,6 +207,7 @@ namespace PeerConnectionClient.ViewModels
             {
                 RunOnUiThread(() =>
                 {
+                    IsReadyToConnect = false;
                     IsConnectedToPeer = true;
                     if (!_keepOnScreenRequested) {
                          _keepScreenOnRequest.RequestActive();
@@ -230,6 +232,14 @@ namespace PeerConnectionClient.ViewModels
                         _keepScreenOnRequest.RequestRelease();
                         _keepOnScreenRequested = false;
                     }
+                });
+            };
+
+            Conductor.Instance.OnReadyToConnect += () =>
+            {
+                RunOnUiThread(() =>
+                {
+                    IsReadyToConnect = true;
                 });
             };
 
@@ -526,6 +536,18 @@ namespace PeerConnectionClient.ViewModels
             set
             {
                 SetProperty(ref _isConnectedToPeer, value);
+                ConnectToPeerCommand.RaiseCanExecuteChanged();
+                DisconnectFromPeerCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        private bool _isReadyToConnect;
+        public bool IsReadyToConnect
+        {
+            get { return _isReadyToConnect; }
+            set
+            {
+                SetProperty(ref _isReadyToConnect, value);
                 ConnectToPeerCommand.RaiseCanExecuteChanged();
                 DisconnectFromPeerCommand.RaiseCanExecuteChanged();
             }
@@ -831,7 +853,7 @@ namespace PeerConnectionClient.ViewModels
 
         private bool ConnectToPeerCommandCanExecute(object obj)
         {
-            return SelectedPeer != null && Peers.Contains(SelectedPeer) && !IsConnectedToPeer;
+            return SelectedPeer != null && Peers.Contains(SelectedPeer) && !IsConnectedToPeer && IsReadyToConnect;
         }
 
         private void ConnectToPeerCommandExecute(object obj)
