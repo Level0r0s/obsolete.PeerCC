@@ -66,16 +66,14 @@ namespace PeerConnectionClient.Signalling
         /// Audio codec used in WebRTC session.
         /// </summary>
         public CodecInfo AudioCodec { get; set; }
-
+        public CaptureCapability VideoCaptureProfile;
         /// <summary>
         /// Video frames per second property.
         /// </summary>
-        public CapFPS VideoCaptureFPS = CapFPS.Default;
 
         /// <summary>
         /// Video resolution property.
         /// </summary>
-        public CapRes VideoCaptureRes = CapRes.Default;
 
         // SDP negotiation attributes
         private static readonly string kCandidateSdpMidName = "sdpMid";
@@ -117,41 +115,13 @@ namespace PeerConnectionClient.Signalling
         /// <summary>
         /// Updates the preferred video frame rate and resolution.
         /// </summary>
-        public void updatePreferredFrameFormat() 
+        public void updatePreferredFrameFormat()
         {
-            if (VideoCaptureFPS!= CapFPS.Default || VideoCaptureRes!= CapRes.Default)
-            {
-                int width = 0;
-                int height = 0;
-                int fps = 0;
-
-                switch (VideoCaptureFPS)
-                {
-                    case CapFPS._5:
-                        fps = 5;
-                        break;
-                    case CapFPS._15:
-                        fps = 15;
-                        break;
-                    case CapFPS._30:
-                        fps = 30;
-                        break;
-                }
-
-                switch (VideoCaptureRes)
-                {
-                    case CapRes._320_240:
-                        width = 320;
-                        height = 240;
-                        break;
-                    case CapRes._640_480:
-                        width = 640;
-                        height = 480;
-                        break;
-                }
-
-                webrtc_winrt_api.WebRTC.SetPreferredVideoCaptureFormat(width,height,fps);
-            }
+          if (VideoCaptureProfile != null)
+          {
+            webrtc_winrt_api.WebRTC.SetPreferredVideoCaptureFormat(
+              (int)VideoCaptureProfile.Width, (int)VideoCaptureProfile.Height, (int)VideoCaptureProfile.FrameRate);
+          }
         }
 
         /// <summary>

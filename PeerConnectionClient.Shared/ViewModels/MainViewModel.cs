@@ -138,6 +138,10 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     Cameras.Add(deviceInfo);
+                    if (Cameras.Count == 1)
+                    {
+                      SelectedCamera = Cameras[0];
+                    }
                 });
             };
 
@@ -148,6 +152,10 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     Microphones.Add(deviceInfo);
+                    if (Microphones.Count == 1)
+                    {
+                      SelectedMicrophone = Microphones[0];
+                    }
                 });
             };
 
@@ -957,6 +965,36 @@ namespace PeerConnectionClient.ViewModels
             {
                 SetProperty(ref _selectedCamera, value);
                 Conductor.Instance.Media.SelectVideoDevice(_selectedCamera);
+                if (_allCapRes == null)
+                {
+                  _allCapRes = new ObservableCollection<String>();
+                }
+                else
+                {
+                  _allCapRes.Clear();
+                }
+                var opRes = value.GetVideoCaptureCapabilities();
+                opRes.AsTask().ContinueWith(resolutions =>
+                {
+                  RunOnUiThread(() =>
+                  {
+                    var uniqueRes = resolutions.Result.GroupBy(test => test.ResolutionDescription).Select(grp => grp.First()).ToList();
+                    CaptureCapability defaultResolution = null;
+                    foreach (var resolution in uniqueRes)
+                    {
+                      if (defaultResolution == null)
+                      {
+                        defaultResolution = resolution;
+                      }
+                      _allCapRes.Add(resolution.ResolutionDescription);
+                      if ((resolution.Width == 640) && (resolution.Height == 480))
+                      {
+                        defaultResolution = resolution;
+                      }
+                    }
+                    SelectedCapResItem = defaultResolution.ResolutionDescription;
+                  });
+                });
             }
         }
 
@@ -1156,60 +1194,79 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-        private ObservableCollection<ComboBoxItemCapRes> _allCapRes;
-
+        private ObservableCollection<String> _allCapRes;
+        public ObservableCollection<String> AllCapRes
         /// <summary>
         /// The list of all capture resolutions.
         /// </summary>
-        public ObservableCollection<ComboBoxItemCapRes> AllCapRes
         {
             get { return _allCapRes; }
             set { SetProperty(ref _allCapRes, value); }
         }
 
-        private ComboBoxItemCapRes _selectedCapResItem;
-
+        private String _selectedCapResItem;
+        public String SelectedCapResItem
         /// <summary>
         /// The selected capture resolution.
         /// </summary>
-        public ComboBoxItemCapRes SelectedCapResItem
         {
             get { return _selectedCapResItem; }
             set
             {
-                if (SetProperty(ref _selectedCapResItem, value))
+                if (_allCapFPS == null)
                 {
-                    Conductor.Instance.VideoCaptureRes = value.ValueCapResEnum;
-                    Conductor.Instance.updatePreferredFrameFormat();
+                  _allCapFPS = new ObservableCollection<CaptureCapability>();
                 }
+                else
+                {
+                  _allCapFPS.Clear();
+                }
+                var opCap = SelectedCamera.GetVideoCaptureCapabilities();
+                opCap.AsTask().ContinueWith(caps =>
+                {
+                  var fpsList = from cap in caps.Result where cap.ResolutionDescription == value select cap;
+                  var t = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    () =>
+                    {
+                      CaptureCapability defaultFPS = null;
+                      foreach (var fps in fpsList)
+                      {
+                        _allCapFPS.Add(fps);
+                        if ((defaultFPS == null) || (fps.FrameRate == 30))
+                        {
+                          defaultFPS = fps;
+                        }
+                      }
+                      SelectedCapFPSItem = defaultFPS;
+                    });
+                });
+                SetProperty(ref _selectedCapResItem, value);
             }
         }
 
-        private ObservableCollection<ComboBoxItemCapFPS> _allCapFPS;
-       
+        private ObservableCollection<CaptureCapability> _allCapFPS;
+        public ObservableCollection<CaptureCapability> AllCapFPS
         /// <summary>
         /// The list of all capture frame rates.
         /// </summary>
-        public ObservableCollection<ComboBoxItemCapFPS> AllCapFPS
         {
             get { return _allCapFPS; }
             set { SetProperty(ref _allCapFPS, value); }
         }
 
-        private ComboBoxItemCapFPS _selectedCapFPSItem;
-
+        private CaptureCapability _selectedCapFPSItem;
+        public CaptureCapability SelectedCapFPSItem
         /// <summary>
         /// The selected capture frame rate.
         /// </summary>
-        public ComboBoxItemCapFPS SelectedCapFPSItem
         {
             get { return _selectedCapFPSItem; }
             set
             {
                 if (SetProperty(ref _selectedCapFPSItem, value))
                 {
-                    Conductor.Instance.VideoCaptureFPS = value.ValueCapFPSEnum;
-                    Conductor.Instance.updatePreferredFrameFormat();
+                  Conductor.Instance.VideoCaptureProfile = value;
+                  Conductor.Instance.updatePreferredFrameFormat();
                 }
             }
         }
@@ -1534,25 +1591,6 @@ namespace PeerConnectionClient.ViewModels
 
             Conductor.Instance.ConfigureIceServers(configIceServers);
 
-            RunOnUiThread(() =>
-            {
-                _allCapRes = new ObservableCollection<ComboBoxItemCapRes>() 
-                { 
-                    new ComboBoxItemCapRes(){ ValueCapResEnum = CapRes.Default, ValueCapResString = "default" },
-                    new ComboBoxItemCapRes(){ ValueCapResEnum = CapRes._640_480, ValueCapResString = "640 x 480" },
-                    new ComboBoxItemCapRes(){ ValueCapResEnum = CapRes._320_240, ValueCapResString = "320 x 240" },
-                };
-                SelectedCapResItem = _allCapRes.First();
-
-                _allCapFPS = new ObservableCollection<ComboBoxItemCapFPS>()
-                { 
-                    new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS.Default, ValueCapFPSString = "default" },
-                    new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._5, ValueCapFPSString = "5" },
-                    new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._15, ValueCapFPSString = "15" },
-                    new ComboBoxItemCapFPS(){ ValueCapFPSEnum = CapFPS._30, ValueCapFPSString = "30" },
-                };
-                SelectedCapFPSItem = _allCapFPS.First();
-            });
         }
 
         /// <summary>
