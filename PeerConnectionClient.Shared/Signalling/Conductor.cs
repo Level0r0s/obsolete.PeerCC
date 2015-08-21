@@ -55,7 +55,6 @@ namespace PeerConnectionClient.Signalling
         private static readonly string kCandidateSdpName = "candidate";
         private static readonly string kSessionDescriptionTypeName = "type";
         private static readonly string kSessionDescriptionSdpName = "sdp";
-        RTCDataChannel _dataChannel;
 
         RTCPeerConnection _peerConnection;
         Media _media;
@@ -117,77 +116,6 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
-        // ====================================================================================
-        private void PeerConnection_OnDataChannel(RTCDataChannelEvent evt)
-        {
-            Debug.WriteLine("ON DATA CHANNEL!!!" + evt);
-            _dataChannel = evt.Channel;
-            _dataChannel.OnMessage += DataChannel_OnMessage;
-            _dataChannel.OnOpen += DataChannel_OnOpen;
-            _dataChannel.OnError += DataChannel_OnError;
-            _dataChannel.OnClose += DataChannel_OnClose;
-        }
-        private void DataChannel_OnMessage(RTCDataChannelMessageEvent msg)
-        {
-            Debug.WriteLine("ON MESSAGE!!! " + msg);
-        }
-        private void DataChannel_OnOpen()
-        {
-            Debug.WriteLine("ON OPEN!!! ");
-        }
-        private void DataChannel_OnClose()
-        {
-            Debug.WriteLine("ON CLOSE!!! ");
-        }
-        private void DataChannel_OnError()
-        {
-            Debug.WriteLine("ON ERROR!!! ");
-        }
-        // ===================================================================================
-        
-        public void SendData()
-        {
-            if (_peerConnection == null)
-            {
-                Debug.WriteLine("Peer connection nulL! can't send data obvi");
-                return;
-            }
-
-            var testMsg = "Hello Stu!";
-            Debug.WriteLine("Reached TestData in Conductor.cs, sending msg: " + testMsg);
-
-            if (_dataChannel == null)
-            {
-                Debug.WriteLine("creating new data channel");
-                RTCDataChannelInit init = new RTCDataChannelInit();
-                init.Ordered = true;
-                init.Negotiated = false;
-                _dataChannel = _peerConnection.CreateDataChannel("TestDataChannel", init);
-                _dataChannel.OnMessage += DataChannel_OnMessage;
-                _dataChannel.OnOpen    += DataChannel_OnOpen;
-                _dataChannel.OnError   += DataChannel_OnError;
-                _dataChannel.OnClose   += DataChannel_OnClose;
-            }
-            if (_dataChannel.ReadyState == RTCDataChannelState.Connecting)
-            {
-                Debug.WriteLine("connecting...");
-            }
-
-            if (_dataChannel.ReadyState == RTCDataChannelState.Open)
-            {
-                _dataChannel.Send(testMsg);
-            }
-            else { 
-                Debug.WriteLine("NOT SENDING: data channel in state: " + _dataChannel.ReadyState);
-            }
-        }
-        // -----------------------------------------------------------------------------------------
-        //private async Task InitializeAfter500ms()
-        //{
-        //    await Task.Delay(500);
-        //    _dataChannel.Send("tesrtaegra");
-        //}
-
         private async Task<bool> CreatePeerConnection()
         {
             Debug.Assert(_peerConnection == null);
@@ -226,9 +154,7 @@ namespace PeerConnectionClient.Signalling
             _peerConnection.AddStream(_mediaStream);
             if (OnAddLocalStream != null)
                 OnAddLocalStream(new MediaStreamEvent() { Stream = _mediaStream });
-            
-            _peerConnection.OnDataChannel += PeerConnection_OnDataChannel;
-            
+
             return true;
         }
 
@@ -483,12 +409,6 @@ namespace PeerConnectionClient.Signalling
         {
             SendHangupMessage();
             ClosePeerConnection();
-        }
-
-        public void TestData() 
-        {
-            var testMsg = "Hello Stu!";
-            Debug.WriteLine("Reached TestData in Conductor.cs, sending msg: " + testMsg);
         }
 
         private string GetLocalPeerName()

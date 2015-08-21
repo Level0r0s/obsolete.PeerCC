@@ -71,14 +71,9 @@
                    </Border>
                 </Grid>
             </Border>
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-        <Button Content="Test Data"
-                  HorizontalAlignment="Left"
-                  Command="{Binding TestDataCommand}" />
         <Button Content="Send Feedback"
-                HorizontalAlignment="Right"
+                HorizontalAlignment="Center"
                 Command="{Binding SendFeedbackCommand}" />
-      </StackPanel>
     </StackPanel>
         <Border BorderThickness="1"
                 BorderBrush="Blue"
