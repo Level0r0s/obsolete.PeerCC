@@ -275,6 +275,11 @@ namespace PeerConnectionClient.Signalling
                     Debug.Assert(_peerId == peerId || _peerId == -1);
                     Debug.Assert(message.Length > 0);
 
+                    if (_peerId != peerId && _peerId != -1) {
+                        Debug.WriteLine("Conductor: Received a message from unknown peer while already in a conversation with a different peer.");
+                        return;
+                    }
+
                     if (_peerConnection == null)
                     {
                         Debug.Assert(_peerId == -1);
