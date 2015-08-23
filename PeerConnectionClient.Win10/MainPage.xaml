@@ -20,15 +20,24 @@
             <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}"/>
         </Style>
     </Page.Resources>
-    <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        
-        <RelativePanel Name="ControlPanel"
-                       RelativePanel.AlignBottomWithPanel="True"
-                       RelativePanel.AlignTopWithPanel="True">
-            <RelativePanel Name="ControlPanelInCall"
-                           Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
-                           RelativePanel.AlignBottomWithPanel="True">
-                <Button Name="DisconnectFromPeerButton_Incall"
+
+    <ScrollViewer 
+        HorizontalScrollMode="Auto" 
+        HorizontalScrollBarVisibility="{Binding ScrollBarVisibilityType}"
+        VerticalScrollMode="Auto" 
+        VerticalScrollBarVisibility="{Binding ScrollBarVisibilityType}">
+        <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+            <RelativePanel
+                Name="ControlPanel"
+                RelativePanel.AlignBottomWithPanel="True"
+                RelativePanel.AlignTopWithPanel="True">
+                <RelativePanel
+                    Name="ControlPanelInCall"
+                    Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
+                    RelativePanel.AlignBottomWithPanel="True">
+                    <Button 
+                        Name="DisconnectFromPeerButton_Incall"
                         Content="&#xE137;"
                         FontFamily="Segoe UI Symbol"
                         HorizontalAlignment="Center"
@@ -36,437 +45,498 @@
                         RelativePanel.Above="ToggletSettingsButton_InCall"
                         RelativePanel.AlignLeftWithPanel="True"
                         Margin="10,5,0,5"/>
-                <ToggleButton Name="ToggletSettingsButton_InCall"
-                              Content="&#xE115;"
-                              FontFamily="Segoe UI Symbol"
-                              HorizontalAlignment="Right"
-                              Margin="10,5,0,5"
-                              IsChecked="{Binding IsChecked,ElementName=ToggletSettingsButton, Mode=TwoWay}"
-                              RelativePanel.AlignBottomWithPanel="True"
-                              RelativePanel.AlignLeftWithPanel="True"/>
-            </RelativePanel>
-            <StackPanel x:Name="ConnectionStackPanel"
-                        Visibility="{Binding Path=IsConnectedToPeer, Converter={StaticResource BoolToVisConverterNegated}}"
-                        Orientation="Vertical"
-                        BorderThickness="1"
-                        BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
+                    <ToggleButton 
+                        Name="ToggletSettingsButton_InCall"
+                        Content="&#xE115;"
+                        FontFamily="Segoe UI Symbol"
+                        HorizontalAlignment="Right"
+                        Margin="10,5,0,5"
+                        IsChecked="{Binding IsChecked,ElementName=ToggletSettingsButton, Mode=TwoWay}"
                         RelativePanel.AlignBottomWithPanel="True"
-                        RelativePanel.AlignTopWithPanel="True"
-                        Margin="10">
-                <ToggleButton Name="ToggletSettingsButton"
-                              Content="&#xE115;"
-                              FontFamily="Segoe UI Symbol"
-                              HorizontalAlignment="Right"
-                              Margin="5"/>
-                <TextBlock Margin="5" Foreground="Red" 
-                           Text="Server not configured"
-                           Visibility="{Binding HasServer, Converter={StaticResource BoolToVisConverterNegated}}"/>
-                <Grid Margin="5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions> 
-                    <TextBlock HorizontalAlignment="Left" 
-                               VerticalAlignment="Center"
-                               FontSize="12"
-                               Visibility="{Binding HasServer, Converter={StaticResource BoolToVisConverter}}">
-                        <Run Text="{Binding Ip.Value}"/>
-                        <Run Text=":"/>
-                        <Run Text="{Binding Port.Value}"/>
-                    </TextBlock>
-                    <Button Grid.Column="1"
+                        RelativePanel.AlignLeftWithPanel="True"
+                        Command="{Binding SettingsButtonCommand}"/>
+                </RelativePanel>
+                <StackPanel 
+                    x:Name="ConnectionStackPanel"
+                    Visibility="{Binding Path=IsConnectedToPeer, Converter={StaticResource BoolToVisConverterNegated}}"
+                    Orientation="Vertical"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
+                    RelativePanel.AlignBottomWithPanel="True"
+                    RelativePanel.AlignTopWithPanel="True"
+                    Margin="10">
+                    <ToggleButton
+                        Name="ToggletSettingsButton"
+                        Content="&#xE115;"
+                        FontFamily="Segoe UI Symbol"
+                        HorizontalAlignment="Right"
+                        Margin="5"
+                        Command="{Binding SettingsButtonCommand}"/>
+                    <TextBlock 
+                        Margin="5" 
+                        Foreground="Red" 
+                        Text="Server not configured"
+                        Visibility="{Binding HasServer, Converter={StaticResource BoolToVisConverterNegated}}"/>
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock 
+                            HorizontalAlignment="Left" 
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Visibility="{Binding HasServer, Converter={StaticResource BoolToVisConverter}}">
+                            <Run Text="{Binding Ip.Value}"/>
+                            <Run Text=":"/>
+                            <Run Text="{Binding Port.Value}"/>
+                        </TextBlock>
+                        <Button 
+                            Grid.Column="1"
                             Content="Connect" 
                             Command="{Binding ConnectCommand}"
                             HorizontalAlignment="Right"
                             Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverterNegated}}"/>
-                    <Button Grid.Column="1"
+                        <Button 
+                            Grid.Column="1"
                             Content="Disconnect" 
                             Command="{Binding DisconnectFromServerCommand}"
                             HorizontalAlignment="Right"
                             Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"/>
-                </Grid>
-                <TextBlock Text="Available Peers"
-                           Margin="5"/>
-                <ListBox Height="320"
-                         Width="200" 
-                         Margin="5" 
-                         SelectedItem="{Binding SelectedPeer, Mode=TwoWay}"
-                         ItemsSource="{Binding Peers}"
-                         BorderThickness="1"
-                         BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"/>
-                <Button Content="&#xE13A;"
+                    </Grid>
+                    <TextBlock 
+                        Text="Available Peers"
+                        Margin="5"/>
+                    <ListBox 
+                        Height="320"
+                        Width="200" 
+                        Margin="5" 
+                        SelectedItem="{Binding SelectedPeer, Mode=TwoWay}"
+                        ItemsSource="{Binding Peers}"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"/>
+                    <Button 
+                        Content="&#xE13A;"
                         FontFamily="Segoe UI Symbol"
                         Margin="5"
                         Command="{Binding ConnectToPeerCommand}"
                         HorizontalAlignment="Right" />
-            </StackPanel>
-        </RelativePanel>
+                </StackPanel>
+            </RelativePanel>
 
-        <Border BorderThickness="1"
+            <Border 
+                BorderThickness="1"
                 BorderBrush="Blue"
                 Margin="5" 
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
                 RelativePanel.RightOf="ControlPanel">
-            <Grid>
-                <MediaElement Name="PeerVideo"
-                              RealTimePlayback="True"
-                              MediaFailed="PeerVideo_MediaFailed"/>
-                <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="110">
-                    <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <Run Text="{Binding PeerWidth}"/>
-                        <Run Text="x"/>
-                        <Run Text="{Binding PeerHeight}"/>
-                        <Run Text="@"/>
-                        <Run Text="{Binding PeerVideoFps}"/>
-                    </TextBlock>
-                </Border>
-            </Grid>
-        </Border>
-        <Border BorderThickness="1"
+                <Grid>
+                    <MediaElement 
+                        Name="PeerVideo"
+                        RealTimePlayback="True"
+                        MediaFailed="PeerVideo_MediaFailed"/>
+                    <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="110">
+                        <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Run Text="{Binding PeerWidth}"/>
+                            <Run Text="x"/>
+                            <Run Text="{Binding PeerHeight}"/>
+                            <Run Text="@"/>
+                            <Run Text="{Binding PeerVideoFps}"/>
+                        </TextBlock>
+                    </Border>
+                </Grid>
+            </Border>
+            <Border
+                BorderThickness="1"
                 Margin="20"
                 BorderBrush="Blue" 
                 Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
                 RelativePanel.AlignBottomWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True">
-            <Grid>
-                <MediaElement Width="200"
-                              Height="200"
-                              RealTimePlayback="True"
-                              Name="SelfVideo"
-                              MediaFailed="SelfVideo_MediaFailed"/>
-                <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="110">
-                    <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
-                          <Run Text="{Binding SelfWidth}"/>
-                          <Run Text="x"/>
-                          <Run Text="{Binding SelfHeight}"/>
-                          <Run Text="@"/>
-                          <Run Text="{Binding SelfVideoFps}"/>
-                    </TextBlock>
-                </Border>
-            </Grid>
-        </Border>
-        <RelativePanel Name="ConnectionSettingsPanel"
-                       BorderThickness="1"
-                       Margin="10,10,5,12"
-                       BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
-                       RelativePanel.RightOf="ControlPanel"
-                       RelativePanel.AlignBottomWithPanel="True"
-                       RelativePanel.AlignTopWithPanel="True"
-                       Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}"
-                       Padding="10,5,5,5">
-            <TextBlock Name="ConnectionSettingPanelHeader"
-                       Text="Connection"
-                       Style="{StaticResource SubtitleTextBlockStyle}"
-                       RelativePanel.AlignTopWithPanel="True"/>
-            <Controls:ErrorControl x:Name="ServerIpTextBox"
-                                   DataContext="{Binding Ip}"
-                                   Margin="5"
-                                   RelativePanel.Below="ConnectionSettingPanelHeader">
-                <Controls:ErrorControl.InnerContent>
-                    <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             MinWidth="160"
-                             Header="IP"/>
-                </Controls:ErrorControl.InnerContent>
-            </Controls:ErrorControl>
-            <Controls:ErrorControl x:Name="ServerPortTextBox"
-                                   DataContext="{Binding Port}"
-                                   Margin="5"
-                                   RelativePanel.Below="ServerIpTextBox">
-                <Controls:ErrorControl.InnerContent>
-                    <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             MinWidth="160"
-                             Header="Port"/>
-                </Controls:ErrorControl.InnerContent>
-            </Controls:ErrorControl>
-            <TextBlock Name="IceServerHeader"
-                       Text="ICE servers"
-                       VerticalAlignment="Center"
-                       Margin="5"
-                       Style="{StaticResource TextBlockHeader}"
-                       RelativePanel.Below="ServerPortTextBox"/>
-            <ListBox Name="IceServersListBox"
-                     ItemsSource="{Binding IceServers}"
-                     SelectedItem="{Binding SelectedIceServer, Mode=TwoWay}"
-                     Width="200"
-                     Margin="5"
-                     MinHeight="200"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     ScrollViewer.VerticalScrollMode="Enabled"
-                     ScrollViewer.HorizontalScrollMode="Disabled"
-                     BorderBrush="Black"
-                     BorderThickness="1"
-                     RelativePanel.Below="IceServerHeader"
-                     RelativePanel.Above="IceServerControlPanel">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <RelativePanel RelativePanel.AlignLeftWithPanel="True"
-                                       RelativePanel.AlignRightWithPanel="True">
-                            <TextBlock Name="IceServerItem_HostAndPort"
-                                       Text="{Binding HostAndPort}"
-                                       Style="{StaticResource CaptionTextBlockStyle}"
-                                       RelativePanel.AlignTopWithPanel="True"/>
-                            <TextBlock Name="IceServerItem_TypeHeader"
-                                       Text="Type"
-                                       Style="{StaticResource CaptionTextBlockStyle}"
-                                       FontWeight="Bold"
-                                       Margin="5,0,10,0"
-                                       RelativePanel.Below="IceServerItem_HostAndPort"/>
-                            <TextBlock Name="IceServerItem_Type"
-                                       Text="{Binding TypeStr}"
-                                       Style="{StaticResource CaptionTextBlockStyle}"
-                                       RelativePanel.RightOf="IceServerItem_TypeHeader"
-                                       RelativePanel.Below="IceServerItem_HostAndPort"/>
-                            <TextBlock Name="IceServerItem_UserHeader"
-                                       Text="User"
-                                       Style="{StaticResource CaptionTextBlockStyle}"
-                                       FontWeight="Bold"
-                                       Margin="5,0,10,0"
-                                       Visibility="{Binding Username, Converter={StaticResource NullToVisibleConverter}}"
-                                       RelativePanel.Below="IceServerItem_TypeHeader"/>
-                            <TextBlock Name="IceServerItem_User"
-                                       Text="{Binding Username}"
-                                       Visibility="{Binding Username, Converter={StaticResource NullToVisibleConverter}}"
-                                       Style="{StaticResource CaptionTextBlockStyle}"
-                                       RelativePanel.RightOf="IceServerItem_UserHeader"
-                                       RelativePanel.Below="IceServerItem_TypeHeader"/>
-                        </RelativePanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <RelativePanel Name="IceServerControlPanel"
-                           RelativePanel.AlignBottomWithPanel="True"
-                           RelativePanel.AlignHorizontalCenterWithPanel="True">
-                <Button Name="AddButton"
+                <Grid>
+                    <MediaElement 
+                        Width="200"
+                        Height="200"
+                        RealTimePlayback="True"
+                        Name="SelfVideo"
+                        MediaFailed="SelfVideo_MediaFailed"/>
+                    <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="110">
+                        <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Run Text="{Binding SelfWidth}"/>
+                            <Run Text="x"/>
+                            <Run Text="{Binding SelfHeight}"/>
+                            <Run Text="@"/>
+                            <Run Text="{Binding SelfVideoFps}"/>
+                        </TextBlock>
+                    </Border>
+                </Grid>
+            </Border>
+            <RelativePanel 
+                Name="ConnectionSettingsPanel"
+                BorderThickness="1"
+                Margin="10,10,5,12"
+                BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
+                RelativePanel.RightOf="ControlPanel"
+                RelativePanel.AlignBottomWithPanel="True"
+                RelativePanel.AlignTopWithPanel="True"
+                Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}"
+                Padding="10,5,5,5">
+                <TextBlock 
+                    Name="ConnectionSettingPanelHeader"
+                    Text="Connection"
+                    Style="{StaticResource SubtitleTextBlockStyle}"
+                    RelativePanel.AlignTopWithPanel="True"/>
+                <Controls:ErrorControl 
+                    x:Name="ServerIpTextBox"
+                    DataContext="{Binding Ip}"
+                    Margin="5"
+                    RelativePanel.Below="ConnectionSettingPanelHeader">
+                    <Controls:ErrorControl.InnerContent>
+                        <TextBox 
+                            Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            MinWidth="160"
+                            Header="IP"/>
+                    </Controls:ErrorControl.InnerContent>
+                </Controls:ErrorControl>
+                <Controls:ErrorControl 
+                    x:Name="ServerPortTextBox"
+                    DataContext="{Binding Port}"
+                    Margin="5"
+                    RelativePanel.Below="ServerIpTextBox">
+                    <Controls:ErrorControl.InnerContent>
+                        <TextBox 
+                            Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            MinWidth="160"
+                            Header="Port"/>
+                    </Controls:ErrorControl.InnerContent>
+                </Controls:ErrorControl>
+                <TextBlock 
+                    Name="IceServerHeader"
+                    Text="ICE servers"
+                    VerticalAlignment="Center"
+                    Margin="5"
+                    Style="{StaticResource TextBlockHeader}"
+                    RelativePanel.Below="ServerPortTextBox"/>
+                <ListBox 
+                    Name="IceServersListBox"
+                    ItemsSource="{Binding IceServers}"
+                    SelectedItem="{Binding SelectedIceServer, Mode=TwoWay}"
+                    Width="200"
+                    Margin="5"
+                    MinHeight="200"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    ScrollViewer.VerticalScrollMode="Enabled"
+                    ScrollViewer.HorizontalScrollMode="Disabled"
+                    BorderBrush="Black"
+                    BorderThickness="1"
+                    RelativePanel.Below="IceServerHeader"
+                    RelativePanel.Above="IceServerControlPanel">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <RelativePanel 
+                                RelativePanel.AlignLeftWithPanel="True"
+                                RelativePanel.AlignRightWithPanel="True">
+                                <TextBlock 
+                                    Name="IceServerItem_HostAndPort"
+                                    Text="{Binding HostAndPort}"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    RelativePanel.AlignTopWithPanel="True"/>
+                                <TextBlock 
+                                    Name="IceServerItem_TypeHeader"
+                                    Text="Type"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    FontWeight="Bold"
+                                    Margin="5,0,10,0"
+                                    RelativePanel.Below="IceServerItem_HostAndPort"/>
+                                <TextBlock 
+                                    Name="IceServerItem_Type"
+                                    Text="{Binding TypeStr}"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    RelativePanel.RightOf="IceServerItem_TypeHeader"
+                                    RelativePanel.Below="IceServerItem_HostAndPort"/>
+                                <TextBlock
+                                    Name="IceServerItem_UserHeader"
+                                    Text="User"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    FontWeight="Bold"
+                                    Margin="5,0,10,0"
+                                    Visibility="{Binding Username, Converter={StaticResource NullToVisibleConverter}}"
+                                    RelativePanel.Below="IceServerItem_TypeHeader"/>
+                                <TextBlock 
+                                    Name="IceServerItem_User"
+                                    Text="{Binding Username}"
+                                    Visibility="{Binding Username, Converter={StaticResource NullToVisibleConverter}}"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    RelativePanel.RightOf="IceServerItem_UserHeader"
+                                    RelativePanel.Below="IceServerItem_TypeHeader"/>
+                            </RelativePanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <RelativePanel 
+                    Name="IceServerControlPanel"
+                    RelativePanel.AlignBottomWithPanel="True"
+                    RelativePanel.AlignHorizontalCenterWithPanel="True">
+                    <Button
+                        Name="AddButton"
                         Content="&#xE109;"
                         FontFamily="Segoe UI Symbol"
                         Margin="5">
-                    <Button.Flyout>
-                        <Flyout>
-                            <StackPanel Margin="20,0,0,0">
-                                <Controls:ErrorControl DataContext="{Binding NewIceServer.Host}">
-                                    <Controls:ErrorControl.InnerContent>
-                                        <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 Header="Server"
-                                                 Width="160"/>
-                                    </Controls:ErrorControl.InnerContent>
-                                </Controls:ErrorControl>
-                                <ComboBox Header="Type"
-                                          ItemsSource="{Binding NewIceServer.Types}"
-                                          SelectedItem="{Binding NewIceServer.Type, Mode=TwoWay}"
-                                          Width="160"/>
-                                <Controls:ErrorControl DataContext="{Binding NewIceServer.Port}">
-                                    <Controls:ErrorControl.InnerContent>
-                                        <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 Header="Port"
-                                                 Width="160"/>
-                                    </Controls:ErrorControl.InnerContent>
-                                </Controls:ErrorControl>
-                                <TextBox Text="{Binding NewIceServer.Username, Mode=TwoWay}"
-                                         Header="Username"
-                                         Width="160"/>
-                                <PasswordBox Password="{Binding NewIceServer.Credential, Mode=TwoWay}"
-                                             Header="Credential"
-                                             Width="160"/>
-                                <Button Content="&#xE105;"
+                        <Button.Flyout>
+                            <Flyout>
+                                <StackPanel Margin="20,0,0,0">
+                                    <Controls:ErrorControl DataContext="{Binding NewIceServer.Host}">
+                                        <Controls:ErrorControl.InnerContent>
+                                            <TextBox
+                                                Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Header="Server"
+                                                Width="160"/>
+                                        </Controls:ErrorControl.InnerContent>
+                                    </Controls:ErrorControl>
+                                    <ComboBox 
+                                        Header="Type"
+                                        ItemsSource="{Binding NewIceServer.Types}"
+                                        SelectedItem="{Binding NewIceServer.Type, Mode=TwoWay}"
+                                        Width="160"/>
+                                    <Controls:ErrorControl DataContext="{Binding NewIceServer.Port}">
+                                        <Controls:ErrorControl.InnerContent>
+                                            <TextBox 
+                                                Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Header="Port"
+                                                Width="160"/>
+                                        </Controls:ErrorControl.InnerContent>
+                                    </Controls:ErrorControl>
+                                    <TextBox 
+                                        Text="{Binding NewIceServer.Username, Mode=TwoWay}"
+                                        Header="Username"
+                                        Width="160"/>
+                                    <PasswordBox 
+                                        Password="{Binding NewIceServer.Credential, Mode=TwoWay}"
+                                        Header="Credential"
+                                        Width="160"/>
+                                    <Button 
+                                        Content="&#xE105;"
                                         FontFamily="Segoe UI Symbol"
                                         Name="ConfirmAddButton"
                                         Click="ConfirmAddButton_Click"
                                         HorizontalAlignment="Center"
                                         Command="{Binding AddIceServerCommand}"
                                         Margin="10"/>
-                            </StackPanel>
-                        </Flyout>
-                    </Button.Flyout>
-                </Button>
-                <Button Content="&#xE107;"
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                    <Button
+                        Content="&#xE107;"
                         FontFamily="Segoe UI Symbol"
                         Command="{Binding RemoveSelectedIceServerCommand}"
                         Margin="5"
                         RelativePanel.RightOf="AddButton"/>
+                </RelativePanel>
             </RelativePanel>
+            <RelativePanel 
+                Name="AudioVideoSettingsPanel"
+                BorderThickness="1"
+                BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
+                Margin="5,10,5,12"
+                Padding="10,5,5,5"
+                RelativePanel.RightOf="ConnectionSettingsPanel"
+                RelativePanel.AlignBottomWithPanel="True"
+                RelativePanel.AlignTopWithPanel="True"
+                Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}">
+                <TextBlock 
+                    Name="AudioVideoSettingsPanelHeader"
+                    Text="Audio and Video"
+                    Style="{StaticResource SubtitleTextBlockStyle}"
+                    RelativePanel.AlignTopWithPanel="True"/>
+                <TextBlock 
+                    Name="CameraListBoxHeader"
+                    Text="Available cameras"
+                    Style="{StaticResource TextBlockHeader}"
+                    Margin="5"
+                    RelativePanel.Below="AudioVideoSettingsPanelHeader"/>
+                <ListBox
+                    Name="CameraListBox"
+                    MinHeight="120"
+                    Width="300"
+                    ItemsSource="{Binding Cameras}"
+                    SelectedItem="{Binding SelectedCamera, Mode=TwoWay}"
+                    BorderThickness="1"
+                    BorderBrush="Black"
+                    RelativePanel.Below="CameraListBoxHeader"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignLeftWithPanel="True"
+                    Margin="5">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                Text="{Binding Name}"
+                                Style="{StaticResource CaptionTextBlockStyle}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock
+                    Name="MicrophoneListBoxHeader"
+                    Text="Available Microphones"
+                    Style="{StaticResource TextBlockHeader}"
+                    Margin="5"
+                    RelativePanel.Below="CameraListBox"/>
+                <ListBox 
+                    Name="MicrophoneListBox"
+                    MinHeight="120"
+                    Width="300"
+                    ItemsSource="{Binding Microphones}"
+                    SelectedItem="{Binding SelectedMicrophone, Mode=TwoWay}"
+                    BorderThickness="1"
+                    BorderBrush="Black"
+                    RelativePanel.Below="MicrophoneListBoxHeader"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignLeftWithPanel="True"
+                    Margin="5">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                Text="{Binding Name}"
+                                Style="{StaticResource CaptionTextBlockStyle}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <ComboBox 
+                    Name="AudioCodecCombo"
+                    Header="Audio codec"
+                    Margin="5"
+                    ItemsSource="{Binding AudioCodecs}"
+                    SelectedItem="{Binding SelectedAudioCodec, Mode=TwoWay}"
+                    Width="200"
+                    HorizontalAlignment="Left"
+                    RelativePanel.Below="MicrophoneListBox"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignLeftWithPanel="True">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name}"/>
+                                <TextBlock Text="|"/>
+                                <TextBlock Text="{Binding Clockrate}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <ComboBox
+                    Name="VideoCodecCombo"
+                    Header="Video codec"
+                    Margin="5"
+                    ItemsSource="{Binding VideoCodecs}"
+                    SelectedItem="{Binding SelectedVideoCodec, Mode=TwoWay}"
+                    Width="200"
+                    HorizontalAlignment="Left"
+                    RelativePanel.Below="AudioCodecCombo"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignLeftWithPanel="True">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name}"/>
+                                <TextBlock Text="|"/>
+                                <TextBlock Text="{Binding Clockrate}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <ComboBox
+                    Name="VideoResolutionCombo"
+                    Header="Capture resolution:"
+                    Margin="5"
+                    Width="200"
+                    HorizontalAlignment="Left" 
+                    DisplayMemberPath="ValueCapResString" 
+                    ItemsSource="{Binding AllCapRes, Mode=OneWay}"
+                    SelectedItem="{Binding SelectedCapResItem, Mode=TwoWay}"
+                    RelativePanel.Below="VideoCodecCombo"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignLeftWithPanel="True"/>
+                <ComboBox 
+                    Name="VideoFrameRateCombo"
+                    Header="Capture frame rate:"
+                    Margin="5"
+                    Width="200"
+                    HorizontalAlignment="Left"
+                    DisplayMemberPath="ValueCapFPSString" 
+                    ItemsSource="{Binding AllCapFPS, Mode=OneWay}"
+                    SelectedItem="{Binding SelectedCapFPSItem, Mode=TwoWay}"
+                    RelativePanel.Below="VideoResolutionCombo"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignLeftWithPanel="True"/>
+            </RelativePanel>
+            <RelativePanel 
+                Name="DebugSettingsPanel"
+                BorderThickness="1"
+                BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
+                Margin="5,10,10,12"
+                Padding="10,5,5,5"
+                RelativePanel.AlignBottomWithPanel="True"
+                RelativePanel.AlignTopWithPanel="True"
+                RelativePanel.RightOf="AudioVideoSettingsPanel"
+                Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}">
+                <TextBlock 
+                    Name="DebugSettingsPanelHeader"
+                    Text="Debug"
+                    Style="{StaticResource SubtitleTextBlockStyle}"
+                    RelativePanel.AlignTopWithPanel="True"/>
+                <ToggleSwitch
+                    Name="TracingToggleSwitch"
+                    Header="Tracing"
+                    IsOn="{Binding TracingEnabled, Mode=TwoWay}"
+                    HorizontalAlignment="Left"
+                    HorizontalContentAlignment="Left"
+                    RelativePanel.Below="DebugSettingsPanelHeader"
+                    Margin="5"/>
+                <TextBlock 
+                    Name="TracingNote"
+                    TextWrapping="Wrap"
+                    Margin="5,0,5,10"
+                    Width="200"
+                    Text="Note: Traces are automatically sent upon the tracing is stopped!"
+                    RelativePanel.Below="TracingToggleSwitch"/>
+                <TextBox
+                    Name="TraceServerIpTextBox"
+                    Header="Trace server IP"
+                    Margin="5"
+                    HorizontalAlignment="Left"
+                    PlaceholderText="IPv4"
+                    Text="{Binding TraceServerIp, Mode=TwoWay}"
+                    IsEnabled="{Binding TracingEnabled, Mode=OneWay}"
+                    Width="155"
+                    RelativePanel.Below="TracingNote"/>
+                <TextBox
+                    Name="TraceServerPortTextBox"
+                    Header="Trace server port"
+                    Margin="5"
+                    Text="{Binding TraceServerPort, Mode=TwoWay}"
+                    IsEnabled="{Binding TracingEnabled, Mode=OneWay}"
+                    HorizontalAlignment="Left"
+                    PlaceholderText="Port"
+                    Width="155"
+                    RelativePanel.Below="TraceServerIpTextBox"/>
+                <ToggleSwitch 
+                    Name="LoggingToggleSwitch"
+                    Header="Logging"  
+                    Margin="5"
+                    IsOn="{Binding LoggingEnabled, Mode=TwoWay}"
+                    HorizontalAlignment="Left"
+                    HorizontalContentAlignment="Left"
+                    RelativePanel.Below="TraceServerPortTextBox"/>
+            </RelativePanel>
+            <TextBlock 
+                Name="AppVersion"
+                Text="{Binding AppVersion}"
+                Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}"
+                FontSize="10"
+                Padding="0,0,10,0"
+                RelativePanel.AlignBottomWithPanel="True"
+                RelativePanel.AlignRightWithPanel="True" />
         </RelativePanel>
-        <RelativePanel Name="AudioVideoSettingsPanel"
-                       BorderThickness="1"
-                       BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
-                       Margin="5,10,5,12"
-                       Padding="10,5,5,5"
-                       RelativePanel.RightOf="ConnectionSettingsPanel"
-                       RelativePanel.LeftOf="DebugSettingsPanel"
-                       RelativePanel.AlignBottomWithPanel="True"
-                       RelativePanel.AlignTopWithPanel="True"
-                       Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}">
-            <TextBlock Name="AudioVideoSettingsPanelHeader"
-                       Text="Audio and Video"
-                       Style="{StaticResource SubtitleTextBlockStyle}"
-                       RelativePanel.AlignTopWithPanel="True"/>
-            <TextBlock Name="CameraListBoxHeader"
-                       Text="Available cameras"
-                       Style="{StaticResource TextBlockHeader}"
-                       Margin="5"
-                       RelativePanel.Below="AudioVideoSettingsPanelHeader"/>
-            <ListBox Name="CameraListBox"
-                     MinHeight="120"
-                     ItemsSource="{Binding Cameras}"
-                     SelectedItem="{Binding SelectedCamera, Mode=TwoWay}"
-                     BorderThickness="1"
-                     BorderBrush="Black"
-                     RelativePanel.Below="CameraListBoxHeader"
-                     RelativePanel.AlignRightWithPanel="True"
-                     RelativePanel.AlignLeftWithPanel="True"
-                     Margin="5">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Name}"
-                                   Style="{StaticResource CaptionTextBlockStyle}"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <TextBlock Name="MicrophoneListBoxHeader"
-                       Text="Available Microphones"
-                       Style="{StaticResource TextBlockHeader}"
-                       Margin="5"
-                       RelativePanel.Below="CameraListBox"/>
-            <ListBox Name="MicrophoneListBox"
-                     MinHeight="120"
-                     ItemsSource="{Binding Microphones}"
-                     SelectedItem="{Binding SelectedMicrophone, Mode=TwoWay}"
-                     BorderThickness="1"
-                     BorderBrush="Black"
-                     RelativePanel.Below="MicrophoneListBoxHeader"
-                     RelativePanel.AlignRightWithPanel="True"
-                     RelativePanel.AlignLeftWithPanel="True"
-                     Margin="5">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Name}"
-                                   Style="{StaticResource CaptionTextBlockStyle}"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <ComboBox Name="AudioCodecCombo"
-                      Header="Audio codec"
-                      Margin="5"
-                      ItemsSource="{Binding AudioCodecs}"
-                      SelectedItem="{Binding SelectedAudioCodec, Mode=TwoWay}"
-                      Width="200"
-                      HorizontalAlignment="Left"
-                      RelativePanel.Below="MicrophoneListBox"
-                      RelativePanel.AlignRightWithPanel="True"
-                      RelativePanel.AlignLeftWithPanel="True">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding Name}"/>
-                            <TextBlock Text="|"/>
-                            <TextBlock Text="{Binding Clockrate}"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <ComboBox Name="VideoCodecCombo"
-                      Header="Video codec"
-                      Margin="5"
-                      ItemsSource="{Binding VideoCodecs}"
-                      SelectedItem="{Binding SelectedVideoCodec, Mode=TwoWay}"
-                      Width="200"
-                      HorizontalAlignment="Left"
-                      RelativePanel.Below="AudioCodecCombo"
-                      RelativePanel.AlignRightWithPanel="True"
-                      RelativePanel.AlignLeftWithPanel="True">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding Name}"/>
-                            <TextBlock Text="|"/>
-                            <TextBlock Text="{Binding Clockrate}"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <ComboBox Name="VideoResolutionCombo"
-                      Header="Capture resolution:"
-                      Margin="5"
-                      Width="200"
-                      HorizontalAlignment="Left" 
-                      DisplayMemberPath="ValueCapResString" 
-                      ItemsSource="{Binding AllCapRes, Mode=OneWay}"
-                      SelectedItem="{Binding SelectedCapResItem, Mode=TwoWay}"
-                      RelativePanel.Below="VideoCodecCombo"
-                      RelativePanel.AlignRightWithPanel="True"
-                      RelativePanel.AlignLeftWithPanel="True"/>
-            <ComboBox Name="VideoFrameRateCombo"
-                      Header="Capture frame rate:"
-                      Margin="5"
-                      Width="200"
-                      HorizontalAlignment="Left"
-                      DisplayMemberPath="ValueCapFPSString" 
-                      ItemsSource="{Binding AllCapFPS, Mode=OneWay}"
-                      SelectedItem="{Binding SelectedCapFPSItem, Mode=TwoWay}"
-                      RelativePanel.Below="VideoResolutionCombo"
-                      RelativePanel.AlignRightWithPanel="True"
-                      RelativePanel.AlignLeftWithPanel="True"/>
-        </RelativePanel>
-        <RelativePanel Name="DebugSettingsPanel"
-                       BorderThickness="1"
-                       BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
-                       Margin="5,10,10,12"
-                       Padding="10,5,5,5"
-                       RelativePanel.AlignBottomWithPanel="True"
-                       RelativePanel.AlignTopWithPanel="True"
-                       RelativePanel.AlignRightWithPanel="True"
-                       Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}">
-            <TextBlock Name="DebugSettingsPanelHeader"
-                       Text="Debug"
-                       Style="{StaticResource SubtitleTextBlockStyle}"
-                       RelativePanel.AlignTopWithPanel="True"/>
-            <ToggleSwitch Name="TracingToggleSwitch"
-                          Header="Tracing"
-                          IsOn="{Binding TracingEnabled, Mode=TwoWay}"
-                          HorizontalAlignment="Left"
-                          HorizontalContentAlignment="Left"
-                          RelativePanel.Below="DebugSettingsPanelHeader"
-                          Margin="5"/>
-            <TextBlock Name="TracingNote"
-                       TextWrapping="Wrap"
-                       Margin="5,0,5,10"
-                       Width="200"
-                       Text="Note: Traces are automatically sent upon the tracing is stopped!"
-                       RelativePanel.Below="TracingToggleSwitch"/>
-            <TextBox Name="TraceServerIpTextBox"
-                     Header="Trace server IP"
-                     Margin="5"
-                     HorizontalAlignment="Left"
-                     PlaceholderText="IPv4"
-                     Text="{Binding TraceServerIp, Mode=TwoWay}"
-                     IsEnabled="{Binding TracingEnabled, Mode=OneWay}"
-                     Width="155"
-                     RelativePanel.Below="TracingNote"/>
-            <TextBox Name="TraceServerPortTextBox"
-                     Header="Trace server port"
-                     Margin="5"
-                     Text="{Binding TraceServerPort, Mode=TwoWay}"
-                     IsEnabled="{Binding TracingEnabled, Mode=OneWay}"
-                     HorizontalAlignment="Left"
-                     PlaceholderText="Port"
-                     Width="155"
-                     RelativePanel.Below="TraceServerIpTextBox"/>
-            <ToggleSwitch Name="LoggingToggleSwitch"
-                          Header="Logging"  
-                          Margin="5"
-                          IsOn="{Binding LoggingEnabled, Mode=TwoWay}"
-                          HorizontalAlignment="Left"
-                          HorizontalContentAlignment="Left"
-                          RelativePanel.Below="TraceServerPortTextBox"/>
-            
-        </RelativePanel>
-        <TextBlock Name="AppVersion"
-                   Text="{Binding AppVersion}"
-                   Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}"
-                   FontSize="10"
-                   Padding="0,0,10,0"
-                   RelativePanel.AlignBottomWithPanel="True"
-                   RelativePanel.AlignRightWithPanel="True" />
-    </RelativePanel>
+    </ScrollViewer>
 </Page>
