@@ -58,17 +58,34 @@
                               FontFamily="Segoe UI Symbol"
                               HorizontalAlignment="Right"
                               Margin="5"/>
-                <Button Content="Connect" 
-                        Margin="5"
-                        Command="{Binding ConnectCommand}"
-                        HorizontalAlignment="Right"
-                        Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverterNegated}}"/>
-                <Button Content="Disconnect" 
-                        Margin="5"
-                        Command="{Binding DisconnectFromServerCommand}"
-                        HorizontalAlignment="Right"
-                        Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"/>
-                <TextBlock Text="Connected Peers"
+                <TextBlock Margin="5" Foreground="Red" 
+                           Text="Server not configured"
+                           Visibility="{Binding HasServer, Converter={StaticResource BoolToVisConverterNegated}}"/>
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions> 
+                    <TextBlock HorizontalAlignment="Left" 
+                               VerticalAlignment="Center"
+                               FontSize="12"
+                               Visibility="{Binding HasServer, Converter={StaticResource BoolToVisConverter}}">
+                        <Run Text="{Binding Ip.Value}"/>
+                        <Run Text=":"/>
+                        <Run Text="{Binding Port.Value}"/>
+                    </TextBlock>
+                    <Button Grid.Column="1"
+                            Content="Connect" 
+                            Command="{Binding ConnectCommand}"
+                            HorizontalAlignment="Right"
+                            Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverterNegated}}"/>
+                    <Button Grid.Column="1"
+                            Content="Disconnect" 
+                            Command="{Binding DisconnectFromServerCommand}"
+                            HorizontalAlignment="Right"
+                            Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"/>
+                </Grid>
+                <TextBlock Text="Available Peers"
                            Margin="5"/>
                 <ListBox Height="320"
                          Width="200" 
@@ -77,7 +94,8 @@
                          ItemsSource="{Binding Peers}"
                          BorderThickness="1"
                          BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"/>
-                <Button Content="Connect to Peer"
+                <Button Content="&#xE13A;"
+                        FontFamily="Segoe UI Symbol"
                         Margin="5"
                         Command="{Binding ConnectToPeerCommand}"
                         HorizontalAlignment="Right" />
