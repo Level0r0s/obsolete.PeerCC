@@ -20,7 +20,6 @@
             <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}"/>
         </Style>
     </Page.Resources>
-
     <ScrollViewer 
         HorizontalScrollMode="Auto" 
         HorizontalScrollBarVisibility="{Binding ScrollBarVisibilityType}"
@@ -28,7 +27,7 @@
         VerticalScrollBarVisibility="{Binding ScrollBarVisibilityType}">
         <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-            <RelativePanel
+            <RelativePanel 
                 Name="ControlPanel"
                 RelativePanel.AlignBottomWithPanel="True"
                 RelativePanel.AlignTopWithPanel="True">
@@ -56,7 +55,7 @@
                         RelativePanel.AlignLeftWithPanel="True"
                         Command="{Binding SettingsButtonCommand}"/>
                 </RelativePanel>
-                <StackPanel 
+                <StackPanel
                     x:Name="ConnectionStackPanel"
                     Visibility="{Binding Path=IsConnectedToPeer, Converter={StaticResource BoolToVisConverterNegated}}"
                     Orientation="Vertical"
@@ -65,7 +64,7 @@
                     RelativePanel.AlignBottomWithPanel="True"
                     RelativePanel.AlignTopWithPanel="True"
                     Margin="10">
-                    <ToggleButton
+                    <ToggleButton 
                         Name="ToggletSettingsButton"
                         Content="&#xE115;"
                         FontFamily="Segoe UI Symbol"
@@ -73,7 +72,7 @@
                         Margin="5"
                         Command="{Binding SettingsButtonCommand}"/>
                     <TextBlock 
-                        Margin="5" 
+                        Margin="5"
                         Foreground="Red" 
                         Text="Server not configured"
                         Visibility="{Binding HasServer, Converter={StaticResource BoolToVisConverterNegated}}"/>
@@ -82,7 +81,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock 
+                        <TextBlock
                             HorizontalAlignment="Left" 
                             VerticalAlignment="Center"
                             FontSize="12"
@@ -91,7 +90,7 @@
                             <Run Text=":"/>
                             <Run Text="{Binding Port.Value}"/>
                         </TextBlock>
-                        <Button 
+                        <Button
                             Grid.Column="1"
                             Content="Connect" 
                             Command="{Binding ConnectCommand}"
@@ -183,7 +182,7 @@
                 RelativePanel.AlignTopWithPanel="True"
                 Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}"
                 Padding="10,5,5,5">
-                <TextBlock 
+                <TextBlock
                     Name="ConnectionSettingPanelHeader"
                     Text="Connection"
                     Style="{StaticResource SubtitleTextBlockStyle}"
@@ -212,7 +211,7 @@
                             Header="Port"/>
                     </Controls:ErrorControl.InnerContent>
                 </Controls:ErrorControl>
-                <TextBlock 
+                <TextBlock
                     Name="IceServerHeader"
                     Text="ICE servers"
                     VerticalAlignment="Center"
@@ -243,7 +242,7 @@
                                     Text="{Binding HostAndPort}"
                                     Style="{StaticResource CaptionTextBlockStyle}"
                                     RelativePanel.AlignTopWithPanel="True"/>
-                                <TextBlock 
+                                <TextBlock
                                     Name="IceServerItem_TypeHeader"
                                     Text="Type"
                                     Style="{StaticResource CaptionTextBlockStyle}"
@@ -264,7 +263,7 @@
                                     Margin="5,0,10,0"
                                     Visibility="{Binding Username, Converter={StaticResource NullToVisibleConverter}}"
                                     RelativePanel.Below="IceServerItem_TypeHeader"/>
-                                <TextBlock 
+                                <TextBlock
                                     Name="IceServerItem_User"
                                     Text="{Binding Username}"
                                     Visibility="{Binding Username, Converter={StaticResource NullToVisibleConverter}}"
@@ -279,7 +278,7 @@
                     Name="IceServerControlPanel"
                     RelativePanel.AlignBottomWithPanel="True"
                     RelativePanel.AlignHorizontalCenterWithPanel="True">
-                    <Button
+                    <Button 
                         Name="AddButton"
                         Content="&#xE109;"
                         FontFamily="Segoe UI Symbol"
@@ -289,7 +288,7 @@
                                 <StackPanel Margin="20,0,0,0">
                                     <Controls:ErrorControl DataContext="{Binding NewIceServer.Host}">
                                         <Controls:ErrorControl.InnerContent>
-                                            <TextBox
+                                            <TextBox 
                                                 Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 Header="Server"
                                                 Width="160"/>
@@ -302,13 +301,13 @@
                                         Width="160"/>
                                     <Controls:ErrorControl DataContext="{Binding NewIceServer.Port}">
                                         <Controls:ErrorControl.InnerContent>
-                                            <TextBox 
+                                            <TextBox
                                                 Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 Header="Port"
                                                 Width="160"/>
                                         </Controls:ErrorControl.InnerContent>
                                     </Controls:ErrorControl>
-                                    <TextBox 
+                                    <TextBox
                                         Text="{Binding NewIceServer.Username, Mode=TwoWay}"
                                         Header="Username"
                                         Width="160"/>
@@ -351,13 +350,13 @@
                     Text="Audio and Video"
                     Style="{StaticResource SubtitleTextBlockStyle}"
                     RelativePanel.AlignTopWithPanel="True"/>
-                <TextBlock 
+                <TextBlock
                     Name="CameraListBoxHeader"
                     Text="Available cameras"
                     Style="{StaticResource TextBlockHeader}"
                     Margin="5"
                     RelativePanel.Below="AudioVideoSettingsPanelHeader"/>
-                <ListBox
+                <ListBox 
                     Name="CameraListBox"
                     MinHeight="120"
                     Width="300"
@@ -371,13 +370,13 @@
                     Margin="5">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock
+                            <TextBlock 
                                 Text="{Binding Name}"
                                 Style="{StaticResource CaptionTextBlockStyle}"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <TextBlock
+                <TextBlock 
                     Name="MicrophoneListBoxHeader"
                     Text="Available Microphones"
                     Style="{StaticResource TextBlockHeader}"
@@ -397,13 +396,13 @@
                     Margin="5">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock
+                            <TextBlock 
                                 Text="{Binding Name}"
                                 Style="{StaticResource CaptionTextBlockStyle}"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <ComboBox 
+                <ComboBox
                     Name="AudioCodecCombo"
                     Header="Audio codec"
                     Margin="5"
@@ -445,7 +444,7 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-                <ComboBox
+                <ComboBox 
                     Name="VideoResolutionCombo"
                     Header="Capture resolution:"
                     Margin="5"
@@ -485,7 +484,7 @@
                     Text="Debug"
                     Style="{StaticResource SubtitleTextBlockStyle}"
                     RelativePanel.AlignTopWithPanel="True"/>
-                <ToggleSwitch
+                <ToggleSwitch 
                     Name="TracingToggleSwitch"
                     Header="Tracing"
                     IsOn="{Binding TracingEnabled, Mode=TwoWay}"
@@ -500,7 +499,7 @@
                     Width="200"
                     Text="Note: Traces are automatically sent upon the tracing is stopped!"
                     RelativePanel.Below="TracingToggleSwitch"/>
-                <TextBox
+                <TextBox 
                     Name="TraceServerIpTextBox"
                     Header="Trace server IP"
                     Margin="5"
@@ -510,7 +509,7 @@
                     IsEnabled="{Binding TracingEnabled, Mode=OneWay}"
                     Width="155"
                     RelativePanel.Below="TracingNote"/>
-                <TextBox
+                <TextBox 
                     Name="TraceServerPortTextBox"
                     Header="Trace server port"
                     Margin="5"
@@ -529,7 +528,7 @@
                     HorizontalContentAlignment="Left"
                     RelativePanel.Below="TraceServerPortTextBox"/>
             </RelativePanel>
-            <TextBlock 
+            <TextBlock
                 Name="AppVersion"
                 Text="{Binding AppVersion}"
                 Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}"
