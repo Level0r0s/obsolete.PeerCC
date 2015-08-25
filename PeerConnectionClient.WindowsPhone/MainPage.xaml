@@ -108,6 +108,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
            
             <TextBlock Text="Available Peers"
@@ -119,9 +120,22 @@
                      ItemsSource="{Binding Peers}" 
                      SelectedItem="{Binding SelectedPeer, Mode=TwoWay}"
                      FontSize="18"/>
+            <TextBlock Grid.Row="2" Text="Server not configured" 
+                       Margin="5"
+                       Foreground ="Red"
+                       Visibility="{Binding HasServer, Converter={StaticResource BoolToVisConverterNegated}, Mode=OneWay}"></TextBlock>
+
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Center"
-                        Grid.Row="2">
+                        Grid.Row="3">
+                <TextBlock Margin="5"
+                           HorizontalAlignment="Left" 
+                           VerticalAlignment="Center"
+                           Visibility="{Binding HasServer, Converter={StaticResource BoolToVisConverter}, Mode=OneWay}">
+                    <Run Text="{Binding Ip.Value}"/>
+                    <Run Text=":"/>
+                    <Run Text="{Binding Port.Value}"/>
+                </TextBlock>
                 <Button Content="Connect"
                         Command="{Binding ConnectCommand}"
                         Margin="5"                
@@ -132,7 +146,8 @@
                         Margin="5" 
                         HorizontalAlignment="Center"
                         Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"/>
-                <Button Content="Connect to peer"
+                <Button Content="&#xE13A;"
+                        FontFamily="Segoe UI Symbol"
                         Command="{Binding ConnectToPeerCommand}"
                         Margin="5"
                         HorizontalAlignment="Center"/>              

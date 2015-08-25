@@ -38,9 +38,6 @@ namespace PeerConnectionClient.ViewModels
             RemoveSelectedIceServerCommand = new ActionCommand(RemoveSelectedIceServerExecute, RemoveSelectedIceServerCanExecute);
             SendFeedbackCommand = new ActionCommand(SendFeedbackExecute);
 
-            Ip = new ValidableNonEmptyString("23.96.124.41");//Temporary: Our Azure server.
-            Port = new ValidableIntegerString(8888, 0, 65535);
-
             var version = Windows.ApplicationModel.Package.Current.Id.Version;
             AppVersion = String.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
 
@@ -507,6 +504,17 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private bool _hasServer;
+        public bool HasServer
+        {
+            get { return _hasServer; }
+            set
+            {
+                SetProperty(ref _hasServer, value);
+            }
+        }
+
+
         private bool _isConnected;
         public bool IsConnected
         {
@@ -849,6 +857,11 @@ namespace PeerConnectionClient.ViewModels
 
         #endregion
 
+        private void ReevaluateHasServer()
+        {
+            HasServer = Ip != null && Ip.Valid && Port != null && Port.Valid;
+        }
+
         private bool ConnectCommandCanExecute(object obj)
         {
             return !IsConnected && !IsConnecting && Ip.Valid && Port.Valid;
@@ -952,6 +965,19 @@ namespace PeerConnectionClient.ViewModels
             //Default values:
             var configTraceServerIp = "127.0.0.1";
             var configTraceServerPort = "55000";
+            var peerCcServerIp = new ValidableNonEmptyString("127.0.0.1");
+            var peerCcPortInt = 8888;
+
+            if (settings.Values["PeerCCServerIp"] != null)
+            {
+                peerCcServerIp = new ValidableNonEmptyString((string)settings.Values["PeerCCServerIp"]);
+            }
+
+            if (settings.Values["PeerCCServerPort"] != null)
+            {
+                peerCcPortInt = Convert.ToInt32(settings.Values["PeerCCServerPort"]);
+            }
+
 
             var configIceServers = new ObservableCollection<IceServer>();
 
@@ -994,6 +1020,9 @@ namespace PeerConnectionClient.ViewModels
                 IceServers = configIceServers;
                 TraceServerIp = configTraceServerIp;
                 TraceServerPort = configTraceServerPort;
+                Ip = peerCcServerIp;
+                Port = new ValidableIntegerString(peerCcPortInt, 0, 65535);
+                ReevaluateHasServer();
             });
 
             Conductor.Instance.ConfigureIceServers(configIceServers);
@@ -1064,6 +1093,9 @@ namespace PeerConnectionClient.ViewModels
             {
                 ConnectCommand.RaiseCanExecuteChanged();
             }
+            ReevaluateHasServer();
+            var localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values["PeerCCServerIp"] = _ip.Value;
         }
 
         void Port_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -1072,6 +1104,9 @@ namespace PeerConnectionClient.ViewModels
             {
                 ConnectCommand.RaiseCanExecuteChanged();
             }
+            ReevaluateHasServer();
+            var localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values["PeerCCServerPort"] = _port.Value;
         }
     }
 }
