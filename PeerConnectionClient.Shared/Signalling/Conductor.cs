@@ -184,6 +184,9 @@ namespace PeerConnectionClient.Signalling
 
               if (OnReadyToConnect != null)
                 OnReadyToConnect();
+
+              GC.Collect(); // Ensure all references are truly dropped.
+
             }
           }
         }

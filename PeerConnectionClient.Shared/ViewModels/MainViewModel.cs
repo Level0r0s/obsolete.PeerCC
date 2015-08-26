@@ -226,6 +226,9 @@ namespace PeerConnectionClient.ViewModels
                     IsConnectedToPeer = false;
                     PeerVideo.Source = null;
                     SelfVideo.Source = null;
+                    _peerVideoTrack = null;
+                    _selfVideoTrack = null;
+                    GC.Collect(); // Ensure all references are truly dropped.
                     IsMicrophoneEnabled = true;
                     IsCameraEnabled = true;
                     SelfVideoFps = PeerVideoFps = "";
@@ -284,15 +287,15 @@ namespace PeerConnectionClient.ViewModels
 
         private void Conductor_OnAddRemoteStream(MediaStreamEvent evt)
         {
-          RunOnUiThread(() =>
-              {
-                _peerVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
-                if (_peerVideoTrack != null)
+            _peerVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
+            if (_peerVideoTrack != null)
+            {
+                var source = new Media().CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
+                RunOnUiThread(() =>
                 {
-                  var source = new Media().CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
-                  PeerVideo.SetMediaStreamSource(source);
-                }
-              });
+                    PeerVideo.SetMediaStreamSource(source);
+                });
+            }
         }
 
         private void Conductor_OnRemoveRemoteStream(MediaStreamEvent evt)
