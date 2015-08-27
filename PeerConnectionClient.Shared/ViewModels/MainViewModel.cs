@@ -13,6 +13,8 @@ using PeerConnectionClient.Model;
 using PeerConnectionClient.MVVM;
 using PeerConnectionClient.Signalling;
 using PeerConnectionClient.Utilities;
+using Windows.ApplicationModel.Core;
+using Windows.ApplicationModel.Activation;
 using webrtc_winrt_api;
 #if !WINDOWS_UAP // Disable on Win10 for now.
 using HockeyApp;
@@ -696,10 +698,74 @@ namespace PeerConnectionClient.ViewModels
                 else
                 {
                   WebRTC.DisableLogging();
-                  WebRTC.SaveLoggingTOUserFolder();
-
+                  SavingLogging();
                 }
             }
+        }
+
+        private async Task SavingLogging()
+        {
+          StorageFolder logFolder = WebRTC.LogFolder();
+
+          String logFileName = WebRTC.LogFileName();
+
+          StorageFile logFile= await logFolder.GetFileAsync(logFileName);
+
+          webrtcLoggingFile = null; //reset
+
+          if (logFile != null) {
+
+            Windows.Storage.Pickers.FileSavePicker savePicker = new Windows.Storage.Pickers.FileSavePicker();
+            savePicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+
+            //generate log file with timestamp
+            DateTime now = DateTime.Now;
+            object[] args = { now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second };
+            String targetFileName = string.Format("webrt_logging_{0}{1}{2}{3}{4}{5}", args);
+            savePicker.SuggestedFileName = targetFileName;
+
+            savePicker.FileTypeChoices.Add("webrtc log", new System.Collections.Generic.List<string>() { ".log" });
+
+#if WINDOWS_PHONE_APP
+
+            CoreApplication.GetCurrentView().Activated += ViewActivated;
+            webrtcLoggingFile = logFile;
+            savePicker.PickSaveFileAndContinue();
+#else
+            //prompt user to select destination to save
+            StorageFile targetFile = await savePicker.PickSaveFileAsync();
+
+            saveLogFIleToUserSelectedFile(logFile, targetFile);
+
+#endif
+          }
+
+        }
+
+        async Task saveLogFIleToUserSelectedFile(StorageFile source, StorageFile targetFile)
+        {
+
+          if (targetFile != null)
+          {
+            await source.CopyAndReplaceAsync(targetFile);
+          }
+        }
+
+        // reached after WP device selects file
+        void ViewActivated(CoreApplicationView sender, IActivatedEventArgs args)
+        {
+#if WINDOWS_PHONE_APP
+          if (args.Kind == ActivationKind.PickSaveFileContinuation)
+          {
+            FileSavePickerContinuationEventArgs fileArgs = args as FileSavePickerContinuationEventArgs;
+            if (fileArgs != null && fileArgs.File != null)
+            {
+              saveLogFIleToUserSelectedFile(webrtcLoggingFile, fileArgs.File);
+            }
+          }
+
+          CoreApplication.GetCurrentView().Activated -= ViewActivated;
+#endif
         }
 
         private ObservableCollection<IceServer> _iceServers;
@@ -1063,5 +1129,6 @@ namespace PeerConnectionClient.ViewModels
                 ConnectCommand.RaiseCanExecuteChanged();
             }
         }
+        private StorageFile webrtcLoggingFile = null;
     }
 }
