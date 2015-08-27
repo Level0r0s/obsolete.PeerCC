@@ -37,11 +37,14 @@ namespace PeerConnectionClient.ViewModels
             AddIceServerCommand = new ActionCommand(AddIceServerExecute, AddIceServerCanExecute);
             RemoveSelectedIceServerCommand = new ActionCommand(RemoveSelectedIceServerExecute, RemoveSelectedIceServerCanExecute);
             SendFeedbackCommand = new ActionCommand(SendFeedbackExecute);
+            SettingsButtonCommand = new ActionCommand(SettingsButtonExecute);
 
             var version = Windows.ApplicationModel.Package.Current.Id.Version;
             AppVersion = String.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
 
             IsReadyToConnect = true;
+            _settingsButtonChecked = false;
+            ScrollBarVisibilityType = ScrollBarVisibility.Disabled;
 
             LoadHockeyAppSettings();
 
@@ -446,6 +449,16 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private ActionCommand _settingsButtonCommand;
+        public ActionCommand SettingsButtonCommand
+        {
+            get { return _settingsButtonCommand; }
+            set
+            {
+                SetProperty(ref _settingsButtonCommand, value);
+            }
+        }
+
         private String _peerWidth;
         public String PeerWidth
         {
@@ -574,6 +587,13 @@ namespace PeerConnectionClient.ViewModels
                 ConnectToPeerCommand.RaiseCanExecuteChanged();
                 DisconnectFromPeerCommand.RaiseCanExecuteChanged();
             }
+        }
+
+        private ScrollBarVisibility _scrollBarVisibility;
+        public ScrollBarVisibility ScrollBarVisibilityType
+        {
+            get { return _scrollBarVisibility;  }
+            set { SetProperty(ref _scrollBarVisibility, value); }
         }
 
         private bool _cameraEnabled = true;
@@ -960,6 +980,18 @@ namespace PeerConnectionClient.ViewModels
 #endif
         }
 
+        private bool _settingsButtonChecked;
+        private void SettingsButtonExecute(object obj) {
+            _settingsButtonChecked = !_settingsButtonChecked;
+            if (_settingsButtonChecked)
+            {
+                ScrollBarVisibilityType = ScrollBarVisibility.Auto;
+            }
+            else
+            {
+                ScrollBarVisibilityType = ScrollBarVisibility.Disabled;
+            }
+        }
 
         void LoadSettings()
         {
