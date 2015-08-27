@@ -690,9 +690,15 @@ namespace PeerConnectionClient.ViewModels
             {
                 if (!SetProperty(ref _loggingEnabled, value)) return;
                 if (_loggingEnabled)
-                    WebRTC.EnableLogging(LogLevel.LOGLVL_INFO);
+                {
+                  WebRTC.EnableLogging(LogLevel.LOGLVL_INFO);
+                }
                 else
-                    WebRTC.DisableLogging();
+                {
+                  WebRTC.DisableLogging();
+                  WebRTC.SaveLoggingTOUserFolder();
+
+                }
             }
         }
 
