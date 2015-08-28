@@ -14,21 +14,26 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
-
 namespace PeerConnectionClient.Win10
 {
     /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// The application main page.
     /// </summary>
     public sealed partial class MainPage : Page
     {
         private MainViewModel _mainViewModel;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public MainPage()
         {
             this.InitializeComponent();
         }
+
+        /// <summary>
+        /// See Page.OnNavigatedTo()
+        /// </summary>
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             _mainViewModel = (MainViewModel)e.Parameter;
@@ -36,25 +41,43 @@ namespace PeerConnectionClient.Win10
             _mainViewModel.PeerVideo = PeerVideo;
             _mainViewModel.SelfVideo = SelfVideo;
         }
+
+        /// <summary>
+        /// Invoked when the Add button is clicked 
+        /// </summary>
+        /// <param name="sender">The object where the handler is attached.</param>
+        /// <param name="e">Details about the exception routed event.</param>
         private void ConfirmAddButton_Click(object sender, RoutedEventArgs e)
         {
             this.AddButton.Flyout.Hide();
         }
 
+        /// <summary>
+        /// Media Failed event handler for remote/peer video.
+        /// Invoked when an error occurs in peer media source.
+        /// </summary>
+        /// <param name="sender">The object where the handler is attached.</param>
+        /// <param name="e">Details about the exception routed event.</param>
         private void PeerVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
         {
-          if(_mainViewModel!=null)
-          {
-            _mainViewModel.PeerVideo_MediaFailed(sender, e);
-          }
+            if(_mainViewModel!=null)
+            {
+                _mainViewModel.PeerVideo_MediaFailed(sender, e);
+            }
         }
 
+        /// <summary>
+        /// Media Failed event handler for self video.
+        /// Invoked when an error occurs in self media source.
+        /// </summary>
+        /// <param name="sender">The object where the handler is attached.</param>
+        /// <param name="e">Details about the exception routed event.</param>
         private void SelfVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
         {
-          if (_mainViewModel != null)
-          {
-            _mainViewModel.SelfVideo_MediaFailed(sender, e);
-          }
+            if (_mainViewModel != null)
+            {
+                _mainViewModel.SelfVideo_MediaFailed(sender, e);
+            }
         }
     }
 }

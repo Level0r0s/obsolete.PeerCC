@@ -6,10 +6,13 @@ namespace PeerConnectionClient.ViewModels
 {
     internal class VideoRenderViewModel : DispatcherBindableBase
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="uiDispatcher">Core event message dispatcher.</param>
         public VideoRenderViewModel(CoreDispatcher uiDispatcher)
             : base(uiDispatcher)
         {
-
         }
 
         private ICommand _disconnectCommand;
@@ -21,7 +24,5 @@ namespace PeerConnectionClient.ViewModels
             }
             set { SetProperty(ref _disconnectCommand, value); }
         }
-
-
     }
 }

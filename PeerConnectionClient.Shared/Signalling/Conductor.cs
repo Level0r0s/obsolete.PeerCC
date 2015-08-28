@@ -14,10 +14,17 @@ using PeerConnectionClient.Utilities;
 
 namespace PeerConnectionClient.Signalling
 {
+    /// <summary>
+    /// A singleton conductor for WebRTC session.
+    /// </summary>
     internal class Conductor
     {
         private static Object _instanceLock = new Object();
         private static Conductor _instance;
+
+        /// <summary>
+        ///  The single instance of the Conductor class.
+        /// </summary>
         public static Conductor Instance
         {
             get
@@ -37,6 +44,11 @@ namespace PeerConnectionClient.Signalling
         }
 
         private readonly Signaller _signaller;
+
+        /// <summary>
+        /// The signaller property.
+        /// Helps to pass WebRTC session signals between client and server.
+        /// </summary>
         public Signaller Signaller
         {
             get
@@ -44,12 +56,28 @@ namespace PeerConnectionClient.Signalling
                 return _signaller;
             }
         }
-
+        
+        /// <summary>
+        /// Video codec used in WebRTC session.
+        /// </summary>
         public CodecInfo VideoCodec { get; set; }
+
+        /// <summary>
+        /// Audio codec used in WebRTC session.
+        /// </summary>
         public CodecInfo AudioCodec { get; set; }
+
+        /// <summary>
+        /// Video frames per second property.
+        /// </summary>
         public CapFPS VideoCaptureFPS = CapFPS.Default;
+
+        /// <summary>
+        /// Video resolution property.
+        /// </summary>
         public CapRes VideoCaptureRes = CapRes.Default;
 
+        // SDP negotiation attributes
         private static readonly string kCandidateSdpMidName = "sdpMid";
         private static readonly string kCandidateSdpMlineIndexName = "sdpMLineIndex";
         private static readonly string kCandidateSdpName = "candidate";
@@ -58,10 +86,16 @@ namespace PeerConnectionClient.Signalling
 
         RTCPeerConnection _peerConnection;
         Media _media;
-        public Media Media {
-          get {
-            return _media;
-          }
+
+        /// <summary>
+        /// Media property to provide media details.
+        /// </summary>
+        public Media Media
+        {
+            get
+            {
+                return _media;
+            }
         }
 
         MediaStream _mediaStream;
@@ -71,51 +105,58 @@ namespace PeerConnectionClient.Signalling
         bool _videoEnabled = true;
         bool _audioEnabled = true;
 
+        // Public events for adding and removing the local stream
         public event Action<MediaStreamEvent> OnAddLocalStream;
         public event Action<MediaStreamEvent> OnRemoveLocalStream;
 
+        // Public events to notify about connection status
         public event Action OnPeerConnectionCreated;
         public event Action OnPeerConnectionClosed;
         public event Action OnReadyToConnect;
 
-        public void updatePreferredFrameFormat() {
+        /// <summary>
+        /// Updates the preferred video frame rate and resolution.
+        /// </summary>
+        public void updatePreferredFrameFormat() 
+        {
+            if (VideoCaptureFPS!= CapFPS.Default || VideoCaptureRes!= CapRes.Default)
+            {
+                int width = 0;
+                int height = 0;
+                int fps = 0;
 
-          if (VideoCaptureFPS!= CapFPS.Default || VideoCaptureRes!= CapRes.Default) {
+                switch (VideoCaptureFPS)
+                {
+                    case CapFPS._5:
+                        fps = 5;
+                        break;
+                    case CapFPS._15:
+                        fps = 15;
+                        break;
+                    case CapFPS._30:
+                        fps = 30;
+                        break;
+                }
 
-              int width = 0;
-              int height = 0;
-              int fps = 0;
+                switch (VideoCaptureRes)
+                {
+                    case CapRes._320_240:
+                        width = 320;
+                        height = 240;
+                        break;
+                    case CapRes._640_480:
+                        width = 640;
+                        height = 480;
+                        break;
+                }
 
-              switch (VideoCaptureFPS)
-              {
-                case CapFPS._5:
-                  fps = 5;
-                  break;
-                case CapFPS._15:
-                  fps = 15;
-                  break;
-                case CapFPS._30:
-                  fps = 30;
-                  break;
-              }
-
-              switch (VideoCaptureRes)
-              {
-                case CapRes._320_240:
-                  width = 320;
-                  height = 240;
-                  break;
-                case CapRes._640_480:
-                  width = 640;
-                  height = 480;
-                  break;
-              }
-
-              webrtc_winrt_api.WebRTC.SetPreferredVideoCaptureFormat(width,height,fps);
-
+                webrtc_winrt_api.WebRTC.SetPreferredVideoCaptureFormat(width,height,fps);
             }
         }
 
+        /// <summary>
+        /// Creates a peer connection.
+        /// </summary>
         private async Task<bool> CreatePeerConnection()
         {
             Debug.Assert(_peerConnection == null);
@@ -138,7 +179,9 @@ namespace PeerConnectionClient.Signalling
             _peerConnection = new RTCPeerConnection(config);
 
             if (OnPeerConnectionCreated != null)
+            {
                 OnPeerConnectionCreated();
+            }
 
             _peerConnection.OnIceCandidate += PeerConnection_OnIceCandidate;
             _peerConnection.OnAddStream += PeerConnection_OnAddStream;
@@ -153,48 +196,62 @@ namespace PeerConnectionClient.Signalling
             Debug.WriteLine("Conductor: Adding local media stream.");
             _peerConnection.AddStream(_mediaStream);
             if (OnAddLocalStream != null)
+            {
                 OnAddLocalStream(new MediaStreamEvent() { Stream = _mediaStream });
+            }
 
             return true;
         }
 
+        /// <summary>
+        /// Closes a peer connection.
+        /// </summary>
         private void ClosePeerConnection()
         {
-          lock (this)
-          {
-            if (_peerConnection != null)
+            lock (this)
             {
-              _peerId = -1;
-
-              if (_mediaStream != null)
-              {
-                foreach (var track in _mediaStream.GetTracks())
+                if (_peerConnection != null)
                 {
-                  track.Stop();
-                  _mediaStream.RemoveTrack(track);
+                    _peerId = -1;
+
+                    if (_mediaStream != null)
+                    {
+                        foreach (var track in _mediaStream.GetTracks())
+                        {
+                            track.Stop();
+                            _mediaStream.RemoveTrack(track);
+                        }
+                    }
+                    _mediaStream = null;
+
+                    if (OnPeerConnectionClosed != null)
+                    {
+                        OnPeerConnectionClosed();
+                    }
+
+                    _peerConnection.Close(); // Slow, so do this after UI updated and camera turned off
+                    _peerConnection = null;
+
+                    if (OnReadyToConnect != null)
+                    {
+                        OnReadyToConnect();
+                    }
+
+                    GC.Collect(); // Ensure all references are truly dropped.
                 }
-              }
-              _mediaStream = null;
-
-              if (OnPeerConnectionClosed != null)
-                OnPeerConnectionClosed();
-
-              _peerConnection.Close(); // slow, so do this after UI updated and camera turned off
-              _peerConnection = null;
-
-              if (OnReadyToConnect != null)
-                OnReadyToConnect();
-
-              GC.Collect(); // Ensure all references are truly dropped.
-
             }
-          }
         }
 
+        /// <summary>
+        /// Handler for OnIceCandidate event.
+        /// </summary>
+        /// <param name="evt">Details about RTC Peer Connection Ice event.</param>
         private void PeerConnection_OnIceCandidate(RTCPeerConnectionIceEvent evt)
         {
             if (evt.Candidate == null) // relevant: GlobalObserver::OnIceComplete in webrtc_winrt_api
+            {
                 return;
+            }
 
             var json = new JsonObject
             {
@@ -206,20 +263,33 @@ namespace PeerConnectionClient.Signalling
             SendMessage(json);
         }
 
+        /// <summary>
+        /// Event and handler for adding a remote media stream.
+        /// </summary>
         public event Action<MediaStreamEvent> OnAddRemoteStream;
         private void PeerConnection_OnAddStream(MediaStreamEvent evt)
         {
             if (OnAddRemoteStream != null)
+            {
                 OnAddRemoteStream(evt);
+            }
         }
 
+        /// <summary>
+        /// Event and handler for removing remote media stream.
+        /// </summary>
         public event Action<MediaStreamEvent> OnRemoveRemoteStream;
         private void PeerConnection_OnRemoveStream(MediaStreamEvent evt)
         {
             if (OnRemoveRemoteStream != null)
+            {
                 OnRemoveRemoteStream(evt);
+            }
         }
 
+        /// <summary>
+        /// Private constructor for singleton class.
+        /// </summary>
         private Conductor()
         {
             _signaller = new Signaller();
@@ -237,23 +307,38 @@ namespace PeerConnectionClient.Signalling
             _iceServers = new List<RTCIceServer>();
         }
 
+        /// <summary>
+        /// Handler for Signaller's OnPeerHangup event.
+        /// </summary>
+        /// <param name="peer_id">ID of the peer to hung up the call with.</param>
         void Signaller_OnPeerHangup(int peer_id)
         {
-            if (peer_id == _peerId) {
+            if (peer_id == _peerId)
+            {
                 Debug.WriteLine("Conductor: Our peer hung up.");
                 ClosePeerConnection();
             }
         }
 
+        /// <summary>
+        /// Handler for Signaller's OnSignedIn event.
+        /// </summary>
         private void Signaller_OnSignedIn()
         {
         }
 
+        /// <summary>
+        /// Handler for Signaller's OnServerConnectionFailure event.
+        /// </summary>
         private void Signaller_OnServerConnectionFailure()
         {
             Debug.WriteLine("ERROR: Connection to server failed!");
         }
 
+        /// <summary>
+        /// Handler for Signaller's OnPeerDisconnected event.
+        /// </summary>
+        /// <param name="peer_id">ID of disconnected peer.</param>
         private void Signaller_OnPeerDisconnected(int peer_id)
         {
             if (peer_id == _peerId)
@@ -263,14 +348,28 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
+        /// <summary>
+        /// Handler for Signaller's OnPeerConnected event.
+        /// </summary>
+        /// <param name="id">ID of the connected peer.</param>
+        /// <param name="name">Name of the connected peer.</param>
         private void Signaller_OnPeerConnected(int id, string name)
         {
         }
 
+        /// <summary>
+        /// Handler for Signaller's OnMessageSent event.
+        /// </summary>
+        /// <param name="err">Error code.</param>
         private void Signaller_OnMessageSent(int err)
         {
         }
 
+        /// <summary>
+        /// HAndler for Signaller's OnMessageFromPeer event.
+        /// </summary>
+        /// <param name="peerId">ID of the peer.</param>
+        /// <param name="message">Message from the peer.</param>
         private void Signaller_OnMessageFromPeer(int peerId, string message)
         {
             Task.Run(async () =>
@@ -278,7 +377,8 @@ namespace PeerConnectionClient.Signalling
                     Debug.Assert(_peerId == peerId || _peerId == -1);
                     Debug.Assert(message.Length > 0);
 
-                    if (_peerId != peerId && _peerId != -1) {
+                    if (_peerId != peerId && _peerId != -1)
+                    {
                         Debug.WriteLine("Conductor: Received a message from unknown peer while already in a conversation with a different peer.");
                         return;
                     }
@@ -362,29 +462,47 @@ namespace PeerConnectionClient.Signalling
                 }).Wait();
         }
 
+        /// <summary>
+        /// Handler for Signaller's OnDisconnected event handler.
+        /// </summary>
         private void Signaller_OnDisconnected()
         {
             ClosePeerConnection();
         }
 
+        /// <summary>
+        /// Starts the login to server process.
+        /// </summary>
+        /// <param name="server">The host server.</param>
+        /// <param name="port">The port to connect to.</param>
         public void StartLogin(string server, string port)
         {
             if (_signaller.IsConnected())
+            {
                 return;
+            }
             _signaller.Connect(server, port, GetLocalPeerName());
         }
-
+       
+        /// <summary>
+        /// Calls to disconnect the user from the server.
+        /// </summary>
         public async void DisconnectFromServer()
         {
             if (_signaller.IsConnected())
+            {
                 await _signaller.SignOut();
+            }
         }
 
+        /// <summary>
+        /// Calls to connect to the selected peer.
+        /// </summary>
+        /// <param name="peerId">ID of the peer to connect to.</param>
         public async void ConnectToPeer(int peerId)
         {
             Debug.Assert(peerId != -1);
             Debug.Assert(_peerId == -1);
-
 
             if (_peerConnection != null)
             {
@@ -397,7 +515,7 @@ namespace PeerConnectionClient.Signalling
                 _peerId = peerId;
                 var offer = await _peerConnection.CreateOffer();
 
-                //Alter sdp to force usage of selected codecs
+                // Alter sdp to force usage of selected codecs
                 string newSdp = offer.Sdp;
                 SdpUtils.SelectCodecs(ref newSdp, AudioCodec, VideoCodec);
                 offer.Sdp = newSdp;
@@ -408,18 +526,29 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
+        /// <summary>
+        /// Calls to disconnect from peer.
+        /// </summary>
         public void DisconnectFromPeer()
         {
             SendHangupMessage();
             ClosePeerConnection();
         }
 
+        /// <summary>
+        /// Constructs and returns the local peer name.
+        /// </summary>
+        /// <returns>The local peer name.</returns>
         private string GetLocalPeerName()
         {
             var hostname = NetworkInformation.GetHostNames().FirstOrDefault(h => h.Type == HostNameType.DomainName);
             return hostname != null ? hostname.CanonicalName : "<unknown host>";
         }
 
+        /// <summary>
+        /// Sends SDP message.
+        /// </summary>
+        /// <param name="description">RTC session description.</param>
         private void SendSdp(RTCSessionDescription description)
         {
             var json = new JsonObject();
@@ -428,17 +557,27 @@ namespace PeerConnectionClient.Signalling
             SendMessage(json);
         }
 
+        /// <summary>
+        /// Helper method to send a message to a peer.
+        /// </summary>
+        /// <param name="json">Message body.</param>
         private void SendMessage(IJsonValue json)
         {
             // Don't await, send it async.
             _signaller.SendToPeer(_peerId, json);
         }
 
+        /// <summary>
+        /// Helper method to send a hangup message to a peer.
+        /// </summary>
         private void SendHangupMessage()
         {
             _signaller.SendToPeer(_peerId, "BYE");
         }
 
+        /// <summary>
+        /// Enables the local media stream.
+        /// </summary>
         public void EnableLocalVideoStream()
         {
             if (_mediaStream != null)
@@ -451,6 +590,9 @@ namespace PeerConnectionClient.Signalling
             _videoEnabled = true;
         }
 
+        /// <summary>
+        /// Disables the local media stream.
+        /// </summary>
         public void DisableLocalVideoStream()
         {
             if (_mediaStream != null)
@@ -463,6 +605,9 @@ namespace PeerConnectionClient.Signalling
             _videoEnabled = false;
         }
 
+        /// <summary>
+        /// Mutes the microphone.
+        /// </summary>
         public void MuteMicrophone()
         {
             if (_mediaStream != null)
@@ -475,6 +620,10 @@ namespace PeerConnectionClient.Signalling
             }
             _audioEnabled = false;
         }
+
+        /// <summary>
+        /// Unmutes the microphone.
+        /// </summary>
         public void UnmuteMicrophone()
         {
             if (_mediaStream != null)
@@ -488,6 +637,10 @@ namespace PeerConnectionClient.Signalling
             _audioEnabled = true;
         }
 
+        /// <summary>
+        /// Receives a new list of Ice servers and updates the local list of servers.
+        /// </summary>
+        /// <param name="iceServers">List of Ice servers to configure.</param>
         public void ConfigureIceServers(Collection<IceServer> iceServers)
         {
             _iceServers.Clear();
@@ -496,13 +649,19 @@ namespace PeerConnectionClient.Signalling
                 //Url format: stun:stun.l.google.com:19302
                 string url = "stun:";
                 if (iceServer.Type == IceServer.ServerType.TURN)
+                {
                     url = "turn:";
+                }
                 url += iceServer.Host.Value + ":" + iceServer.Port.Value;
                 RTCIceServer server = new RTCIceServer { Url = url };
-                if(iceServer.Credential != null)
+                if (iceServer.Credential != null)
+                {
                     server.Credential = iceServer.Credential;
-                if(iceServer.Username != null)
+                }
+                if (iceServer.Username != null)
+                {
                     server.Username = iceServer.Username;
+                }
                 _iceServers.Add(server);
             }
         }
