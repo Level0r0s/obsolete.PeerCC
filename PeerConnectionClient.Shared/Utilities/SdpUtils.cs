@@ -16,7 +16,7 @@ namespace PeerConnectionClient.Utilities
         /// <param name="sdp">Session description.</param>
         /// <param name="audioCodec">Audio codec.</param>
         /// <param name="videoCodec">Video codec.</param>
-        /// <returns></returns>
+        /// <returns>True if succeeds to force to use the selected audio/video codecs.</returns>
         public static bool SelectCodecs(ref string sdp, CodecInfo audioCodec, CodecInfo videoCodec)
         {
             if (audioCodec == null)

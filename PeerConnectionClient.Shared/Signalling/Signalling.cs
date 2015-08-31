@@ -290,7 +290,7 @@ namespace PeerConnectionClient.Signalling
                     }
                     else
                     {
-                        // TODO: if content length recived, but content is smaller (packet is fragmented), then throw all received data?  
+                        // TODO: if content length received, but content is smaller (packet is fragmented), then throw all received data?  
                         // We haven't received everything.  Just continue to accept data.
                         Debug.WriteLine("Error: incomplete response; expected to receive " + total_response_size + ", received" + data.Length);
                     }
@@ -304,9 +304,10 @@ namespace PeerConnectionClient.Signalling
         }
 
         /// <summary>
-        /// Sends a request to the server.
+        /// Sends a request to the server, waits for response and parses it.
         /// </summary>
         /// <param name="sendBuffer">Information to send.</param>
+        /// <returns>False if there is a failure. Otherwise returns true.</returns>
         private async Task<bool> ControlSocketRequestAsync(string sendBuffer)
         {
             using (var socket = new StreamSocket())

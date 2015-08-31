@@ -29,7 +29,7 @@ namespace PeerConnectionClient.Utilities
         //  in the given context.
         /// </summary>
         /// <param name="parameter">Data used by the command.</param>
-        /// <returns></returns>
+        /// <returns>True if the action can be executed in the given context.</returns>
         public bool CanExecute(object parameter)
         {
             return _actionCanExecute == null || _actionCanExecute(parameter);

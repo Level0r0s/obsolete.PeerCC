@@ -157,6 +157,7 @@ namespace PeerConnectionClient.Signalling
         /// <summary>
         /// Creates a peer connection.
         /// </summary>
+        /// <returns>True if connection to a peer is successfully created.</returns>
         private async Task<bool> CreatePeerConnection()
         {
             Debug.Assert(_peerConnection == null);

@@ -803,11 +803,19 @@ namespace PeerConnectionClient.ViewModels
             get { return _cameraEnabled; }
             set
             {
-                if (!SetProperty(ref _cameraEnabled, value)) return;
+                if (!SetProperty(ref _cameraEnabled, value))
+                {
+                    return;
+                }
+
                 if (_cameraEnabled)
+                {
                     Conductor.Instance.EnableLocalVideoStream();
+                }
                 else
+                {
                     Conductor.Instance.DisableLocalVideoStream();
+                }
             }
         }
 
@@ -822,11 +830,19 @@ namespace PeerConnectionClient.ViewModels
             get { return _microphoneIsOn; }
             set
             {
-                if (!SetProperty(ref _microphoneIsOn, value)) return;
+                if (!SetProperty(ref _microphoneIsOn, value))
+                {
+                    return;
+                }
+
                 if (_microphoneIsOn)
+                {
                     Conductor.Instance.UnmuteMicrophone();
+                }
                 else
+                {
                     Conductor.Instance.MuteMicrophone();
+                }
             }
         }
 
@@ -983,7 +999,11 @@ namespace PeerConnectionClient.ViewModels
             get { return _loggingEnabled; }
             set
             {
-                if (!SetProperty(ref _loggingEnabled, value)) return;
+                if (!SetProperty(ref _loggingEnabled, value))
+                {
+                    return;
+                }
+
                 if (_loggingEnabled)
                 {
                   WebRTC.EnableLogging(LogLevel.LOGLVL_INFO);
@@ -1030,7 +1050,7 @@ namespace PeerConnectionClient.ViewModels
                 // Prompt user to select destination to save
                 StorageFile targetFile = await savePicker.PickSaveFileAsync();
 
-                saveLogFIleToUserSelectedFile(logFile, targetFile);
+                saveLogFileToUserSelectedFile(logFile, targetFile);
 #endif
             }
         }
@@ -1041,7 +1061,7 @@ namespace PeerConnectionClient.ViewModels
         /// <param name="source">The log source file</param>
         /// <param name="targetFile">The target file</param>
         /// <returns></returns>
-        async Task saveLogFIleToUserSelectedFile(StorageFile source, StorageFile targetFile)
+        async Task saveLogFileToUserSelectedFile(StorageFile source, StorageFile targetFile)
         {
             if (targetFile != null)
             {
@@ -1058,7 +1078,7 @@ namespace PeerConnectionClient.ViewModels
                 FileSavePickerContinuationEventArgs fileArgs = args as FileSavePickerContinuationEventArgs;
                 if (fileArgs != null && fileArgs.File != null)
                 {
-                    saveLogFIleToUserSelectedFile(webrtcLoggingFile, fileArgs.File);
+                    saveLogFileToUserSelectedFile(webrtcLoggingFile, fileArgs.File);
                 }
             }
             CoreApplication.GetCurrentView().Activated -= ViewActivated;
@@ -1213,7 +1233,11 @@ namespace PeerConnectionClient.ViewModels
             get { return Conductor.Instance.VideoCodec; }
             set
             {
-                if (Conductor.Instance.VideoCodec == value) return;
+                if (Conductor.Instance.VideoCodec == value)
+                {
+                    return;
+                }
+
                 Conductor.Instance.VideoCodec = value;
                 OnPropertyChanged(() => SelectedVideoCodec);
             }
