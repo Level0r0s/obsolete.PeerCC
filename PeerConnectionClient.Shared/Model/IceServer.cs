@@ -109,7 +109,8 @@ namespace PeerConnectionClient.Model
         }
 
         /// <summary>
-        /// Ice server's credentials.
+        /// The Ice server's password.
+        /// Used with the Username below to connect to the Ice server.
         /// </summary>
         public string Credential { get; set; }
 

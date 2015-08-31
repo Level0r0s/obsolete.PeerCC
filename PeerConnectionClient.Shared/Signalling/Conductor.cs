@@ -244,7 +244,8 @@ namespace PeerConnectionClient.Signalling
         }
 
         /// <summary>
-        /// Handler for OnIceCandidate event.
+        /// Called when WebRTC detects another ICE candidate. 
+        /// This candidate needs to be sent to the other peer.
         /// </summary>
         /// <param name="evt">Details about RTC Peer Connection Ice event.</param>
         private void PeerConnection_OnIceCandidate(RTCPeerConnectionIceEvent evt)
@@ -265,7 +266,7 @@ namespace PeerConnectionClient.Signalling
         }
 
         /// <summary>
-        /// Event and handler for adding a remote media stream.
+        /// Invoked when the remote peer added a media stream to the peer connection.
         /// </summary>
         public event Action<MediaStreamEvent> OnAddRemoteStream;
         private void PeerConnection_OnAddStream(MediaStreamEvent evt)
@@ -277,7 +278,7 @@ namespace PeerConnectionClient.Signalling
         }
 
         /// <summary>
-        /// Event and handler for removing remote media stream.
+        /// Invoked when the remote peer removed a media stream from the peer connection.
         /// </summary>
         public event Action<MediaStreamEvent> OnRemoveRemoteStream;
         private void PeerConnection_OnRemoveStream(MediaStreamEvent evt)
@@ -367,7 +368,7 @@ namespace PeerConnectionClient.Signalling
         }
 
         /// <summary>
-        /// HAndler for Signaller's OnMessageFromPeer event.
+        /// Handler for Signaller's OnMessageFromPeer event.
         /// </summary>
         /// <param name="peerId">ID of the peer.</param>
         /// <param name="message">Message from the peer.</param>
