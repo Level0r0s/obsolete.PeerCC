@@ -9,8 +9,6 @@ using Windows.UI.Xaml.Navigation;
 using PeerConnectionClient.ViewModels;
 using HockeyApp;
 
-// The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
-
 namespace PeerConnectionClient
 {
     /// <summary>
@@ -163,6 +161,10 @@ namespace PeerConnectionClient
             deferral.Complete();
         }
 
+        /// <summary>
+        /// Invoked when the application MainViewModel is initialized.
+        /// Creates the application initial page
+        /// </summary>
         private void OnMainViewModelInitialized()
         {
             var rootFrame = (Frame) Window.Current.Content;

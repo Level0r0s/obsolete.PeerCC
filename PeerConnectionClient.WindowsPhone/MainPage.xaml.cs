@@ -14,12 +14,10 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
-
 namespace PeerConnectionClient
 {
     /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// The application main page.
     /// </summary>
     public sealed partial class MainPage : Page
     {
@@ -51,24 +49,43 @@ namespace PeerConnectionClient
             _mainViewModel.SelfVideo = SelfVideo;
         }
 
+        /// <summary>
+        /// Handles the click on Application bar button
+        /// </summary>
+        /// <param name="sender">The object where the handler is attached.</param>
+        /// <param name="e">Details about routes event.</param>
         private void AppBarButton_Click(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(SettingsPage), this.DataContext);
         }
 
+
+        /// <summary>
+        /// Media Failed event handler for remote/peer video.
+        /// Invoked when an error occurs in peer media source.
+        /// </summary>
+        /// <param name="sender">The object where the handler is attached.</param>
+        /// <param name="e">Details about the exception routed event.</param>
         private void PeerVideo_MediaFailed(object sender, ExceptionRoutedEventArgs e)
         {
-          if (_mainViewModel != null)
-          {
-            _mainViewModel.PeerVideo_MediaFailed(sender, e);
-          }
+            if (_mainViewModel != null)
+            {
+                _mainViewModel.PeerVideo_MediaFailed(sender, e);
+            }
         }
+
+        /// <summary>
+        /// Media Failed event handler for self video.
+        /// Invoked when an error occurs in self media source.
+        /// </summary>
+        /// <param name="sender">The object where the handler is attached.</param>
+        /// <param name="e">Details about the exception routed event.</param>
         private void SelfVideo_MediaFailed(object sender, ExceptionRoutedEventArgs e)
         {
-          if (_mainViewModel != null)
-          {
-            _mainViewModel.SelfVideo_MediaFailed(sender, e);
-          }
+            if (_mainViewModel != null)
+            {
+                _mainViewModel.SelfVideo_MediaFailed(sender, e);
+            }
         }
 
         private MainViewModel _mainViewModel;

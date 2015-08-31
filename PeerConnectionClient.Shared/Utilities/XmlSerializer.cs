@@ -7,7 +7,9 @@ namespace PeerConnectionClient.Utilities
 {
     internal static class XmlSerializer<T>
     {
-        // Serialize to xml
+        /// <summary>
+        /// Serialize to xml.
+        /// </summary>
         public static string ToXml(T value)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(T));
@@ -25,7 +27,9 @@ namespace PeerConnectionClient.Utilities
             return stringBuilder.ToString();
         }
 
-        // Deserialize from xml
+        /// <summary>
+        /// Deserialize from xml.
+        /// </summary>
         public static T FromXml(string xml)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(T));
@@ -39,5 +43,4 @@ namespace PeerConnectionClient.Utilities
             return value;
         }
     }
-
 }

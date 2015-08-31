@@ -17,8 +17,6 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 //using Microsoft.ApplicationInsights;
 
-// The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=402347&clcid=0x409
-
 namespace PeerConnectionClient.Win10
 {
     /// <summary>
@@ -118,6 +116,10 @@ namespace PeerConnectionClient.Win10
             deferral.Complete();
         }
 
+        /// <summary>
+        /// Invoked when the application MainViewModel is initialized.
+        /// Creates the application initial page
+        /// </summary>
         private void OnMainViewModelInitialized()
         {
             Frame rootFrame = Window.Current.Content as Frame;
