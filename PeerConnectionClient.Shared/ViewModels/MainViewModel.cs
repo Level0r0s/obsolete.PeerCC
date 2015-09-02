@@ -52,7 +52,7 @@ namespace PeerConnectionClient.ViewModels
 
             IsReadyToConnect = true;
             _settingsButtonChecked = false;
-            ScrollBarVisibilityType = ScrollBarVisibility.Disabled;
+            ScrollBarVisibilityType = ScrollBarVisibility.Auto;
 
             // Prepare Hockey app to collect the crash logs and send to the server
             LoadHockeyAppSettings();
@@ -262,6 +262,7 @@ namespace PeerConnectionClient.ViewModels
                     }
                     IsMicrophoneEnabled = MicrophoneIsOn;
                     IsCameraEnabled = CameraEnabled;
+                    UpdateScrollBarVisibilityTypeHelper();
                 });
             };
 
@@ -285,6 +286,7 @@ namespace PeerConnectionClient.ViewModels
                         _keepScreenOnRequest.RequestRelease();
                         _keepOnScreenRequested = false;
                     }
+                    UpdateScrollBarVisibilityTypeHelper();
                 });
             };
 
@@ -1446,20 +1448,33 @@ namespace PeerConnectionClient.ViewModels
 
         /// <summary>
         /// Execute for Settings button is hit event.
-        /// Makes the UI scrollable if the controls do not fit the device
-        /// screen size.
+        /// Calls to update the ScrollBarVisibilityType property.
         /// </summary>
         /// <param name="obj">The sender object.</param>
         private void SettingsButtonExecute(object obj) 
         {
             _settingsButtonChecked = !_settingsButtonChecked;
+            UpdateScrollBarVisibilityTypeHelper();
+        }
+
+        /// <summary>
+        /// Makes the UI scrollable if the controls do not fit the device
+        /// screen size.
+        /// The UI is not scrollable if connected to a peer.
+        /// </summary>
+        private void UpdateScrollBarVisibilityTypeHelper()
+        {
             if (_settingsButtonChecked)
             {
                 ScrollBarVisibilityType = ScrollBarVisibility.Auto;
             }
-            else
+            else if (IsConnectedToPeer)
             {
                 ScrollBarVisibilityType = ScrollBarVisibility.Disabled;
+            }
+            else
+            {
+                ScrollBarVisibilityType = ScrollBarVisibility.Auto;
             }
         }
 
