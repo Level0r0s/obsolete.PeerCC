@@ -89,10 +89,16 @@ namespace PeerConnectionClient.ViewModels
           if (_peerVideoTrack != null)
           {
             Debug.WriteLine("Re-establishing peer video");
-            var source = Media.CreateMedia().CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
-            PeerVideo.SetMediaStreamSource(source);
-            PeerVideo.Play();
-            Debug.WriteLine("Peer video re-established");
+            Media.CreateMediaAsync().AsTask().ContinueWith(media => 
+            {
+              var source = media.Result.CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
+              RunOnUiThread(() =>
+              {
+                PeerVideo.SetMediaStreamSource(source);
+                PeerVideo.Play();
+                Debug.WriteLine("Peer video re-established");
+              });
+            });
           }
         }
 
@@ -108,10 +114,16 @@ namespace PeerConnectionClient.ViewModels
           if (_selfVideoTrack != null)
           {
             Debug.WriteLine("Re-establishing self video");
-            var source = Media.CreateMedia().CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
-            SelfVideo.SetMediaStreamSource(source);
-            SelfVideo.Play();
-            Debug.WriteLine("Self video re-established");
+            Media.CreateMediaAsync().AsTask().ContinueWith(media =>
+            {
+              var source = media.Result.CreateMediaStreamSource(_peerVideoTrack, 30, "SELF");
+              RunOnUiThread(() =>
+              {
+                SelfVideo.SetMediaStreamSource(source);
+                SelfVideo.Play();
+                Debug.WriteLine("Self video re-established");
+              });
+            });
           }
         }
 
@@ -368,10 +380,13 @@ namespace PeerConnectionClient.ViewModels
             _peerVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
             if (_peerVideoTrack != null)
             {
-                var source = Media.CreateMedia().CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
-                RunOnUiThread(() =>
+                Media.CreateMediaAsync().AsTask().ContinueWith(media => 
                 {
+                  var source = media.Result.CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
+                  RunOnUiThread(() =>
+                  {
                     PeerVideo.SetMediaStreamSource(source);
+                  });
                 });
             }
         }
@@ -394,10 +409,12 @@ namespace PeerConnectionClient.ViewModels
         /// <param name="evt">Details about Media stream event.</param>
         private void Conductor_OnAddLocalStream(MediaStreamEvent evt)
         {
-          Media localMedia;
-          Media.CreateMediaAsync().AsTask().ContinueWith(media =>
+          _selfVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
+          if (_selfVideoTrack != null)
+          {
+            Media.CreateMediaAsync().AsTask().ContinueWith(media => 
             {
-              localMedia = media.Result;
+              var source = media.Result.CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
               RunOnUiThread(() =>
                 {
                   if (_cameraEnabled)
@@ -417,25 +434,10 @@ namespace PeerConnectionClient.ViewModels
                   {
                     Conductor.Instance.MuteMicrophone();
                   }
-                  _selfVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
-                  if (_selfVideoTrack != null)
-                  {
-                    var source = localMedia.CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
-                    SelfVideo.SetMediaStreamSource(source);
-                  }
-
+                  SelfVideo.SetMediaStreamSource(source);
                 });
             });
-            //RunOnUiThread(() =>
-            //{
-
-            //    _selfVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
-            //    if (_selfVideoTrack != null)
-            //    {
-            //      var source = media.CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
-            //      SelfVideo.SetMediaStreamSource(source);
-            //    }
-            //});
+          }
         }
 
         #region Bindings
