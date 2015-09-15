@@ -89,7 +89,7 @@ namespace PeerConnectionClient.ViewModels
           if (_peerVideoTrack != null)
           {
             Debug.WriteLine("Re-establishing peer video");
-            var source = new Media().CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
+            var source = Media.CreateMedia().CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
             PeerVideo.SetMediaStreamSource(source);
             PeerVideo.Play();
             Debug.WriteLine("Peer video re-established");
@@ -108,7 +108,7 @@ namespace PeerConnectionClient.ViewModels
           if (_selfVideoTrack != null)
           {
             Debug.WriteLine("Re-establishing self video");
-            var source = new Media().CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
+            var source = Media.CreateMedia().CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
             SelfVideo.SetMediaStreamSource(source);
             SelfVideo.Play();
             Debug.WriteLine("Self video re-established");
@@ -368,7 +368,7 @@ namespace PeerConnectionClient.ViewModels
             _peerVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
             if (_peerVideoTrack != null)
             {
-                var source = new Media().CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
+                var source = Media.CreateMedia().CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
                 RunOnUiThread(() =>
                 {
                     PeerVideo.SetMediaStreamSource(source);
@@ -394,33 +394,48 @@ namespace PeerConnectionClient.ViewModels
         /// <param name="evt">Details about Media stream event.</param>
         private void Conductor_OnAddLocalStream(MediaStreamEvent evt)
         {
-            RunOnUiThread(() =>
+          Media localMedia;
+          Media.CreateMediaAsync().AsTask().ContinueWith(media =>
             {
-                if (_cameraEnabled)
+              localMedia = media.Result;
+              RunOnUiThread(() =>
                 {
+                  if (_cameraEnabled)
+                  {
                     Conductor.Instance.EnableLocalVideoStream();
-                }
-                else
-                {
+                  }
+                  else
+                  {
                     Conductor.Instance.DisableLocalVideoStream();
-                }
+                  }
 
-                if (_microphoneIsOn)
-                {
+                  if (_microphoneIsOn)
+                  {
                     Conductor.Instance.UnmuteMicrophone();
-                }
-                else
-                {
+                  }
+                  else
+                  {
                     Conductor.Instance.MuteMicrophone();
-                }
+                  }
+                  _selfVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
+                  if (_selfVideoTrack != null)
+                  {
+                    var source = localMedia.CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
+                    SelfVideo.SetMediaStreamSource(source);
+                  }
 
-                _selfVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
-                if (_selfVideoTrack != null)
-                {
-                  var source = new Media().CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
-                  SelfVideo.SetMediaStreamSource(source);
-                }
+                });
             });
+            //RunOnUiThread(() =>
+            //{
+
+            //    _selfVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
+            //    if (_selfVideoTrack != null)
+            //    {
+            //      var source = media.CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
+            //      SelfVideo.SetMediaStreamSource(source);
+            //    }
+            //});
         }
 
         #region Bindings
