@@ -192,9 +192,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api_win10.vcxproj">
-      <Project>{98be9a35-cf73-40a5-3ba7-cd4f0f330887}</Project>
-      <Name>webrtc_winrt_api_win10</Name>
+    <ProjectReference Include="..\..\..\..\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api.vcxproj">
+      <Project>{08a72a31-ed29-591b-a715-7842ad71fd3d}</Project>
+      <Name>webrtc_winrt_api</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
