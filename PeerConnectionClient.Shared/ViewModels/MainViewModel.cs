@@ -335,10 +335,17 @@ namespace PeerConnectionClient.ViewModels
             // Prepare to list supported video codecs
             VideoCodecs = new ObservableCollection<CodecInfo>();
 
-            // Right now, The WebRTC reports the trial codecs before the officially supported one.
-            //reverse the list, so that the official ones will  be default.
-            var videoCodecList = WebRTC.GetVideoCodecs().Reverse();
-
+            // Order the video codecs so that the stable VP8 is in front.
+            var videoCodecList = WebRTC.GetVideoCodecs().OrderBy(codec =>
+            {
+                switch (codec.Name)
+                {
+                    case "VP8": return 1;
+                    case "VP9": return 2;
+                    case "H264": return 3;
+                    default: return 99;
+                }
+            });
 
             // Load the supported audio/video information into the Settings controls
             RunOnUiThread(() =>
@@ -1234,13 +1241,13 @@ namespace PeerConnectionClient.ViewModels
             get { return _selectedCapResItem; }
             set
             {
-                if (_allCapFPS == null)
+                if (AllCapFPS == null)
                 {
-                  _allCapFPS = new ObservableCollection<CaptureCapability>();
+                  AllCapFPS = new ObservableCollection<CaptureCapability>();
                 }
                 else
                 {
-                  _allCapFPS.Clear();
+                  AllCapFPS.Clear();
                 }
                 var opCap = SelectedCamera.GetVideoCaptureCapabilities();
                 opCap.AsTask().ContinueWith(caps =>
@@ -1252,7 +1259,7 @@ namespace PeerConnectionClient.ViewModels
                       CaptureCapability defaultFPS = null;
                       foreach (var fps in fpsList)
                       {
-                        _allCapFPS.Add(fps);
+                        AllCapFPS.Add(fps);
                         if ((defaultFPS == null) || (fps.FrameRate == 30))
                         {
                           defaultFPS = fps;
