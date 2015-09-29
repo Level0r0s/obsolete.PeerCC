@@ -143,7 +143,6 @@ namespace PeerConnectionClient.ViewModels
         public void Initialize(CoreDispatcher uiDispatcher)
         {
             WebRTC.Initialize(uiDispatcher);
-            GetNetworkTime();
 
             // Get information of cameras attached to the device
             Cameras = new ObservableCollection<MediaDevice>();
@@ -1715,7 +1714,7 @@ namespace PeerConnectionClient.ViewModels
         /// <summary>
         /// retrieve the current network time from ntp server  "time.windows.com"
         /// </summary>
-        async Task GetNetworkTime()
+        public static async Task GetNetworkTime()
         {
           //default Windows time server
           const string ntpServer = "time.windows.com";
@@ -1744,7 +1743,7 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         /// <param name="socket">The udp socket object which triggered this event </param>
         /// <param name="eventArguments">event information</param>
-        async void OnNTPTimeReceived(Windows.Networking.Sockets.DatagramSocket socket, Windows.Networking.Sockets.DatagramSocketMessageReceivedEventArgs eventArguments)
+        static async void OnNTPTimeReceived(Windows.Networking.Sockets.DatagramSocket socket, Windows.Networking.Sockets.DatagramSocketMessageReceivedEventArgs eventArguments)
         {
           byte[] ntpData = new byte[48];
    
@@ -1774,7 +1773,7 @@ namespace PeerConnectionClient.ViewModels
         }
 
 
-        uint SwapEndianness(ulong x)
+        static uint SwapEndianness(ulong x)
         {
           return (uint)(((x & 0x000000ff) << 24) +
                          ((x & 0x0000ff00) << 8) +
