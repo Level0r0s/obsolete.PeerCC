@@ -275,6 +275,7 @@ namespace PeerConnectionClient.ViewModels
                 {
                     IsReadyToConnect = false;
                     IsConnectedToPeer = true;
+                    IsReadyToDisconnect = false;
 
                     // Make sure the screen is always active while on call
                     if (!_keepOnScreenRequested) {
@@ -397,6 +398,7 @@ namespace PeerConnectionClient.ViewModels
                   });
                 });
             }
+            IsReadyToDisconnect = true;
         }
 
         /// <summary>
@@ -813,6 +815,21 @@ namespace PeerConnectionClient.ViewModels
                 DisconnectFromPeerCommand.RaiseCanExecuteChanged();
             }
         }
+
+        private bool _isReadyToDisconnect;
+        /// <summary>
+        /// Indicator if the app is ready to disconnect from a peer.
+        /// </summary>
+        public bool IsReadyToDisconnect
+        {
+            get { return _isReadyToDisconnect; }
+            set
+            {
+                SetProperty(ref _isReadyToDisconnect, value);
+                DisconnectFromPeerCommand.RaiseCanExecuteChanged();
+            }
+        }
+
 
         private ScrollBarVisibility _scrollBarVisibility;
 
@@ -1422,7 +1439,7 @@ namespace PeerConnectionClient.ViewModels
         /// <returns>True if the application is ready to disconnect from a peer.</returns>
         private bool DisconnectFromPeerCommandCanExecute(object obj)
         {
-            return IsConnectedToPeer;
+            return IsConnectedToPeer && IsReadyToDisconnect;
         }
 
         /// <summary>
