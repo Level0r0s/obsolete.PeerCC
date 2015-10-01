@@ -50,7 +50,7 @@
                         FontFamily="Segoe UI Symbol"
                         HorizontalAlignment="Right"
                         Margin="10,5,0,5"
-                        IsChecked="{Binding IsChecked,ElementName=ToggletSettingsButton, Mode=TwoWay}"
+                        IsChecked="{Binding SettingsButtonChecked, Mode=TwoWay}"
                         RelativePanel.AlignBottomWithPanel="True"
                         RelativePanel.AlignLeftWithPanel="True"
                         Command="{Binding SettingsButtonCommand}"/>
@@ -70,6 +70,7 @@
                         FontFamily="Segoe UI Symbol"
                         HorizontalAlignment="Right"
                         Margin="5"
+                        IsChecked="{Binding SettingsButtonChecked, Mode=TwoWay}"
                         Command="{Binding SettingsButtonCommand}"/>
                     <TextBlock 
                         Margin="5"

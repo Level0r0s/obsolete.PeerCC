@@ -275,7 +275,15 @@ namespace PeerConnectionClient.ViewModels
                 {
                     IsReadyToConnect = false;
                     IsConnectedToPeer = true;
+<<<<<<< HEAD
                     IsReadyToDisconnect = false;
+=======
+                    if (SettingsButtonChecked) {
+                        // close settings screen if open
+                        SettingsButtonChecked = false;
+                        ScrollBarVisibilityType = ScrollBarVisibility.Disabled;
+                    }
+>>>>>>> Fixed Bug 12948 If call is started when settings are open, not switching to the active call view
 
                     // Make sure the screen is always active while on call
                     if (!_keepOnScreenRequested) {
@@ -1571,13 +1579,24 @@ namespace PeerConnectionClient.ViewModels
         private bool _settingsButtonChecked;
 
         /// <summary>
+        /// Indicator if Settings button is checked
+        /// </summary>
+        public bool SettingsButtonChecked
+        {
+            get { return _settingsButtonChecked; }
+            set
+            {
+                SetProperty(ref _settingsButtonChecked, value);
+            }
+        }
+
+        /// <summary>
         /// Execute for Settings button is hit event.
         /// Calls to update the ScrollBarVisibilityType property.
         /// </summary>
         /// <param name="obj">The sender object.</param>
         private void SettingsButtonExecute(object obj) 
         {
-            _settingsButtonChecked = !_settingsButtonChecked;
             UpdateScrollBarVisibilityTypeHelper();
         }
 
@@ -1588,7 +1607,7 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         private void UpdateScrollBarVisibilityTypeHelper()
         {
-            if (_settingsButtonChecked)
+            if (SettingsButtonChecked)
             {
                 ScrollBarVisibilityType = ScrollBarVisibility.Auto;
             }
