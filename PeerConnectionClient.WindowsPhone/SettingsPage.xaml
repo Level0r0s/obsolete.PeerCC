@@ -49,6 +49,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
             <Grid Grid.Row="0"
                   Margin="0,25,0,0">
@@ -309,6 +310,15 @@
                  Grid.Column="0"
                  Text="{Binding CrashReportUserInfo, Mode=TwoWay}"
                  PlaceholderText="User info"/>
+      <Controls:ErrorControl DataContext="{Binding NtpServer}"
+                                   Grid.Row="20"
+                                   Margin="5">
+        <Controls:ErrorControl.InnerContent>
+          <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         MinWidth="160"
+                         Header="NTP Server"/>
+        </Controls:ErrorControl.InnerContent>
+      </Controls:ErrorControl>
     </Grid>
     </ScrollViewer>
 </Page>

@@ -17,6 +17,7 @@ using PeerConnectionClient.Utilities;
 using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.Activation;
 using webrtc_winrt_api;
+using System.Diagnostics;
 #if !WINDOWS_UAP // Disable on Win10 for now.
 using HockeyApp;
 using Windows.Networking.Connectivity;
@@ -449,6 +450,22 @@ namespace PeerConnectionClient.ViewModels
         }
 
         #region Bindings
+
+        private ValidableNonEmptyString _ntpServer;
+
+        /// <summary>
+        /// address of the ntp server to sync app clock.
+        /// </summary>
+        public ValidableNonEmptyString NtpServer
+        {
+            get { return _ntpServer; }
+            set
+            {
+                SetProperty(ref _ntpServer, value);
+                _ntpServer.PropertyChanged += NtpServer_PropertyChanged;
+            }
+        }
+
 
         private ValidableNonEmptyString _ip;
 
@@ -1571,6 +1588,7 @@ namespace PeerConnectionClient.ViewModels
             var configTraceServerIp = "127.0.0.1";
             var configTraceServerPort = "55000";
             var peerCcServerIp = new ValidableNonEmptyString("127.0.0.1");
+            var ntpServerAddress = new ValidableNonEmptyString("time.windows.com");
             var peerCcPortInt = 8888;
 
             if (settings.Values["PeerCCServerIp"] != null)
@@ -1619,12 +1637,19 @@ namespace PeerConnectionClient.ViewModels
                 configIceServers.Add(new IceServer("stun4.l.google.com", "19302", IceServer.ServerType.STUN));
             }
 
+            if (settings.Values["NTPServer"] != null && (string)settings.Values["NTPServer"] !="" )
+            {
+                ntpServerAddress = new ValidableNonEmptyString((string)settings.Values["NTPServer"]);
+            }
+
+
             RunOnUiThread(() =>
             {
                 IceServers = configIceServers;
                 TraceServerIp = configTraceServerIp;
                 TraceServerPort = configTraceServerPort;
                 Ip = peerCcServerIp;
+                NtpServer = ntpServerAddress;
                 Port = new ValidableIntegerString(peerCcPortInt, 0, 65535);
                 ReevaluateHasServer();
             });
@@ -1685,6 +1710,21 @@ namespace PeerConnectionClient.ViewModels
         }
 
         /// <summary>
+        /// ntp server changed event handler.
+        /// </summary>
+        /// <param name="sender">The sender object.</param>
+        /// <param name="e">Property Changed event information.</param>
+        void NtpServer_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Valid")
+            {
+                ConnectCommand.RaiseCanExecuteChanged();
+            }
+            var localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values["NTPServer"] = _ntpServer.Value;
+        }
+
+        /// <summary>
         /// IP changed event handler.
         /// </summary>
         /// <param name="sender">The sender object.</param>
@@ -1718,13 +1758,21 @@ namespace PeerConnectionClient.ViewModels
         }
         private StorageFile webrtcLoggingFile = null;
 
+        private static Stopwatch ntpResponseMonitor = new Stopwatch();
+
         /// <summary>
         /// retrieve the current network time from ntp server  "time.windows.com"
         /// </summary>
         public static async Task GetNetworkTime()
         {
             //default Windows time server
-            const string ntpServer = "time.windows.com";
+            string ntpServer = "time.windows.com"; //default value;
+            var localSettings = ApplicationData.Current.LocalSettings;
+            if (localSettings.Values["NTPServer"] != null && (string)localSettings.Values["NTPServer"] != "")
+            {
+                ntpServer = (string) localSettings.Values["NTPServer"];
+
+            }
 
             // NTP message size - 16 bytes of the digest (RFC 2030)
             byte[] ntpData = new byte[48];
@@ -1741,8 +1789,8 @@ namespace PeerConnectionClient.ViewModels
             {
                 //The UDP port number assigned to NTP is 123
                 await socket.ConnectAsync(new Windows.Networking.HostName(ntpServer), "123");
+                ntpResponseMonitor.Restart();
                 await socket.OutputStream.WriteAsync(ntpData.AsBuffer());
-
             }
             catch (Exception e)
             {
@@ -1779,7 +1827,7 @@ namespace PeerConnectionClient.ViewModels
 
             ulong milliseconds = (intPart * 1000) + ((fractPart * 1000) / 0x100000000L);
 
-            WebRTC.SynNTPTime((long)milliseconds);
+            WebRTC.SynNTPTime((long)milliseconds + ntpResponseMonitor.ElapsedMilliseconds/2);
 
             socket.Dispose();
 

@@ -35,6 +35,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Controls:ErrorControl DataContext="{Binding Ip}"
                                Grid.Row="0"
@@ -170,5 +171,15 @@
                         Margin="5"/>
             </Grid>
         </StackPanel>
-    </Grid>
+    <Controls:ErrorControl DataContext="{Binding NtpServer}"
+                               Grid.Row="5"
+                               Margin="5">
+      <Controls:ErrorControl.InnerContent>
+        <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         MinWidth="160"
+                         Header="NTP server"/>
+      </Controls:ErrorControl.InnerContent>
+    </Controls:ErrorControl>
+
+  </Grid>
 </SettingsFlyout>
