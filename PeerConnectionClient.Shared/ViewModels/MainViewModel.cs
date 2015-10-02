@@ -1011,7 +1011,7 @@ namespace PeerConnectionClient.ViewModels
         /// The selected camera.
         /// </summary>
         public MediaDevice SelectedCamera
-        {
+        { 
             get { return _selectedCamera; }
             set
             {
@@ -1036,6 +1036,7 @@ namespace PeerConnectionClient.ViewModels
                 {
                     RunOnUiThread(async () =>
                     {
+<<<<<<< HEAD
                         if (resolutions.IsFaulted)
                         {
                             Exception ex = resolutions.Exception;
@@ -1071,6 +1072,21 @@ namespace PeerConnectionClient.ViewModels
                         }
                         SelectedCapResItem = defaultResolution.ResolutionDescription;
                     });
+=======
+                      if (defaultResolution == null)
+                      {
+                        defaultResolution = resolution;
+                      }
+                      _allCapRes.Add(resolution.ResolutionDescription);
+                      if ((resolution.Width == 640) && (resolution.Height == 480))
+                      {
+                        defaultResolution = resolution;
+                      }
+                    }
+                    SelectedCapResItem = defaultResolution.ResolutionDescription;
+                  });
+                  OnPropertyChanged("AllCapRes");
+>>>>>>> Fixed Bug 14052:PeerCC: Win10: empty capture resolution or frame rate drop downs
                 });
             }
         }
@@ -1277,7 +1293,13 @@ namespace PeerConnectionClient.ViewModels
         /// The list of all capture resolutions.
         /// </summary>
         {
-            get { return _allCapRes; }
+            get {
+                if (_allCapRes == null)
+                {
+                    _allCapRes = new ObservableCollection<String>();
+                }
+                return _allCapRes;
+            }
             set { SetProperty(ref _allCapRes, value); }
         }
 
@@ -1316,6 +1338,7 @@ namespace PeerConnectionClient.ViewModels
                       }
                       SelectedCapFPSItem = defaultFPS;
                     });
+                    OnPropertyChanged("AllCapFPS");
                 });
                 SetProperty(ref _selectedCapResItem, value);
             }
@@ -1327,7 +1350,13 @@ namespace PeerConnectionClient.ViewModels
         /// The list of all capture frame rates.
         /// </summary>
         {
-            get { return _allCapFPS; }
+            get {
+                if (_allCapFPS == null)
+                {
+                    _allCapFPS = new ObservableCollection<CaptureCapability>();
+                }
+                return _allCapFPS;
+            }
             set { SetProperty(ref _allCapFPS, value); }
         }
 
