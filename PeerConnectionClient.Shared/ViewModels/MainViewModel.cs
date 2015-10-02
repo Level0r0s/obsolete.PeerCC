@@ -117,7 +117,7 @@ namespace PeerConnectionClient.ViewModels
             Debug.WriteLine("Re-establishing self video");
             Media.CreateMediaAsync().AsTask().ContinueWith(media =>
             {
-              var source = media.Result.CreateMediaStreamSource(_peerVideoTrack, 30, "SELF");
+              var source = media.Result.CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
               RunOnUiThread(() =>
               {
                 SelfVideo.SetMediaStreamSource(source);
