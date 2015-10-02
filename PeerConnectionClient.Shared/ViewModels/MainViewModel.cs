@@ -1011,33 +1011,58 @@ namespace PeerConnectionClient.ViewModels
                 Conductor.Instance.Media.SelectVideoDevice(_selectedCamera);
                 if (_allCapRes == null)
                 {
-                  _allCapRes = new ObservableCollection<String>();
+                    _allCapRes = new ObservableCollection<String>();
                 }
                 else
                 {
-                  _allCapRes.Clear();
+                    _allCapRes.Clear();
+                }
+                if (value == null)
+                {
+                    String errorMsg = "SetSelectedCamera: Skip GetVideoCaptureCapabilities (Trying to set Null)";
+                    Debug.WriteLine(errorMsg);
+                    return;
                 }
                 var opRes = value.GetVideoCaptureCapabilities();
                 opRes.AsTask().ContinueWith(resolutions =>
                 {
-                  RunOnUiThread(() =>
-                  {
-                    var uniqueRes = resolutions.Result.GroupBy(test => test.ResolutionDescription).Select(grp => grp.First()).ToList();
-                    CaptureCapability defaultResolution = null;
-                    foreach (var resolution in uniqueRes)
+                    RunOnUiThread(async () =>
                     {
-                      if (defaultResolution == null)
-                      {
-                        defaultResolution = resolution;
-                      }
-                      _allCapRes.Add(resolution.ResolutionDescription);
-                      if ((resolution.Width == 640) && (resolution.Height == 480))
-                      {
-                        defaultResolution = resolution;
-                      }
-                    }
-                    SelectedCapResItem = defaultResolution.ResolutionDescription;
-                  });
+                        if (resolutions.IsFaulted)
+                        {
+                            Exception ex = resolutions.Exception;
+                            while (ex is AggregateException && ex.InnerException != null)
+                                ex = ex.InnerException;
+                            String errorMsg = "SetSelectedCamera: Failed to GetVideoCaptureCapabilities (Error: " + ex.Message + ")";
+                            Debug.WriteLine(errorMsg);
+                            var msgDialog = new MessageDialog(errorMsg);
+                            await msgDialog.ShowAsync();
+                            return;
+                        }
+                        if (resolutions.Result == null)
+                        {
+                            String errorMsg = "SetSelectedCamera: Failed to GetVideoCaptureCapabilities (Result is null)";
+                            Debug.WriteLine(errorMsg);
+                            var msgDialog = new MessageDialog(errorMsg);
+                            await msgDialog.ShowAsync();
+                            return;
+                        }
+                        var uniqueRes = resolutions.Result.GroupBy(test => test.ResolutionDescription).Select(grp => grp.First()).ToList();
+                        CaptureCapability defaultResolution = null;
+                        foreach (var resolution in uniqueRes)
+                        {
+                            if (defaultResolution == null)
+                            {
+                                defaultResolution = resolution;
+                            }
+                            _allCapRes.Add(resolution.ResolutionDescription);
+                            if ((resolution.Width == 640) && (resolution.Height == 480))
+                            {
+                                defaultResolution = resolution;
+                            }
+                        }
+                        SelectedCapResItem = defaultResolution.ResolutionDescription;
+                    });
                 });
             }
         }
