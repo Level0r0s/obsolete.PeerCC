@@ -117,7 +117,7 @@ namespace PeerConnectionClient.ViewModels
             Debug.WriteLine("Re-establishing self video");
             Media.CreateMediaAsync().AsTask().ContinueWith(media =>
             {
-              var source = media.Result.CreateMediaStreamSource(_peerVideoTrack, 30, "SELF");
+              var source = media.Result.CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
               RunOnUiThread(() =>
               {
                 SelfVideo.SetMediaStreamSource(source);
@@ -143,7 +143,6 @@ namespace PeerConnectionClient.ViewModels
         public void Initialize(CoreDispatcher uiDispatcher)
         {
             WebRTC.Initialize(uiDispatcher);
-            GetNetworkTime();
 
             // Get information of cameras attached to the device
             Cameras = new ObservableCollection<MediaDevice>();
@@ -281,6 +280,7 @@ namespace PeerConnectionClient.ViewModels
                         SettingsButtonChecked = false;
                         ScrollBarVisibilityType = ScrollBarVisibility.Disabled;
                     }
+                    IsReadyToDisconnect = false;
 
                     // Make sure the screen is always active while on call
                     if (!_keepOnScreenRequested) {
@@ -340,10 +340,17 @@ namespace PeerConnectionClient.ViewModels
             // Prepare to list supported video codecs
             VideoCodecs = new ObservableCollection<CodecInfo>();
 
-            // Right now, The WebRTC reports the trial codecs before the officially supported one.
-            //reverse the list, so that the official ones will  be default.
-            var videoCodecList = WebRTC.GetVideoCodecs().Reverse();
-
+            // Order the video codecs so that the stable VP8 is in front.
+            var videoCodecList = WebRTC.GetVideoCodecs().OrderBy(codec =>
+            {
+                switch (codec.Name)
+                {
+                    case "VP8": return 1;
+                    case "VP9": return 2;
+                    case "H264": return 3;
+                    default: return 99;
+                }
+            });
 
             // Load the supported audio/video information into the Settings controls
             RunOnUiThread(() =>
@@ -396,6 +403,7 @@ namespace PeerConnectionClient.ViewModels
                   });
                 });
             }
+            IsReadyToDisconnect = true;
         }
 
         /// <summary>
@@ -813,6 +821,21 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private bool _isReadyToDisconnect;
+        /// <summary>
+        /// Indicator if the app is ready to disconnect from a peer.
+        /// </summary>
+        public bool IsReadyToDisconnect
+        {
+            get { return _isReadyToDisconnect; }
+            set
+            {
+                SetProperty(ref _isReadyToDisconnect, value);
+                DisconnectFromPeerCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+
         private ScrollBarVisibility _scrollBarVisibility;
 
         /// <summary>
@@ -993,33 +1016,58 @@ namespace PeerConnectionClient.ViewModels
                 Conductor.Instance.Media.SelectVideoDevice(_selectedCamera);
                 if (_allCapRes == null)
                 {
-                  _allCapRes = new ObservableCollection<String>();
+                    _allCapRes = new ObservableCollection<String>();
                 }
                 else
                 {
-                  _allCapRes.Clear();
+                    _allCapRes.Clear();
+                }
+                if (value == null)
+                {
+                    String errorMsg = "SetSelectedCamera: Skip GetVideoCaptureCapabilities (Trying to set Null)";
+                    Debug.WriteLine(errorMsg);
+                    return;
                 }
                 var opRes = value.GetVideoCaptureCapabilities();
                 opRes.AsTask().ContinueWith(resolutions =>
                 {
-                  RunOnUiThread(() =>
-                  {
-                    var uniqueRes = resolutions.Result.GroupBy(test => test.ResolutionDescription).Select(grp => grp.First()).ToList();
-                    CaptureCapability defaultResolution = null;
-                    foreach (var resolution in uniqueRes)
+                    RunOnUiThread(async () =>
                     {
-                      if (defaultResolution == null)
-                      {
-                        defaultResolution = resolution;
-                      }
-                      _allCapRes.Add(resolution.ResolutionDescription);
-                      if ((resolution.Width == 640) && (resolution.Height == 480))
-                      {
-                        defaultResolution = resolution;
-                      }
-                    }
-                    SelectedCapResItem = defaultResolution.ResolutionDescription;
-                  });
+                        if (resolutions.IsFaulted)
+                        {
+                            Exception ex = resolutions.Exception;
+                            while (ex is AggregateException && ex.InnerException != null)
+                                ex = ex.InnerException;
+                            String errorMsg = "SetSelectedCamera: Failed to GetVideoCaptureCapabilities (Error: " + ex.Message + ")";
+                            Debug.WriteLine(errorMsg);
+                            var msgDialog = new MessageDialog(errorMsg);
+                            await msgDialog.ShowAsync();
+                            return;
+                        }
+                        if (resolutions.Result == null)
+                        {
+                            String errorMsg = "SetSelectedCamera: Failed to GetVideoCaptureCapabilities (Result is null)";
+                            Debug.WriteLine(errorMsg);
+                            var msgDialog = new MessageDialog(errorMsg);
+                            await msgDialog.ShowAsync();
+                            return;
+                        }
+                        var uniqueRes = resolutions.Result.GroupBy(test => test.ResolutionDescription).Select(grp => grp.First()).ToList();
+                        CaptureCapability defaultResolution = null;
+                        foreach (var resolution in uniqueRes)
+                        {
+                            if (defaultResolution == null)
+                            {
+                                defaultResolution = resolution;
+                            }
+                            _allCapRes.Add(resolution.ResolutionDescription);
+                            if ((resolution.Width == 640) && (resolution.Height == 480))
+                            {
+                                defaultResolution = resolution;
+                            }
+                        }
+                        SelectedCapResItem = defaultResolution.ResolutionDescription;
+                    });
                 });
             }
         }
@@ -1239,13 +1287,13 @@ namespace PeerConnectionClient.ViewModels
             get { return _selectedCapResItem; }
             set
             {
-                if (_allCapFPS == null)
+                if (AllCapFPS == null)
                 {
-                  _allCapFPS = new ObservableCollection<CaptureCapability>();
+                  AllCapFPS = new ObservableCollection<CaptureCapability>();
                 }
                 else
                 {
-                  _allCapFPS.Clear();
+                  AllCapFPS.Clear();
                 }
                 var opCap = SelectedCamera.GetVideoCaptureCapabilities();
                 opCap.AsTask().ContinueWith(caps =>
@@ -1257,7 +1305,7 @@ namespace PeerConnectionClient.ViewModels
                       CaptureCapability defaultFPS = null;
                       foreach (var fps in fpsList)
                       {
-                        _allCapFPS.Add(fps);
+                        AllCapFPS.Add(fps);
                         if ((defaultFPS == null) || (fps.FrameRate == 30))
                         {
                           defaultFPS = fps;
@@ -1421,7 +1469,7 @@ namespace PeerConnectionClient.ViewModels
         /// <returns>True if the application is ready to disconnect from a peer.</returns>
         private bool DisconnectFromPeerCommandCanExecute(object obj)
         {
-            return IsConnectedToPeer;
+            return IsConnectedToPeer && IsReadyToDisconnect;
         }
 
         /// <summary>
@@ -1731,27 +1779,34 @@ namespace PeerConnectionClient.ViewModels
         /// <summary>
         /// retrieve the current network time from ntp server  "time.windows.com"
         /// </summary>
-        async Task GetNetworkTime()
+        public static async Task GetNetworkTime()
         {
-          //default Windows time server
-          const string ntpServer = "time.windows.com";
+            //default Windows time server
+            const string ntpServer = "time.windows.com";
 
-          // NTP message size - 16 bytes of the digest (RFC 2030)
-          byte[] ntpData = new byte[48];
+            // NTP message size - 16 bytes of the digest (RFC 2030)
+            byte[] ntpData = new byte[48];
 
-          //Setting the Leap Indicator, Version Number and Mode values
-          ntpData[0] = 0x1B; //LI = 0 (no warning), VN = 3 (IPv4 only), Mode = 3 (Client Mode)
+            //Setting the Leap Indicator, Version Number and Mode values
+            ntpData[0] = 0x1B; //LI = 0 (no warning), VN = 3 (IPv4 only), Mode = 3 (Client Mode)
 
 
-          //NTP uses UDP
-          var socket = new Windows.Networking.Sockets.DatagramSocket();
-          socket.MessageReceived += OnNTPTimeReceived;
+            //NTP uses UDP
+            var socket = new Windows.Networking.Sockets.DatagramSocket();
+            socket.MessageReceived += OnNTPTimeReceived;
 
-          //The UDP port number assigned to NTP is 123
-          await socket.ConnectAsync(new Windows.Networking.HostName(ntpServer), "123");
+            try
+            {
+                //The UDP port number assigned to NTP is 123
+                await socket.ConnectAsync(new Windows.Networking.HostName(ntpServer), "123");
+                await socket.OutputStream.WriteAsync(ntpData.AsBuffer());
 
-          await socket.OutputStream.WriteAsync(ntpData.AsBuffer());
-
+            }
+            catch (Exception e)
+            {
+                MessageDialog dialog = new MessageDialog("Failed To sync with ntp server.");
+                dialog.ShowAsync();
+            }
 
         }
 
@@ -1760,42 +1815,42 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         /// <param name="socket">The udp socket object which triggered this event </param>
         /// <param name="eventArguments">event information</param>
-        async void OnNTPTimeReceived(Windows.Networking.Sockets.DatagramSocket socket, Windows.Networking.Sockets.DatagramSocketMessageReceivedEventArgs eventArguments)
+        static async void OnNTPTimeReceived(Windows.Networking.Sockets.DatagramSocket socket, Windows.Networking.Sockets.DatagramSocketMessageReceivedEventArgs eventArguments)
         {
-          byte[] ntpData = new byte[48];
-   
-          eventArguments.GetDataReader().ReadBytes(ntpData);
+            byte[] ntpData = new byte[48];
 
-          //Offset to get to the "Transmit Timestamp" field (time at which the reply 
-          //departed the server for the client, in 64-bit timestamp format."
-          const byte serverReplyTime = 40;
+            eventArguments.GetDataReader().ReadBytes(ntpData);
 
-          //Get the seconds part
-          ulong intPart = BitConverter.ToUInt32(ntpData, serverReplyTime);
+            //Offset to get to the "Transmit Timestamp" field (time at which the reply 
+            //departed the server for the client, in 64-bit timestamp format."
+            const byte serverReplyTime = 40;
 
-          //Get the seconds fraction
-          ulong fractPart = BitConverter.ToUInt32(ntpData, serverReplyTime + 4);
+            //Get the seconds part
+            ulong intPart = BitConverter.ToUInt32(ntpData, serverReplyTime);
 
-          //Convert From big-endian to little-endian
-          intPart = SwapEndianness(intPart);
-          fractPart = SwapEndianness(fractPart);
+            //Get the seconds fraction
+            ulong fractPart = BitConverter.ToUInt32(ntpData, serverReplyTime + 4);
 
-          ulong milliseconds = (intPart * 1000) + ((fractPart * 1000) / 0x100000000L);
+            //Convert From big-endian to little-endian
+            intPart = SwapEndianness(intPart);
+            fractPart = SwapEndianness(fractPart);
 
-          WebRTC.SynNTPTime((long)milliseconds);
+            ulong milliseconds = (intPart * 1000) + ((fractPart * 1000) / 0x100000000L);
 
-          socket.Dispose();
+            WebRTC.SynNTPTime((long)milliseconds);
+
+            socket.Dispose();
 
 
         }
 
 
-        uint SwapEndianness(ulong x)
+        static uint SwapEndianness(ulong x)
         {
-          return (uint)(((x & 0x000000ff) << 24) +
-                         ((x & 0x0000ff00) << 8) +
-                         ((x & 0x00ff0000) >> 8) +
-                         ((x & 0xff000000) >> 24));
+            return (uint)(((x & 0x000000ff) << 24) +
+                           ((x & 0x0000ff00) << 8) +
+                           ((x & 0x00ff0000) >> 8) +
+                           ((x & 0xff000000) >> 24));
         }
     }
 }
