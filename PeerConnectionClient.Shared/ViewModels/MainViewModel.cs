@@ -275,15 +275,12 @@ namespace PeerConnectionClient.ViewModels
                 {
                     IsReadyToConnect = false;
                     IsConnectedToPeer = true;
-<<<<<<< HEAD
                     IsReadyToDisconnect = false;
-=======
                     if (SettingsButtonChecked) {
                         // close settings screen if open
                         SettingsButtonChecked = false;
                         ScrollBarVisibilityType = ScrollBarVisibility.Disabled;
                     }
->>>>>>> Fixed Bug 12948 If call is started when settings are open, not switching to the active call view
 
                     // Make sure the screen is always active while on call
                     if (!_keepOnScreenRequested) {
@@ -1036,7 +1033,6 @@ namespace PeerConnectionClient.ViewModels
                 {
                     RunOnUiThread(async () =>
                     {
-<<<<<<< HEAD
                         if (resolutions.IsFaulted)
                         {
                             Exception ex = resolutions.Exception;
@@ -1072,21 +1068,7 @@ namespace PeerConnectionClient.ViewModels
                         }
                         SelectedCapResItem = defaultResolution.ResolutionDescription;
                     });
-=======
-                      if (defaultResolution == null)
-                      {
-                        defaultResolution = resolution;
-                      }
-                      _allCapRes.Add(resolution.ResolutionDescription);
-                      if ((resolution.Width == 640) && (resolution.Height == 480))
-                      {
-                        defaultResolution = resolution;
-                      }
-                    }
-                    SelectedCapResItem = defaultResolution.ResolutionDescription;
-                  });
-                  OnPropertyChanged("AllCapRes");
->>>>>>> Fixed Bug 14052:PeerCC: Win10: empty capture resolution or frame rate drop downs
+                    OnPropertyChanged("AllCapRes");
                 });
             }
         }
