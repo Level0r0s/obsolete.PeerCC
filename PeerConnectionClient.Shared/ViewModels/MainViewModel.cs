@@ -281,6 +281,11 @@ namespace PeerConnectionClient.ViewModels
                         ScrollBarVisibilityType = ScrollBarVisibility.Disabled;
                     }
                     IsReadyToDisconnect = false;
+                    if (SettingsButtonChecked) {
+                        // close settings screen if open
+                        SettingsButtonChecked = false;
+                        ScrollBarVisibilityType = ScrollBarVisibility.Disabled;
+                    }
 
                     // Make sure the screen is always active while on call
                     if (!_keepOnScreenRequested) {
@@ -1008,7 +1013,7 @@ namespace PeerConnectionClient.ViewModels
         /// The selected camera.
         /// </summary>
         public MediaDevice SelectedCamera
-        {
+        { 
             get { return _selectedCamera; }
             set
             {
@@ -1068,6 +1073,7 @@ namespace PeerConnectionClient.ViewModels
                         }
                         SelectedCapResItem = defaultResolution.ResolutionDescription;
                     });
+                    OnPropertyChanged("AllCapRes");
                 });
             }
         }
@@ -1274,7 +1280,13 @@ namespace PeerConnectionClient.ViewModels
         /// The list of all capture resolutions.
         /// </summary>
         {
-            get { return _allCapRes; }
+            get {
+                if (_allCapRes == null)
+                {
+                    _allCapRes = new ObservableCollection<String>();
+                }
+                return _allCapRes;
+            }
             set { SetProperty(ref _allCapRes, value); }
         }
 
@@ -1313,6 +1325,7 @@ namespace PeerConnectionClient.ViewModels
                       }
                       SelectedCapFPSItem = defaultFPS;
                     });
+                    OnPropertyChanged("AllCapFPS");
                 });
                 SetProperty(ref _selectedCapResItem, value);
             }
@@ -1324,7 +1337,13 @@ namespace PeerConnectionClient.ViewModels
         /// The list of all capture frame rates.
         /// </summary>
         {
-            get { return _allCapFPS; }
+            get {
+                if (_allCapFPS == null)
+                {
+                    _allCapFPS = new ObservableCollection<CaptureCapability>();
+                }
+                return _allCapFPS;
+            }
             set { SetProperty(ref _allCapFPS, value); }
         }
 
