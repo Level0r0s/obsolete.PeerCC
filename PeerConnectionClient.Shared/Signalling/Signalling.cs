@@ -188,6 +188,7 @@ namespace PeerConnectionClient.Signalling
                 {
                     Close();
                     OnDisconnected();
+                    _myId = -1;
                     return false;
                 }
 

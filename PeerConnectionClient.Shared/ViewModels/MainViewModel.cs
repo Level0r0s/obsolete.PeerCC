@@ -260,6 +260,10 @@ namespace PeerConnectionClient.ViewModels
                     IsMicrophoneEnabled = false;
                     IsCameraEnabled = false;
                     IsDisconnecting = false;
+                    if (Peers != null)
+                    {
+                        Peers.Clear();
+                    }
                 });
             };
 
@@ -782,7 +786,7 @@ namespace PeerConnectionClient.ViewModels
         private bool _isDisconnecting;
 
         /// <summary>
-        /// Indicator if the application is in the process of difconnecting from the server.
+        /// Indicator if the application is in the process of disconnecting from the server.
         /// </summary>
         public bool IsDisconnecting
         {
