@@ -113,7 +113,6 @@ namespace PeerConnectionClient
             //Unfortunately, there is no guaranteed way to prevent the flicker because XAML renders content
             //asynchronously and there is no guaranteed way to predict when rendering will be complete."
             //Window.Current.Activate();
-            await MainViewModel.GetNetworkTime();
             _mainViewModel = new MainViewModel(CoreApplication.MainView.CoreWindow.Dispatcher);
             _mainViewModel.OnInitialized += OnMainViewModelInitialized;
 

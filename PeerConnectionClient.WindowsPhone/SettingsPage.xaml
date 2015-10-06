@@ -50,6 +50,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
             <Grid Grid.Row="0"
                   Margin="0,25,0,0">
@@ -310,8 +311,13 @@
                  Grid.Column="0"
                  Text="{Binding CrashReportUserInfo, Mode=TwoWay}"
                  PlaceholderText="User info"/>
+      <ToggleSwitch Name="NtpSyncToggleSwitch"
+                    Header="NTP Sync"
+                    IsOn="{Binding NtpSyncEnabled, Mode=TwoWay}"
+                    Grid.Row="20"
+                    Margin="5"/>
       <Controls:ErrorControl DataContext="{Binding NtpServer}"
-                                   Grid.Row="20"
+                                   Grid.Row="21"
                                    Margin="5">
         <Controls:ErrorControl.InnerContent>
           <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

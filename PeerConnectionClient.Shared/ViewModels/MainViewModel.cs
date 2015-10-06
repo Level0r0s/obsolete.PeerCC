@@ -463,6 +463,8 @@ namespace PeerConnectionClient.ViewModels
             {
                 SetProperty(ref _ntpServer, value);
                 _ntpServer.PropertyChanged += NtpServer_PropertyChanged;
+                NtpSyncEnabled = false; //reset
+
             }
         }
 
@@ -1758,12 +1760,76 @@ namespace PeerConnectionClient.ViewModels
         }
         private StorageFile webrtcLoggingFile = null;
 
-        private static Stopwatch ntpResponseMonitor = new Stopwatch();
+        private Windows.UI.Xaml.DispatcherTimer ntpQueryTimer = null;
+
+        /// <summary>
+        /// report whether succeeded int sync with the ntp server or not
+        /// </summary>
+        private void NTPQueryTImeout(object sender, object e) 
+        {
+            if (ntpResponseMonitor.IsRunning)
+            {
+                ntpResponseMonitor.Stop();
+                reportNtpSyncStatus(false);
+                NtpSyncEnabled = false;
+            }
+        }
+
+        private bool _ntpSyncEnabled;
+
+        /// <summary>
+        /// Indicator if sync with ntp is enabled.
+        /// </summary>
+        public bool NtpSyncEnabled
+        {
+            get { return _ntpSyncEnabled; }
+            set
+            {
+                if (!SetProperty(ref _ntpSyncEnabled, value))
+                {
+                    return;
+                }
+
+                if (_ntpSyncEnabled)
+                {
+                    GetNetworkTime();
+                }
+                else
+                {
+                    //do nothing
+
+                }
+            }
+        }
+
+        private Stopwatch ntpResponseMonitor = new Stopwatch();
+
+        /// <summary>
+        /// report whether succeeded int sync with the ntp server or not
+        /// </summary>
+        void reportNtpSyncStatus(bool status)
+        {
+            MessageDialog dialog;
+            if (status)
+            {
+                dialog = new MessageDialog("Synced with ntp server.");
+            }
+            else
+            {
+                dialog = new MessageDialog("Failed To sync with ntp server.");
+            }
+
+            RunOnUiThread(async () =>
+            {
+                dialog.ShowAsync();
+            });
+        }
+
 
         /// <summary>
         /// retrieve the current network time from ntp server  "time.windows.com"
         /// </summary>
-        public static async Task GetNetworkTime()
+        public async Task GetNetworkTime()
         {
             //default Windows time server
             string ntpServer = "time.windows.com"; //default value;
@@ -1785,6 +1851,15 @@ namespace PeerConnectionClient.ViewModels
             var socket = new Windows.Networking.Sockets.DatagramSocket();
             socket.MessageReceived += OnNTPTimeReceived;
 
+            if (ntpQueryTimer == null)
+            {
+                ntpQueryTimer = new Windows.UI.Xaml.DispatcherTimer();
+                ntpQueryTimer.Tick += NTPQueryTImeout;
+                ntpQueryTimer.Interval = new TimeSpan(0, 0, 5); //5seconds
+            }
+
+            ntpQueryTimer.Start();
+
             try
             {
                 //The UDP port number assigned to NTP is 123
@@ -1794,8 +1869,9 @@ namespace PeerConnectionClient.ViewModels
             }
             catch (Exception e)
             {
-                MessageDialog dialog = new MessageDialog("Failed To sync with ntp server.");
-                dialog.ShowAsync();
+                ntpResponseMonitor.Stop();
+                reportNtpSyncStatus(false);
+                NtpSyncEnabled = false;
             }
 
         }
@@ -1805,7 +1881,7 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         /// <param name="socket">The udp socket object which triggered this event </param>
         /// <param name="eventArguments">event information</param>
-        static async void OnNTPTimeReceived(Windows.Networking.Sockets.DatagramSocket socket, Windows.Networking.Sockets.DatagramSocketMessageReceivedEventArgs eventArguments)
+        async void OnNTPTimeReceived(Windows.Networking.Sockets.DatagramSocket socket, Windows.Networking.Sockets.DatagramSocketMessageReceivedEventArgs eventArguments)
         {
             byte[] ntpData = new byte[48];
 
@@ -1828,10 +1904,8 @@ namespace PeerConnectionClient.ViewModels
             ulong milliseconds = (intPart * 1000) + ((fractPart * 1000) / 0x100000000L);
 
             WebRTC.SynNTPTime((long)milliseconds + ntpResponseMonitor.ElapsedMilliseconds/2);
-
+            ntpResponseMonitor.Stop();
             socket.Dispose();
-
-
         }
 
 
