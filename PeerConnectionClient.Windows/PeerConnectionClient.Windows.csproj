@@ -16,6 +16,8 @@
     <SynthesizeLinkMetadata>true</SynthesizeLinkMetadata>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>PeerConnectionClient.Windows_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxBundlePlatforms>x86</AppxBundlePlatforms>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -168,18 +170,18 @@
     </SDKReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api.vcxproj">
-      <Project>{08a72a31-ed29-591b-a715-7842ad71fd3d}</Project>
-      <Name>webrtc_winrt_api</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="HockeyApp">
       <HintPath>..\packages\HockeySDK.WINRT.2.2.2\lib\portable-win81\HockeyApp.dll</HintPath>
     </Reference>
     <Reference Include="HockeyAppPCL">
       <HintPath>..\packages\HockeySDK.Core.2.2.2\lib\portable-net45+win8+wp8+wpa81+win81\HockeyAppPCL.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\webrtc\build\WinRT_gyp\Api\webrtc_winrt_api_win.vcxproj">
+      <Project>{e74f603c-7ec6-6a13-1813-651687983db7}</Project>
+      <Name>webrtc_winrt_api_win</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>
