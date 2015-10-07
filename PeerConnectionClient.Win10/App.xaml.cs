@@ -112,7 +112,7 @@ namespace PeerConnectionClient.Win10
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
-            //TODO: Save application state and stop any background activity
+            mainViewModel.OnAppSuspending();
             deferral.Complete();
         }
 

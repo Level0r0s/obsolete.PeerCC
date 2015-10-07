@@ -154,7 +154,7 @@ namespace PeerConnectionClient.ViewModels
                     Cameras.Add(deviceInfo);
                     if (Cameras.Count == 1)
                     {
-                      SelectedCamera = Cameras[0];
+                        SelectedCamera = Cameras[0];
                     }
                 });
             };
@@ -168,7 +168,7 @@ namespace PeerConnectionClient.ViewModels
                     Microphones.Add(deviceInfo);
                     if (Microphones.Count == 1)
                     {
-                      SelectedMicrophone = Microphones[0];
+                        SelectedMicrophone = Microphones[0];
                     }
                 });
             };
@@ -190,13 +190,17 @@ namespace PeerConnectionClient.ViewModels
             };
 
             // Handler for Peer/Self video resolution changed event 
-            ResolutionHelper.ResolutionChanged += (id, width, height) => {
-                RunOnUiThread(() => {
-                    if (id == "SELF") {
+            ResolutionHelper.ResolutionChanged += (id, width, height) =>
+            {
+                RunOnUiThread(() =>
+                {
+                    if (id == "SELF")
+                    {
                         SelfHeight = height.ToString();
                         SelfWidth = width.ToString();
                     }
-                    else if (id == "PEER") {
+                    else if (id == "PEER")
+                    {
                         PeerHeight = height.ToString();
                         PeerWidth = width.ToString();
                     }
@@ -2007,7 +2011,7 @@ namespace PeerConnectionClient.ViewModels
         }
 
         /// <summary>
-        /// event hander when receiving response from the ntp server
+        /// Event hander when receiving response from the ntp server.
         /// </summary>
         /// <param name="socket">The udp socket object which triggered this event </param>
         /// <param name="eventArguments">event information</param>
@@ -2093,6 +2097,14 @@ namespace PeerConnectionClient.ViewModels
                            ((x & 0x0000ff00) << 8) +
                            ((x & 0x00ff0000) >> 8) +
                            ((x & 0xff000000) >> 24));
+        }
+
+        /// <summary>
+        /// Application suspending event handler.
+        /// </summary>
+        public void OnAppSuspending()
+        {
+            Conductor.Instance.Media.OnAppSuspending();
         }
     }
 }
