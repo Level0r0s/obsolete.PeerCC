@@ -103,6 +103,7 @@
                 Margin="5" 
                 Grid.Column="1" >
             <Grid>
+                <ProgressRing Height="50" Width="50" IsActive="{Binding NtpSyncInProgress, Mode=TwoWay}"/>
                 <MediaElement Name="PeerVideo" RealTimePlayback="True" MediaFailed="PeerVideo_MediaFailed"/>
                 <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="80">
                     <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
