@@ -17,6 +17,7 @@ using PeerConnectionClient.Utilities;
 using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.Activation;
 using webrtc_winrt_api;
+using System.Diagnostics;
 #if !WINDOWS_UAP // Disable on Win10 for now.
 using HockeyApp;
 using Windows.Networking.Connectivity;
@@ -461,6 +462,24 @@ namespace PeerConnectionClient.ViewModels
         }
 
         #region Bindings
+
+        private ValidableNonEmptyString _ntpServer;
+
+        /// <summary>
+        /// address of the ntp server to sync app clock.
+        /// </summary>
+        public ValidableNonEmptyString NtpServer
+        {
+            get { return _ntpServer; }
+            set
+            {
+                SetProperty(ref _ntpServer, value);
+                _ntpServer.PropertyChanged += NtpServer_PropertyChanged;
+                NtpSyncEnabled = false; //reset
+
+            }
+        }
+
 
         private ValidableNonEmptyString _ip;
 
@@ -1648,6 +1667,7 @@ namespace PeerConnectionClient.ViewModels
             var configTraceServerIp = "127.0.0.1";
             var configTraceServerPort = "55000";
             var peerCcServerIp = new ValidableNonEmptyString("127.0.0.1");
+            var ntpServerAddress = new ValidableNonEmptyString("time.windows.com");
             var peerCcPortInt = 8888;
 
             if (settings.Values["PeerCCServerIp"] != null)
@@ -1696,12 +1716,19 @@ namespace PeerConnectionClient.ViewModels
                 configIceServers.Add(new IceServer("stun4.l.google.com", "19302", IceServer.ServerType.STUN));
             }
 
+            if (settings.Values["NTPServer"] != null && (string)settings.Values["NTPServer"] !="" )
+            {
+                ntpServerAddress = new ValidableNonEmptyString((string)settings.Values["NTPServer"]);
+            }
+
+
             RunOnUiThread(() =>
             {
                 IceServers = configIceServers;
                 TraceServerIp = configTraceServerIp;
                 TraceServerPort = configTraceServerPort;
                 Ip = peerCcServerIp;
+                NtpServer = ntpServerAddress;
                 Port = new ValidableIntegerString(peerCcPortInt, 0, 65535);
                 ReevaluateHasServer();
             });
@@ -1762,6 +1789,21 @@ namespace PeerConnectionClient.ViewModels
         }
 
         /// <summary>
+        /// ntp server changed event handler.
+        /// </summary>
+        /// <param name="sender">The sender object.</param>
+        /// <param name="e">Property Changed event information.</param>
+        void NtpServer_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Valid")
+            {
+                ConnectCommand.RaiseCanExecuteChanged();
+            }
+            var localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values["NTPServer"] = _ntpServer.Value;
+        }
+
+        /// <summary>
         /// IP changed event handler.
         /// </summary>
         /// <param name="sender">The sender object.</param>
@@ -1795,37 +1837,172 @@ namespace PeerConnectionClient.ViewModels
         }
         private StorageFile webrtcLoggingFile = null;
 
+
+        //Todo, refractoring the code to move NTP syn related logic to a separate file
+
+        private Windows.UI.Xaml.DispatcherTimer ntpQueryTimer = null;
+
+        /// <summary>
+        /// report whether succeeded in sync with the ntp server or not
+        /// </summary>
+        private void NTPQueryTImeout(object sender, object e) 
+        {
+            if (ntpResponseMonitor.IsRunning)
+            {
+                ntpResponseMonitor.Stop();
+                reportNtpSyncStatus(false);
+                NtpSyncEnabled = false;
+            }
+        }
+
+        private Boolean _ntpSyncInProgress = false;
+
+        /// <summary>
+        /// Indicator if sync with ntp is in progress.
+        /// </summary>
+        public Boolean NtpSyncInProgress
+        {
+            get { return _ntpSyncInProgress; }
+            set
+            {
+                if (!SetProperty(ref _ntpSyncInProgress, value))
+                {
+                    return;
+                }
+            }
+        }
+
+        private bool _ntpSyncEnabled;
+
+        /// <summary>
+        /// Indicator if sync with ntp is enabled.
+        /// </summary>
+        public bool NtpSyncEnabled
+        {
+            get { return _ntpSyncEnabled; }
+            set
+            {
+                if (!SetProperty(ref _ntpSyncEnabled, value))
+                {
+                    return;
+                }
+
+                if (_ntpSyncEnabled)
+                {
+                    GetNetworkTime();
+                }
+                else
+                {
+                    //do nothing
+
+                }
+            }
+        }
+
+        private Stopwatch ntpResponseMonitor = new Stopwatch();
+
+        /// <summary>
+        /// report whether succeeded in sync with the ntp server or not
+        /// </summary>
+        void reportNtpSyncStatus(bool status, int rtt = 0)
+        {
+            MessageDialog dialog;
+            if (status)
+            {
+                dialog = new MessageDialog(String.Format("Synced with ntp server. RTT time {0}ms",rtt));
+            }
+            else
+            {
+                dialog = new MessageDialog("Failed To sync with ntp server.");
+            }
+
+            RunOnUiThread(async () =>
+            {
+                dialog.ShowAsync();
+                ntpRTTIntervalTimer.Stop();
+                NtpSyncInProgress = false;
+            });
+
+        }
+
+        private int averageNtpRTT = 0; //ms initialized to a invalid number
+        private int minNtpRTT = -1;
+        const int MaxyNtpRTTProbeQuery = 100; // the attempt to get average RTT for NTP query/response
+        private int currentNtpQueryCount = 0;
+        private Windows.Networking.Sockets.DatagramSocket ntpSocket = null;
+        private Windows.UI.Xaml.DispatcherTimer ntpRTTIntervalTimer = null;
         /// <summary>
         /// retrieve the current network time from ntp server  "time.windows.com"
         /// </summary>
-        public static async Task GetNetworkTime()
+        public async Task GetNetworkTime()
         {
-            //default Windows time server
-            const string ntpServer = "time.windows.com";
+            NtpSyncInProgress = true;
 
+            averageNtpRTT = 0; //reset
+
+            currentNtpQueryCount = 0; //reset
+            minNtpRTT = -1; //reset
+            //default Windows time server
+            string ntpServer = "time.windows.com"; //default value;
+            var localSettings = ApplicationData.Current.LocalSettings;
+            if (localSettings.Values["NTPServer"] != null && (string)localSettings.Values["NTPServer"] != "")
+            {
+                ntpServer = (string) localSettings.Values["NTPServer"];
+
+            }
+
+
+            //NTP uses UDP
+            ntpSocket = new Windows.Networking.Sockets.DatagramSocket();
+            ntpSocket.MessageReceived += OnNTPTimeReceived;
+
+
+            if (ntpQueryTimer == null)
+            {
+                ntpQueryTimer = new Windows.UI.Xaml.DispatcherTimer();
+                ntpQueryTimer.Tick += NTPQueryTImeout;
+                ntpQueryTimer.Interval = new TimeSpan(0, 0, 5); //5 seconds
+            }
+
+            if (ntpRTTIntervalTimer == null)
+            {
+                ntpRTTIntervalTimer = new Windows.UI.Xaml.DispatcherTimer();
+                ntpRTTIntervalTimer.Tick += sendNTPQuery;
+                ntpRTTIntervalTimer.Interval = new TimeSpan(0, 0, 0,0,200); //200ms
+
+            }
+
+            ntpQueryTimer.Start();
+
+            try
+            {
+                //The UDP port number assigned to NTP is 123
+                await ntpSocket.ConnectAsync(new Windows.Networking.HostName(ntpServer), "123");
+                ntpRTTIntervalTimer.Start();
+
+            }
+            catch (Exception e)
+            {
+                ntpResponseMonitor.Stop();
+                reportNtpSyncStatus(false);
+                NtpSyncEnabled = false;
+            }
+
+        }
+
+        private void sendNTPQuery(object sender, object e)
+        {
+            currentNtpQueryCount++;
             // NTP message size - 16 bytes of the digest (RFC 2030)
             byte[] ntpData = new byte[48];
 
             //Setting the Leap Indicator, Version Number and Mode values
             ntpData[0] = 0x1B; //LI = 0 (no warning), VN = 3 (IPv4 only), Mode = 3 (Client Mode)
 
+            ntpQueryTimer.Start();
 
-            //NTP uses UDP
-            var socket = new Windows.Networking.Sockets.DatagramSocket();
-            socket.MessageReceived += OnNTPTimeReceived;
-
-            try
-            {
-                //The UDP port number assigned to NTP is 123
-                await socket.ConnectAsync(new Windows.Networking.HostName(ntpServer), "123");
-                await socket.OutputStream.WriteAsync(ntpData.AsBuffer());
-
-            }
-            catch (Exception e)
-            {
-                MessageDialog dialog = new MessageDialog("Failed To sync with ntp server.");
-                dialog.ShowAsync();
-            }
+            ntpResponseMonitor.Restart();
+            ntpSocket.OutputStream.WriteAsync(ntpData.AsBuffer());
 
         }
 
@@ -1834,8 +2011,55 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         /// <param name="socket">The udp socket object which triggered this event </param>
         /// <param name="eventArguments">event information</param>
-        static async void OnNTPTimeReceived(Windows.Networking.Sockets.DatagramSocket socket, Windows.Networking.Sockets.DatagramSocketMessageReceivedEventArgs eventArguments)
+        async void OnNTPTimeReceived(Windows.Networking.Sockets.DatagramSocket socket, Windows.Networking.Sockets.DatagramSocketMessageReceivedEventArgs eventArguments)
         {
+            int currentRTT = (int)ntpResponseMonitor.ElapsedMilliseconds;
+
+            ntpResponseMonitor.Stop();
+
+            if (currentNtpQueryCount < MaxyNtpRTTProbeQuery)
+            {
+                //we only trace 'min' RTT within the RTT probe attempts
+                if (minNtpRTT == -1 || minNtpRTT > currentRTT)
+                {
+
+                    minNtpRTT = currentRTT;
+
+                    if (minNtpRTT == 0)
+                        minNtpRTT = 1; //in case we got response so  fast, consider it to be 1ms.
+                }
+
+
+                averageNtpRTT = (averageNtpRTT * (currentNtpQueryCount - 1) + currentRTT) / currentNtpQueryCount;
+
+                if (averageNtpRTT<1)
+                {
+                    averageNtpRTT = 1;
+                }
+
+                RunOnUiThread(async () =>
+                {
+                    ntpQueryTimer.Stop();
+                    ntpRTTIntervalTimer.Start();
+                });
+
+                return;
+
+            }
+
+            //if currentRTT is good enough, e.g.: closer to minRTT, then, we don't have to continue to query.
+            if (currentRTT > (averageNtpRTT + minNtpRTT)/2)
+            {
+                RunOnUiThread(async () =>
+                {
+                    ntpQueryTimer.Stop();
+                    ntpRTTIntervalTimer.Start();
+                });
+
+                return;
+            }
+
+
             byte[] ntpData = new byte[48];
 
             eventArguments.GetDataReader().ReadBytes(ntpData);
@@ -1856,11 +2080,10 @@ namespace PeerConnectionClient.ViewModels
 
             ulong milliseconds = (intPart * 1000) + ((fractPart * 1000) / 0x100000000L);
 
-            WebRTC.SynNTPTime((long)milliseconds);
+            WebRTC.SynNTPTime((long)milliseconds + currentRTT / 2);
 
             socket.Dispose();
-
-
+            reportNtpSyncStatus(true, currentRTT);
         }
 
 

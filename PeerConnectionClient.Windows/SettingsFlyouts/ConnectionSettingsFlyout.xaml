@@ -34,8 +34,8 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
         <Controls:ErrorControl DataContext="{Binding Ip}"
                                Grid.Row="0"
                                Margin="5">
@@ -170,5 +170,5 @@
                         Margin="5"/>
             </Grid>
         </StackPanel>
-    </Grid>
+  </Grid>
 </SettingsFlyout>
