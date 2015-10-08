@@ -2102,9 +2102,22 @@ namespace PeerConnectionClient.ViewModels
         /// <summary>
         /// Application suspending event handler.
         /// </summary>
-        public void OnAppSuspending()
+        public async Task OnAppSuspending()
         {
+            if (IsConnectedToPeer)
+            {
+                await Conductor.Instance.DisconnectFromPeer();
+            }
+            if (IsConnected)
+            {
+                IsDisconnecting = true;
+                await Conductor.Instance.DisconnectFromServer();
+            }
             Conductor.Instance.Media.OnAppSuspending();
+            if (Peers != null)
+            {
+                Peers.Clear();
+            }
         }
     }
 }

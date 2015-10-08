@@ -467,7 +467,7 @@ namespace PeerConnectionClient.Signalling
         /// <summary>
         /// Calls to disconnect the user from the server.
         /// </summary>
-        public async void DisconnectFromServer()
+        public async Task DisconnectFromServer()
         {
             if (_signaller.IsConnected())
             {
@@ -509,9 +509,9 @@ namespace PeerConnectionClient.Signalling
         /// <summary>
         /// Calls to disconnect from peer.
         /// </summary>
-        public void DisconnectFromPeer()
+        public async Task DisconnectFromPeer()
         {
-            SendHangupMessage();
+            await SendHangupMessage();
             ClosePeerConnection();
         }
 
@@ -550,9 +550,9 @@ namespace PeerConnectionClient.Signalling
         /// <summary>
         /// Helper method to send a hangup message to a peer.
         /// </summary>
-        private void SendHangupMessage()
+        private async Task SendHangupMessage()
         {
-            _signaller.SendToPeer(_peerId, "BYE");
+            await _signaller.SendToPeer(_peerId, "BYE");
         }
 
         /// <summary>
