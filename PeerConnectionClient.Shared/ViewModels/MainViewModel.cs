@@ -144,6 +144,7 @@ namespace PeerConnectionClient.ViewModels
         public void Initialize(CoreDispatcher uiDispatcher)
         {
             WebRTC.Initialize(uiDispatcher);
+            var settings = ApplicationData.Current.LocalSettings;
 
             // Get information of cameras attached to the device
             Cameras = new ObservableCollection<MediaDevice>();
@@ -152,10 +153,29 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     Cameras.Add(deviceInfo);
-                    if (Cameras.Count == 1)
+                    if (SelectedCamera == null)
                     {
-                        SelectedCamera = Cameras[0];
+                        // do not call SelectedCamera = Cameras[0]; here
+                        // as it will change SelectedCameraId setting value too
+                        _selectedCamera = Cameras[0];
+                        OnPropertyChanged("SelectedCamera");
                     }
+                    if (settings.Values["SelectedCameraId"] != null)
+                    {
+                        string Id = (String)settings.Values["SelectedCameraId"];
+                        if (SelectedCamera.Id != Id)
+                        {
+                            foreach (var camera in Cameras)
+                            {
+                                if (camera.Id == Id)
+                                {
+                                    SelectedCamera = camera;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                       
                 });
             };
 
@@ -166,9 +186,27 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     Microphones.Add(deviceInfo);
-                    if (Microphones.Count == 1)
+                    if (SelectedMicrophone == null)
                     {
-                        SelectedMicrophone = Microphones[0];
+                        // do not call SelectedMicrophone = Microphones[0]; here
+                        // as it will change SelectedMicrophoneId setting value too
+                        _selectedMicrophone = Microphones[0];
+                        OnPropertyChanged("SelectedMicrophone");
+                    }
+                    if (settings.Values["SelectedMicrophoneId"] != null)
+                    {
+                        String Id = (String)settings.Values["SelectedMicrophoneId"];
+                        if (SelectedMicrophone.Id != Id)
+                        {
+                            foreach (var microphone in Microphones)
+                            {
+                                if (microphone.Id == Id)
+                                {
+                                    SelectedMicrophone = microphone;
+                                    break;
+                                }
+                            }
+                        }
                     }
                 });
             };
@@ -372,17 +410,50 @@ namespace PeerConnectionClient.ViewModels
                         AudioCodecs.Add(audioCodec);
                     }
                 }
+
                 if (AudioCodecs.Count > 0)
                 {
-                    SelectedAudioCodec = AudioCodecs.First();
+                    if (settings.Values["SelectedAudioCodecId"] != null)
+                    {
+                        int id = (int)settings.Values["SelectedAudioCodecId"];
+                        foreach (var audioCodec in AudioCodecs)
+                        {
+                            if (audioCodec.Id == id)
+                            {
+                                SelectedAudioCodec = audioCodec;
+                                break;
+                            }
+                        }
+                    }
+                    if (SelectedAudioCodec == null)
+                    {
+                        SelectedAudioCodec = AudioCodecs.First();
+                    }
                 }
+
                 foreach (var videoCodec in videoCodecList)
                 {
                     VideoCodecs.Add(videoCodec);
                 }
+
                 if (VideoCodecs.Count > 0)
                 {
-                    SelectedVideoCodec = VideoCodecs.First();
+                    if (settings.Values["SelectedVideoCodecId"] != null)
+                    {
+                        int id = (int)settings.Values["SelectedVideoCodecId"];
+                        foreach (var videoCodec in VideoCodecs)
+                        {
+                            if (videoCodec.Id == id)
+                            {
+                                SelectedVideoCodec = videoCodec;
+                                break;
+                            }
+                        }
+                    }
+                    if (SelectedVideoCodec == null)
+                    {
+                        SelectedVideoCodec = VideoCodecs.First();
+                    }
                 }
             });
             LoadSettings();
@@ -1041,6 +1112,8 @@ namespace PeerConnectionClient.ViewModels
             set
             {
                 SetProperty(ref _selectedCamera, value);
+                var localSettings = ApplicationData.Current.LocalSettings;
+                localSettings.Values["SelectedCameraId"] = _selectedCamera.Id;
                 Conductor.Instance.Media.SelectVideoDevice(_selectedCamera);
                 if (_allCapRes == null)
                 {
@@ -1094,7 +1167,22 @@ namespace PeerConnectionClient.ViewModels
                                 defaultResolution = resolution;
                             }
                         }
-                        SelectedCapResItem = defaultResolution.ResolutionDescription;
+                        var settings = ApplicationData.Current.LocalSettings;
+                        string selectedCapResItem = string.Empty;
+
+                        if (settings.Values["SelectedCapResItem"] != null)
+                        {
+                            selectedCapResItem = (string)settings.Values["SelectedCapResItem"];
+                        }
+
+                        if (!string.IsNullOrEmpty(selectedCapResItem) && _allCapRes.Contains(selectedCapResItem))
+                        {
+                            SelectedCapResItem = selectedCapResItem;
+                        }
+                        else
+                        {
+                            SelectedCapResItem = defaultResolution.ResolutionDescription;
+                        }
                     });
                     OnPropertyChanged("AllCapRes");
                 });
@@ -1127,6 +1215,8 @@ namespace PeerConnectionClient.ViewModels
             {
                 SetProperty(ref _selectedMicrophone, value);
                 Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
+                var localSettings = ApplicationData.Current.LocalSettings;
+                localSettings.Values["SelectedMicrophoneId"] = _selectedMicrophone.Id;
             }
         }
 
@@ -1294,6 +1384,8 @@ namespace PeerConnectionClient.ViewModels
                 }
                 Conductor.Instance.AudioCodec = value;
                 OnPropertyChanged(() => SelectedAudioCodec);
+                var localSettings = ApplicationData.Current.LocalSettings;
+                localSettings.Values["SelectedAudioCodecId"] = Conductor.Instance.AudioCodec.Id;
             }
         }
 
@@ -1324,32 +1416,44 @@ namespace PeerConnectionClient.ViewModels
             {
                 if (AllCapFPS == null)
                 {
-                  AllCapFPS = new ObservableCollection<CaptureCapability>();
+                    AllCapFPS = new ObservableCollection<CaptureCapability>();
                 }
                 else
                 {
-                  AllCapFPS.Clear();
+                    AllCapFPS.Clear();
                 }
                 var opCap = SelectedCamera.GetVideoCaptureCapabilities();
                 opCap.AsTask().ContinueWith(caps =>
                 {
-                  var fpsList = from cap in caps.Result where cap.ResolutionDescription == value select cap;
-                  var t = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                    () =>
-                    {
-                      CaptureCapability defaultFPS = null;
-                      foreach (var fps in fpsList)
-                      {
-                        AllCapFPS.Add(fps);
-                        if ((defaultFPS == null) || (fps.FrameRate == 30))
+                    var fpsList = from cap in caps.Result where cap.ResolutionDescription == value select cap;
+                    var t = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                        () =>
                         {
-                          defaultFPS = fps;
-                        }
-                      }
-                      SelectedCapFPSItem = defaultFPS;
-                    });
+                            CaptureCapability defaultFPS = null;
+                            uint selectedCapFPSFrameRate = 0;
+                            var settings = ApplicationData.Current.LocalSettings;
+                            if (settings.Values["SelectedCapFPSItemFrameRate"] != null)
+                            {
+                                selectedCapFPSFrameRate = (uint)settings.Values["SelectedCapFPSItemFrameRate"];
+                            }
+
+                            foreach (var fps in fpsList)
+                            {
+                                if (selectedCapFPSFrameRate != 0 && fps.FrameRate == selectedCapFPSFrameRate) {
+                                    defaultFPS = fps;
+                                }
+                                AllCapFPS.Add(fps);
+                                if (defaultFPS == null)
+                                {
+                                    defaultFPS = fps;
+                                }
+                            }
+                            SelectedCapFPSItem = defaultFPS;
+                        });
                     OnPropertyChanged("AllCapFPS");
                 });
+                var localSettings = ApplicationData.Current.LocalSettings;
+                localSettings.Values["SelectedCapResItem"] = value;
                 SetProperty(ref _selectedCapResItem, value);
             }
         }
@@ -1383,6 +1487,8 @@ namespace PeerConnectionClient.ViewModels
                 {
                   Conductor.Instance.VideoCaptureProfile = value;
                   Conductor.Instance.updatePreferredFrameFormat();
+                  var localSettings = ApplicationData.Current.LocalSettings;
+                  localSettings.Values["SelectedCapFPSItemFrameRate"] = (value != null) ? value.FrameRate : 0;
                 }
             }
         }
@@ -1413,6 +1519,8 @@ namespace PeerConnectionClient.ViewModels
 
                 Conductor.Instance.VideoCodec = value;
                 OnPropertyChanged(() => SelectedVideoCodec);
+                var localSettings = ApplicationData.Current.LocalSettings;
+                localSettings.Values["SelectedVideoCodecId"] = Conductor.Instance.VideoCodec.Id;
             }
         }
 
