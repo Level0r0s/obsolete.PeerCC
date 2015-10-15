@@ -57,15 +57,22 @@
                           IsOn="{Binding NtpSyncEnabled, Mode=TwoWay}"
                           HorizontalAlignment="Left"
                           HorizontalContentAlignment="Left"
-                          Margin="5"/>
+                          Margin="-6,5,5,5"/>
       <Controls:ErrorControl DataContext="{Binding NtpServer}"
-                               Margin="5">
+                               Margin="0,5,5,5">
         <Controls:ErrorControl.InnerContent>
           <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          MinWidth="160"
                          Header="NTP server"/>
         </Controls:ErrorControl.InnerContent>
       </Controls:ErrorControl>
+    </StackPanel>
+    <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
+        <ToggleSwitch Header="ETW Statistics"  
+                      Margin="-6,0,0,0"
+                      IsOn="{Binding ETWStatsEnabled, Mode=TwoWay}"
+                      HorizontalAlignment="Left"
+                      HorizontalContentAlignment="Left"/>
     </StackPanel>
   </StackPanel>
 </SettingsFlyout>

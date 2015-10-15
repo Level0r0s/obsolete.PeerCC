@@ -553,7 +553,15 @@
                           HorizontalContentAlignment="Left"
                           RelativePanel.Below="NTPServerAddressTextBox"
                           Margin="5"/>
-        </RelativePanel>
+                    <ToggleSwitch 
+                          Name="EtwStatsToggleSwitch"
+                          Header="ETW Statistics"
+                          IsOn="{Binding ETWStatsEnabled, Mode=TwoWay}"
+                          HorizontalAlignment="Left"
+                          HorizontalContentAlignment="Left"
+                          RelativePanel.Below="NtpSyncToggleSwitch"
+                          Margin="5"/>
+                </RelativePanel>
             </RelativePanel>
             <TextBlock
                 Name="AppVersion"
