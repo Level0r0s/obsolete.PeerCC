@@ -103,6 +103,28 @@ namespace PeerConnectionClient.Signalling
         bool _videoEnabled = true;
         bool _audioEnabled = true;
 
+        bool _etwStatsEnabled = false;
+
+        /// <summary>
+        /// Enable/Disable ETW stats used by WebRTCDiagHubTool Visual Studio plugin.
+        /// If the ETW Stats are disabled, no data will be sent to the plugin.
+        /// </summary>
+        public bool ETWStatsEnabled
+        {
+            get
+            {
+                return _etwStatsEnabled;
+            }
+            set
+            {
+                _etwStatsEnabled = value;
+                if (_peerConnection != null)
+                {
+                    _peerConnection.ToggleETWStats(_etwStatsEnabled);
+                }
+            }
+        }
+
         // Public events for adding and removing the local stream
         public event Action<MediaStreamEvent> OnAddLocalStream;
         public event Action<MediaStreamEvent> OnRemoveLocalStream;
@@ -148,6 +170,7 @@ namespace PeerConnectionClient.Signalling
 
             Debug.WriteLine("Conductor: Creating peer connection.");
             _peerConnection = new RTCPeerConnection(config);
+            _peerConnection.ToggleETWStats(_etwStatsEnabled);
 
             if (OnPeerConnectionCreated != null)
             {

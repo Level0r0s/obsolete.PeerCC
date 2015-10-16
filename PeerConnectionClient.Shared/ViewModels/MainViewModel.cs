@@ -1558,6 +1558,27 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        /// <summary>
+        /// Enable/Disable ETW stats used by WebRTCDiagHubTool Visual Studio plugin.
+        /// If the ETW Stats are disabled, no data will be sent to the plugin.
+        /// </summary>
+        public bool ETWStatsEnabled
+        {
+            get
+            {
+                return Conductor.Instance.ETWStatsEnabled;
+            }
+            set
+            {
+                if(Conductor.Instance.ETWStatsEnabled !=  value)
+                {
+
+                    Conductor.Instance.ETWStatsEnabled = value;
+                    OnPropertyChanged("ETWStatsEnabled");
+                }
+            }
+        }
+
         public MediaElement SelfVideo;
         public MediaElement PeerVideo;
 
