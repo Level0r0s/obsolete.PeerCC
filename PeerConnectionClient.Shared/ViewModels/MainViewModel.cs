@@ -1137,6 +1137,7 @@ namespace PeerConnectionClient.ViewModels
                 {
                     String errorMsg = "SetSelectedCamera: Skip GetVideoCaptureCapabilities (Trying to set Null)";
                     Debug.WriteLine(errorMsg);
+                    isInitializingCamera = false;
                     return;
                 }
                 var opRes = value.GetVideoCaptureCapabilities();
@@ -1153,6 +1154,7 @@ namespace PeerConnectionClient.ViewModels
                             Debug.WriteLine(errorMsg);
                             var msgDialog = new MessageDialog(errorMsg);
                             await msgDialog.ShowAsync();
+                            isInitializingCamera = false;
                             return;
                         }
                         if (resolutions.Result == null)
@@ -1161,6 +1163,7 @@ namespace PeerConnectionClient.ViewModels
                             Debug.WriteLine(errorMsg);
                             var msgDialog = new MessageDialog(errorMsg);
                             await msgDialog.ShowAsync();
+                            isInitializingCamera = false;
                             return;
                         }
                         var uniqueRes = resolutions.Result.GroupBy(test => test.ResolutionDescription).Select(grp => grp.First()).ToList();
