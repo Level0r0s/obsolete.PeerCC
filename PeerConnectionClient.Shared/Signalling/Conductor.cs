@@ -336,7 +336,8 @@ namespace PeerConnectionClient.Signalling
         /// <param name="peer_id">ID of disconnected peer.</param>
         private void Signaller_OnPeerDisconnected(int peer_id)
         {
-            if (peer_id == _peerId)
+            // is the same peer or peer_id does not exist (0) in case of 500 Error
+            if (peer_id == _peerId || peer_id == 0)
             {
                 Debug.WriteLine("Conductor: Our peer disconnected.");
                 ClosePeerConnection();
@@ -387,28 +388,36 @@ namespace PeerConnectionClient.Signalling
 
                     string type = jMessage.ContainsKey(kSessionDescriptionTypeName) ? jMessage.GetNamedString(kSessionDescriptionTypeName) : null;
 
-                    if (_peerConnection == null && !String.IsNullOrEmpty(type))
+                    if (_peerConnection == null)
                     {
-                        // Create the peer connection only when call is
-                        // about to get initiated. Otherwise ignore the
-                        // messages from peers which could be a result
-                        // of old (but not yet fully closed) connections.
-                        if (type == "offer" || type == "answer")
+                        if (!String.IsNullOrEmpty(type))
                         {
-                            Debug.Assert(_peerId == -1);
-                            _peerId = peerId;
+                            // Create the peer connection only when call is
+                            // about to get initiated. Otherwise ignore the
+                            // messages from peers which could be a result
+                            // of old (but not yet fully closed) connections.
+                            if (type == "offer" || type == "answer")
+                            {
+                                Debug.Assert(_peerId == -1);
+                                _peerId = peerId;
 
-                            if (!await CreatePeerConnection())
-                            {
-                                Debug.WriteLine("Conductor: Failed to initialize our PeerConnection instance");
-                                await Signaller.SignOut();
-                                return;
+                                if (!await CreatePeerConnection())
+                                {
+                                    Debug.WriteLine("Conductor: Failed to initialize our PeerConnection instance");
+                                    await Signaller.SignOut();
+                                    return;
+                                }
+                                else if (_peerId != peerId)
+                                {
+                                    Debug.WriteLine("Conductor: Received a message from unknown peer while already in a conversation with a different peer.");
+                                    return;
+                                }
                             }
-                            else if (_peerId != peerId)
-                            {
-                                Debug.WriteLine("Conductor: Received a message from unknown peer while already in a conversation with a different peer.");
-                                return;
-                            }
+                        }
+                        else
+                        {
+                            Debug.WriteLine("Conductor: Received an untyped message after closing peer connection.");
+                            return;
                         }
                     }
 

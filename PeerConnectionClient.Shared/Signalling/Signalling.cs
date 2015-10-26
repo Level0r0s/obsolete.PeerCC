@@ -186,6 +186,13 @@ namespace PeerConnectionClient.Signalling
                 int status = int.Parse(buffer.Substring(index, 3));
                 if (status != 200)
                 {
+                    if (status == 500 && buffer.Contains("Peer most likely gone."))
+                    {
+                        Debug.WriteLine("[Info] Peer most likely gone. Closing peer connection.");
+                        //As Peer Id doesn't exist in buffer using 0
+                        OnPeerDisconnected(0);
+                        return false;
+                    }
                     Close();
                     OnDisconnected();
                     _myId = -1;
