@@ -136,6 +136,10 @@ namespace PeerConnectionClient.ViewModels
         private MediaVideoTrack _peerVideoTrack;
         private MediaVideoTrack _selfVideoTrack;
 
+        // Flag for showing whether camera fields (resolution and frame rate)
+        // are changing, because camera is initializing. This is used to
+        // prevent updating local setting values
+        bool isInitializingCamera = false;
 
         /// <summary>
         /// The initializer for MainViewModel.
@@ -155,10 +159,8 @@ namespace PeerConnectionClient.ViewModels
                     Cameras.Add(deviceInfo);
                     if (SelectedCamera == null)
                     {
-                        // do not call SelectedCamera = Cameras[0]; here
-                        // as it will change SelectedCameraId setting value too
-                        _selectedCamera = Cameras[0];
-                        OnPropertyChanged("SelectedCamera");
+                        isInitializingCamera = true;
+                        SelectedCamera = Cameras[0];
                     }
                     if (settings.Values["SelectedCameraId"] != null)
                     {
@@ -191,6 +193,7 @@ namespace PeerConnectionClient.ViewModels
                         // do not call SelectedMicrophone = Microphones[0]; here
                         // as it will change SelectedMicrophoneId setting value too
                         _selectedMicrophone = Microphones[0];
+                        Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
                         OnPropertyChanged("SelectedMicrophone");
                     }
                     if (settings.Values["SelectedMicrophoneId"] != null)
@@ -1116,8 +1119,11 @@ namespace PeerConnectionClient.ViewModels
             set
             {
                 SetProperty(ref _selectedCamera, value);
-                var localSettings = ApplicationData.Current.LocalSettings;
-                localSettings.Values["SelectedCameraId"] = _selectedCamera.Id;
+                if (!isInitializingCamera)
+                {
+                    var localSettings = ApplicationData.Current.LocalSettings;
+                    localSettings.Values["SelectedCameraId"] = _selectedCamera.Id;
+                }
                 Conductor.Instance.Media.SelectVideoDevice(_selectedCamera);
                 if (_allCapRes == null)
                 {
@@ -1131,6 +1137,7 @@ namespace PeerConnectionClient.ViewModels
                 {
                     String errorMsg = "SetSelectedCamera: Skip GetVideoCaptureCapabilities (Trying to set Null)";
                     Debug.WriteLine(errorMsg);
+                    isInitializingCamera = false;
                     return;
                 }
                 var opRes = value.GetVideoCaptureCapabilities();
@@ -1147,6 +1154,7 @@ namespace PeerConnectionClient.ViewModels
                             Debug.WriteLine(errorMsg);
                             var msgDialog = new MessageDialog(errorMsg);
                             await msgDialog.ShowAsync();
+                            isInitializingCamera = false;
                             return;
                         }
                         if (resolutions.Result == null)
@@ -1155,6 +1163,7 @@ namespace PeerConnectionClient.ViewModels
                             Debug.WriteLine(errorMsg);
                             var msgDialog = new MessageDialog(errorMsg);
                             await msgDialog.ShowAsync();
+                            isInitializingCamera = false;
                             return;
                         }
                         var uniqueRes = resolutions.Result.GroupBy(test => test.ResolutionDescription).Select(grp => grp.First()).ToList();
@@ -1418,6 +1427,11 @@ namespace PeerConnectionClient.ViewModels
             get { return _selectedCapResItem; }
             set
             {
+                if (!isInitializingCamera)
+                {
+                    var localSettings = ApplicationData.Current.LocalSettings;
+                    localSettings.Values["SelectedCapResItem"] = value;
+                }
                 if (AllCapFPS == null)
                 {
                     AllCapFPS = new ObservableCollection<CaptureCapability>();
@@ -1456,8 +1470,6 @@ namespace PeerConnectionClient.ViewModels
                         });
                     OnPropertyChanged("AllCapFPS");
                 });
-                var localSettings = ApplicationData.Current.LocalSettings;
-                localSettings.Values["SelectedCapResItem"] = value;
                 SetProperty(ref _selectedCapResItem, value);
             }
         }
@@ -1491,8 +1503,16 @@ namespace PeerConnectionClient.ViewModels
                 {
                   Conductor.Instance.VideoCaptureProfile = value;
                   Conductor.Instance.updatePreferredFrameFormat();
-                  var localSettings = ApplicationData.Current.LocalSettings;
-                  localSettings.Values["SelectedCapFPSItemFrameRate"] = (value != null) ? value.FrameRate : 0;
+
+                  if (!isInitializingCamera)
+                  {
+                      var localSettings = ApplicationData.Current.LocalSettings;
+                      localSettings.Values["SelectedCapFPSItemFrameRate"] = (value != null) ? value.FrameRate : 0;
+                  }
+                  else
+                  {
+                      isInitializingCamera = false;
+                  }
                 }
             }
         }
