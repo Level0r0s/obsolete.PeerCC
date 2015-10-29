@@ -267,9 +267,12 @@ namespace PeerConnectionClient.ViewModels
             {
                 RunOnUiThread(() =>
                 {
-                    var peerToRemove = Peers.FirstOrDefault(p => p.Id == peerId);
-                    if (peerToRemove != null)
-                        Peers.Remove(peerToRemove);
+                    if (Peers != null)
+                    {
+                        var peerToRemove = Peers.FirstOrDefault(p => p.Id == peerId);
+                        if (peerToRemove != null)
+                            Peers.Remove(peerToRemove);
+                    }
                 });
             };
 
