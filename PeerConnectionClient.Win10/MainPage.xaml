@@ -121,6 +121,21 @@
                         Margin="5"
                         Command="{Binding ConnectToPeerCommand}"
                         HorizontalAlignment="Right" />
+
+                    <ToggleSwitch Header="Microphone"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Top"
+                          IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"
+                          IsEnabled="{Binding IsMicrophoneEnabled, Mode=OneWay}"
+                          Margin="5"
+                          FlowDirection="RightToLeft" />
+                    <ToggleSwitch Header="Camera"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Top"
+                          IsOn="{Binding CameraEnabled, Mode=TwoWay}"
+                          IsEnabled="{Binding IsCameraEnabled, Mode=OneWay}"
+                          Margin="5"
+                          FlowDirection="RightToLeft" />
                 </StackPanel>
             </RelativePanel>
 
