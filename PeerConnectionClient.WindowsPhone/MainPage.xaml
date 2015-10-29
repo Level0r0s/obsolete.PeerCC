@@ -55,15 +55,33 @@
                 <Grid>
                     <ProgressRing Height="50" Width="50" IsActive="{Binding NtpSyncInProgress, Mode=TwoWay}"/>
                     <MediaElement Name="PeerVideo" RealTimePlayback="True" MediaFailed="PeerVideo_MediaFailed" Stretch="Uniform"/>
-                    <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="80">
-                        <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <StackPanel Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" MinWidth="80">
+                        <TextBlock HorizontalAlignment="Left"
+                               Foreground="Black"
+                               Visibility="{Binding ShowPeerConnectionHealthStats, Converter={StaticResource BoolToVisConverter}, Mode=OneWay}">
+                            <Run Text="RTT="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.RTT}"/>
+                            <Run Text="&#10;LocalCandType ="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.LocalCandidateType}"/>
+                            <Run Text="&#10;RemoteCandType ="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.RemoteCandidateType}"/>
+                            <Run Text="&#10;Send ="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.SentKbps}"/>
+                            <Run Text=" kbps&#10;Receive ="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.ReceivedKpbs}"/>
+                            <Run Text=" kbps&#10;SentBytes ="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.SentBytes}"/>
+                            <Run Text="&#10;ReceivedBytes ="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.ReceivedBytes}"/>
+                        </TextBlock>
+                        <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Left">
                             <Run Text="{Binding PeerWidth}"/>
                             <Run Text="x"/>
                             <Run Text="{Binding PeerHeight}"/>
                             <Run Text="@"/>
                             <Run Text="{Binding PeerVideoFps}"/>
                         </TextBlock>
-                    </Border>
+                    </StackPanel>
                 </Grid>
             </Border>
             <Border BorderBrush="Blue"

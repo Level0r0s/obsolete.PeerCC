@@ -73,6 +73,11 @@
                       IsOn="{Binding ETWStatsEnabled, Mode=TwoWay}"
                       HorizontalAlignment="Left"
                       HorizontalContentAlignment="Left"/>
-    </StackPanel>
+        <ToggleSwitch Header="Connection Health Statistics"  
+                      Margin="-6,0,0,0"
+                      IsOn="{Binding PeerConnectionHealthStatsEnabled, Mode=TwoWay}"
+                      HorizontalAlignment="Left"
+                      HorizontalContentAlignment="Left"/>
+        </StackPanel>
   </StackPanel>
 </SettingsFlyout>
