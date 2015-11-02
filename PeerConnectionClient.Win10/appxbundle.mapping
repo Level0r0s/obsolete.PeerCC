@@ -1,5 +1,0 @@
-[Files]
-"AppPackages\PeerConnectionClient.Win10_1.1.71.0_arm_Test\PeerConnectionClient.Win10_1.1.71.0_arm.appx" "PeerConnectionClient.Win10_1.1.71.0_arm.appx"
-"AppPackages\PeerConnectionClient.Win10_1.1.71.0_x64_Test\PeerConnectionClient.Win10_1.1.71.0_x64.appx" "PeerConnectionClient.Win10_1.1.71.0_x64.appx"
-"AppPackages\PeerConnectionClient.Win10_1.1.71.0_x86_Test\PeerConnectionClient.Win10_1.1.71.0_x86.appx" "PeerConnectionClient.Win10_1.1.71.0_x86.appx"
-
