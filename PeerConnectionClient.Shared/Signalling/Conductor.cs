@@ -125,6 +125,28 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
+        bool _peerConnectionStatsEnabled = false;
+
+        /// <summary>
+        /// Enable/Disable connection health stats.
+        /// Connection health stats are delivered by the OnConnectionHealthStats event. 
+        /// </summary>
+        public bool PeerConnectionStatsEnabled
+        {
+            get
+            {
+                return _peerConnectionStatsEnabled;
+            }
+            set
+            {
+                _peerConnectionStatsEnabled = value;
+                if (_peerConnection != null)
+                {
+                    _peerConnection.ToggleConnectionHealthStats(_peerConnectionStatsEnabled);
+                }
+            }
+        }
+
         // Public events for adding and removing the local stream
         public event Action<MediaStreamEvent> OnAddLocalStream;
         public event Action<MediaStreamEvent> OnRemoveLocalStream;
@@ -171,6 +193,7 @@ namespace PeerConnectionClient.Signalling
             Debug.WriteLine("Conductor: Creating peer connection.");
             _peerConnection = new RTCPeerConnection(config);
             _peerConnection.ToggleETWStats(_etwStatsEnabled);
+            _peerConnection.ToggleConnectionHealthStats(_peerConnectionStatsEnabled);
 
             if (OnPeerConnectionCreated != null)
             {
@@ -180,6 +203,7 @@ namespace PeerConnectionClient.Signalling
             _peerConnection.OnIceCandidate += PeerConnection_OnIceCandidate;
             _peerConnection.OnAddStream += PeerConnection_OnAddStream;
             _peerConnection.OnRemoveStream += PeerConnection_OnRemoveStream;
+            _peerConnection.OnConnectionHealthStats += PeerConnection_OnConnectionHealthStats;
 
             Debug.WriteLine("Conductor: Getting user media.");
             RTCMediaStreamConstraints mediaStreamConstraints = new RTCMediaStreamConstraints();
@@ -279,6 +303,19 @@ namespace PeerConnectionClient.Signalling
             if (OnRemoveRemoteStream != null)
             {
                 OnRemoveRemoteStream(evt);
+            }
+        }
+
+        /// <summary>
+        /// Invoked when new connection health stats are available.
+        /// Use ToggleConnectionHealthStats to turn on/of the connection health stats.
+        /// </summary>
+        public event Action<RTCPeerConnectionHealthStats> OnConnectionHealthStats;
+        private void PeerConnection_OnConnectionHealthStats(RTCPeerConnectionHealthStats stats)
+        {
+            if (OnConnectionHealthStats != null)
+            {
+                OnConnectionHealthStats(stats);
             }
         }
 

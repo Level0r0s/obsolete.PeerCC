@@ -52,29 +52,30 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-      </Grid.RowDefinitions>
-            <Grid Grid.Row="0"
-                  Margin="0,25,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="SETTINGS"
-                           Style="{ThemeResource SubheaderTextBlockStyle}"
-                           Grid.Column="0"/>
-                <TextBlock Text="{Binding AppVersion, Mode=OneWay}"
-                           TextAlignment="Right"
-                           VerticalAlignment="Bottom"
-                           Grid.Column="1"/>
-            </Grid>
-            <Controls:ErrorControl DataContext="{Binding Ip}"
-                                   Grid.Row="1"
-                                   Margin="5">
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0"
+              Margin="0,25,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="SETTINGS"
+                        Style="{ThemeResource SubheaderTextBlockStyle}"
+                        Grid.Column="0"/>
+            <TextBlock Text="{Binding AppVersion, Mode=OneWay}"
+                        TextAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Grid.Column="1"/>
+        </Grid>
+        <Controls:ErrorControl DataContext="{Binding Ip}"
+                               Grid.Row="1"
+                               Margin="5">
             <Controls:ErrorControl.InnerContent>
                 <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          MinWidth="160"
                          Header="IP"/>
-             </Controls:ErrorControl.InnerContent>
+            </Controls:ErrorControl.InnerContent>
         </Controls:ErrorControl>
         <Controls:ErrorControl DataContext="{Binding Port}"
                                Grid.Row="2"
@@ -331,6 +332,11 @@
                     IsOn="{Binding ETWStatsEnabled, Mode=TwoWay}"
                     Grid.Row="22"
                     Margin="5"/>
-        </Grid>
-    </ScrollViewer>
+      <ToggleSwitch Name="ConnectionHealthStatsToggle"
+                    Header="Connection Health Statistics"  
+                    IsOn="{Binding PeerConnectionHealthStatsEnabled, Mode=TwoWay}"
+                    Grid.Row="23"
+                    Margin="5"/>
+    </Grid>
+  </ScrollViewer>
 </Page>

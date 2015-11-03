@@ -147,21 +147,54 @@
                 VerticalAlignment="Stretch"
                 Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
                 RelativePanel.RightOf="ControlPanel">
-                <Grid>
+                <RelativePanel RelativePanel.AlignLeftWithPanel="True"
+                               RelativePanel.AlignRightWithPanel="True"
+                               RelativePanel.AlignBottomWithPanel="True"
+                               RelativePanel.AlignTopWithPanel="True">
                     <MediaElement 
                         Name="PeerVideo"
                         RealTimePlayback="True"
+                        RelativePanel.AlignLeftWithPanel="True"
+                        RelativePanel.AlignRightWithPanel="True"
+                        RelativePanel.AlignBottomWithPanel="True"
+                        RelativePanel.AlignTopWithPanel="True"
                         MediaFailed="PeerVideo_MediaFailed"/>
-                    <Border Background="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="110">
+                    <TextBlock Text="aaa">
+                    </TextBlock>
+                    <Border Background="White" Width="110"
+                            RelativePanel.AlignBottomWithPanel="True"
+                            RelativePanel.AlignLeftWithPanel="True"
+                            Name="RemoteResFPSLabel">
                         <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <Run Text="{Binding PeerWidth}"/>
+                            <Run Text="{Binding SelfWidth}"/>
                             <Run Text="x"/>
-                            <Run Text="{Binding PeerHeight}"/>
+                            <Run Text="{Binding SelfHeight}"/>
                             <Run Text="@"/>
-                            <Run Text="{Binding PeerVideoFps}"/>
+                            <Run Text="{Binding SelfVideoFps}"/>
                         </TextBlock>
                     </Border>
-                </Grid>
+                    <Border Background="White"
+                            RelativePanel.AlignLeftWithPanel="True"
+                            RelativePanel.Above="RemoteResFPSLabel"
+                            Visibility="{Binding ShowPeerConnectionHealthStats, Converter={StaticResource BoolToVisConverter}, Mode=OneWay}">
+                        <TextBlock HorizontalAlignment="Left" Foreground="Black">
+                            <Run Text="RTT="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.RTT}"/>
+                            <Run Text="&#10;LocalCandType ="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.LocalCandidateType}"/>
+                            <Run Text="&#10;RemoteCandType ="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.RemoteCandidateType}"/>
+                            <Run Text="&#10;Send ="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.SentKbps}"/>
+                            <Run Text=" kbps&#10;Receive ="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.ReceivedKpbs}"/>
+                            <Run Text=" kbps&#10;SentBytes ="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.SentBytes}"/>
+                            <Run Text="&#10;ReceivedBytes ="/>
+                            <Run Text="{Binding PeerConnectionHealthStats.ReceivedBytes}"/>
+                        </TextBlock>
+                    </Border>
+                </RelativePanel>
             </Border>
             <Border
                 BorderThickness="1"
@@ -575,6 +608,14 @@
                           HorizontalAlignment="Left"
                           HorizontalContentAlignment="Left"
                           RelativePanel.Below="NtpSyncToggleSwitch"
+                          Margin="5"/>
+                    <ToggleSwitch 
+                          Name="ConnectionHealtStatsToggleSwitch"
+                          Header="Connection Health Statistics"
+                          IsOn="{Binding PeerConnectionHealthStatsEnabled, Mode=TwoWay}"
+                          HorizontalAlignment="Left"
+                          HorizontalContentAlignment="Left"
+                          RelativePanel.Below="EtwStatsToggleSwitch"
                           Margin="5"/>
                 </RelativePanel>
             </RelativePanel>

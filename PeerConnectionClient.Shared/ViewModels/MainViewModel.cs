@@ -321,6 +321,8 @@ namespace PeerConnectionClient.ViewModels
             Conductor.Instance.OnRemoveRemoteStream += Conductor_OnRemoveRemoteStream;
             Conductor.Instance.OnAddLocalStream += Conductor_OnAddLocalStream;
 
+            Conductor.Instance.OnConnectionHealthStats += Conductor_OnPeerConnectionHealthStats;
+
             // Connected to a peer event handler
             Conductor.Instance.OnPeerConnectionCreated += () =>
             {
@@ -546,12 +548,21 @@ namespace PeerConnectionClient.ViewModels
           }
         }
 
+        /// <summary>
+        /// New connection health statistics received.
+        /// </summary>
+        /// <param name="stats">Connection health statistics.</param>
+        private void Conductor_OnPeerConnectionHealthStats(RTCPeerConnectionHealthStats stats)
+        {
+            PeerConnectionHealthStats = stats;
+        }
+
         #region Bindings
 
         private ValidableNonEmptyString _ntpServer;
 
         /// <summary>
-        /// address of the ntp server to sync app clock.
+        /// Address of the ntp server to sync app clock.
         /// </summary>
         public ValidableNonEmptyString NtpServer
         {
@@ -911,6 +922,9 @@ namespace PeerConnectionClient.ViewModels
                 SetProperty(ref _isConnectedToPeer, value);
                 ConnectToPeerCommand.RaiseCanExecuteChanged();
                 DisconnectFromPeerCommand.RaiseCanExecuteChanged();
+
+                PeerConnectionHealthStats = null;
+                UpdatePeerConnHealthStatsVisibilityHelper();
             }
         }
 
@@ -1602,6 +1616,53 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        /// <summary>
+        /// Peer connection health statistics from WebRTC.
+        /// </summary>
+        private RTCPeerConnectionHealthStats _peerConnectionHealthStats;
+        public RTCPeerConnectionHealthStats PeerConnectionHealthStats
+        {
+            get { return _peerConnectionHealthStats; }
+            set 
+            {
+                if(SetProperty(ref _peerConnectionHealthStats, value))
+                {
+                    UpdatePeerConnHealthStatsVisibilityHelper();
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// Enable/Disable peer connection health stats.
+        /// </summary>
+        private bool _peerConnectioneHealthStatsEnabled;
+        public bool PeerConnectionHealthStatsEnabled
+        {
+            get { return _peerConnectioneHealthStatsEnabled; }
+            set
+            {
+                if (SetProperty(ref _peerConnectioneHealthStatsEnabled, value))
+                {
+                    Conductor.Instance.PeerConnectionStatsEnabled = value;
+                    UpdatePeerConnHealthStatsVisibilityHelper();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Flag for showing/hiding the peer connection health stats.
+        /// </summary>
+        private bool _showPeerConnectionHealthStats;
+        public bool ShowPeerConnectionHealthStats
+        {
+            get { return _showPeerConnectionHealthStats; }
+            set
+            {
+                SetProperty(ref _showPeerConnectionHealthStats, value);
+            }
+        }
+
         public MediaElement SelfVideo;
         public MediaElement PeerVideo;
 
@@ -2273,6 +2334,21 @@ namespace PeerConnectionClient.ViewModels
             if (Peers != null)
             {
                 Peers.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Logic to determine if the peer connection health stats needs to be shown.
+        /// </summary>
+        public void UpdatePeerConnHealthStatsVisibilityHelper()
+        {
+            if (IsConnectedToPeer && PeerConnectionHealthStatsEnabled && PeerConnectionHealthStats != null)
+            {
+                ShowPeerConnectionHealthStats = true;
+            }
+            else
+            {
+                ShowPeerConnectionHealthStats = false;
             }
         }
     }
