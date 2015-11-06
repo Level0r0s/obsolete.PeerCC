@@ -113,7 +113,7 @@ namespace PeerConnectionClient.ViewModels
         public void SelfVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
         {
           Debug.WriteLine("SelfVideo_MediaFailed");
-          if (_selfVideoTrack != null)
+          if (_selfVideoTrack != null && VideoLoopbackEnabled)
           {
             Debug.WriteLine("Re-establishing self video");
             Media.CreateMediaAsync().AsTask().ContinueWith(media =>
@@ -518,7 +518,7 @@ namespace PeerConnectionClient.ViewModels
         private void Conductor_OnAddLocalStream(MediaStreamEvent evt)
         {
           _selfVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
-          if (_selfVideoTrack != null)
+          if (_selfVideoTrack != null && VideoLoopbackEnabled)
           {
             Media.CreateMediaAsync().AsTask().ContinueWith(media => 
             {
@@ -554,7 +554,7 @@ namespace PeerConnectionClient.ViewModels
         /// <param name="stats">Connection health statistics.</param>
         private void Conductor_OnPeerConnectionHealthStats(RTCPeerConnectionHealthStats stats)
         {
-            PeerConnectionHealthStats = stats;
+            PeerConnectionHealthStats = stats; 
         }
 
         #region Bindings
@@ -925,6 +925,7 @@ namespace PeerConnectionClient.ViewModels
 
                 PeerConnectionHealthStats = null;
                 UpdatePeerConnHealthStatsVisibilityHelper();
+                UpdateLoopbackVideoVisibilityHelper();
             }
         }
 
@@ -1274,6 +1275,44 @@ namespace PeerConnectionClient.ViewModels
                   WebRTC.DisableLogging();
                   SavingLogging();
                 }
+            }
+        }
+
+        private bool _videoLoopbackEnabled = true;
+        /// <summary>
+        /// Video loopback indicator/control.
+        /// </summary>
+        public bool VideoLoopbackEnabled
+        {
+            get { return _videoLoopbackEnabled; }
+            set
+            {
+                if (SetProperty(ref _videoLoopbackEnabled, value))
+                {
+                    if(value)
+                    {
+                        if (_selfVideoTrack != null)
+                        {
+                            Debug.WriteLine("Enabling video loopback");
+                            Media.CreateMediaAsync().AsTask().ContinueWith(media =>
+                            {
+                                var source = media.Result.CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
+                                RunOnUiThread(() =>
+                                {
+                                    SelfVideo.SetMediaStreamSource(source);
+                                    SelfVideo.Play();
+                                    Debug.WriteLine("Video loopback enabled");
+                                });
+                            });
+                        }
+                    }
+                    else
+                    {
+                            SelfVideo.Source = null;
+                            GC.Collect(); // Ensure all references are truly dropped.
+                    }
+                }
+                UpdateLoopbackVideoVisibilityHelper();
             }
         }
        
@@ -1660,6 +1699,19 @@ namespace PeerConnectionClient.ViewModels
             set
             {
                 SetProperty(ref _showPeerConnectionHealthStats, value);
+            }
+        }
+
+        /// <summary>
+        /// Flag for showing/hiding the loopback video UI element
+        /// </summary>
+        private bool _showLoopbackVideo;
+        public bool ShowLoopbackVideo
+        {
+            get { return _showLoopbackVideo; }
+            set
+            {
+                SetProperty(ref _showLoopbackVideo, value);
             }
         }
 
@@ -2349,6 +2401,21 @@ namespace PeerConnectionClient.ViewModels
             else
             {
                 ShowPeerConnectionHealthStats = false;
+            }
+        }
+
+        /// <summary>
+        /// Logic to determine if the loopback video UI element needs to be shown.
+        /// </summary>
+        public void UpdateLoopbackVideoVisibilityHelper()
+        {
+            if (IsConnectedToPeer && VideoLoopbackEnabled)
+            {
+                ShowLoopbackVideo = true;
+            }
+            else
+            {
+                ShowLoopbackVideo = false;
             }
         }
     }
