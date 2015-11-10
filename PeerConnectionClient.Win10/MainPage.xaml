@@ -200,7 +200,7 @@
                 BorderThickness="1"
                 Margin="20"
                 BorderBrush="Blue" 
-                Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
+                Visibility="{Binding ShowLoopbackVideo, Converter={StaticResource BoolToVisConverter}}"
                 RelativePanel.AlignBottomWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True">
                 <Grid>
@@ -520,6 +520,14 @@
                         ItemsSource="{Binding AllCapFPS, Mode=OneWay}"
                         SelectedItem="{Binding SelectedCapFPSItem, Mode=TwoWay}"
                         RelativePanel.Below="VideoResolutionCombo"
+                        RelativePanel.AlignRightWithPanel="True"
+                        RelativePanel.AlignLeftWithPanel="True"/>
+                    <ToggleSwitch
+                        Name="VideoLoopbackSwitch"
+                        Header="Video loopback"
+                        HorizontalAlignment="Left"
+                        IsOn="{Binding VideoLoopbackEnabled, Mode=TwoWay}"
+                        RelativePanel.Below="VideoFrameRateCombo"
                         RelativePanel.AlignRightWithPanel="True"
                         RelativePanel.AlignLeftWithPanel="True"/>
                 </RelativePanel>

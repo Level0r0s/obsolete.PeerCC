@@ -93,6 +93,10 @@
                           VerticalAlignment="Top"
                           IsOn="{Binding CameraEnabled, Mode=TwoWay}"
                           IsEnabled="{Binding IsCameraEnabled, Mode=OneWay}"/>
+            <ToggleSwitch Header="Video loopback" 
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Top"
+                          IsOn="{Binding VideoLoopbackEnabled, Mode=TwoWay}"/>
             <Button Content="Send Feedback"
                     Margin="5,30,5,0"
                     HorizontalAlignment="Right"
