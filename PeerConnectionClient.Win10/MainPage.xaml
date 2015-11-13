@@ -159,18 +159,16 @@
                         RelativePanel.AlignBottomWithPanel="True"
                         RelativePanel.AlignTopWithPanel="True"
                         MediaFailed="PeerVideo_MediaFailed"/>
-                    <TextBlock Text="aaa">
-                    </TextBlock>
                     <Border Background="White" Width="110"
                             RelativePanel.AlignBottomWithPanel="True"
                             RelativePanel.AlignLeftWithPanel="True"
                             Name="RemoteResFPSLabel">
                         <TextBlock Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <Run Text="{Binding SelfWidth}"/>
+                            <Run Text="{Binding PeerWidth}"/>
                             <Run Text="x"/>
-                            <Run Text="{Binding SelfHeight}"/>
+                            <Run Text="{Binding PeerHeight}"/>
                             <Run Text="@"/>
-                            <Run Text="{Binding SelfVideoFps}"/>
+                            <Run Text="{Binding PeerVideoFps}"/>
                         </TextBlock>
                     </Border>
                     <Border Background="White"
