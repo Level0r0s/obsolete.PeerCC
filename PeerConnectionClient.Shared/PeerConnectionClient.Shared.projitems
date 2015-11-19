@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Signalling\Conductor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Signalling\Signalling.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\ActionCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\AppPerf.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\BoolToVisConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\InvertedBooleanConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\NullToVisibleConverter.cs" />
