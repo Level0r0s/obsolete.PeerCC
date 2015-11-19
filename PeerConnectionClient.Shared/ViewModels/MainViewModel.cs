@@ -347,8 +347,7 @@ namespace PeerConnectionClient.ViewModels
                          _keepScreenOnRequest.RequestActive();
                          _keepOnScreenRequested = true;
                     }
-                    IsMicrophoneEnabled = MicrophoneIsOn;
-                    IsCameraEnabled = CameraEnabled;
+
                     UpdateScrollBarVisibilityTypeHelper();
                 });
             };
@@ -989,13 +988,16 @@ namespace PeerConnectionClient.ViewModels
                     return;
                 }
 
-                if (_cameraEnabled)
+                if (IsConnectedToPeer)
                 {
-                    Conductor.Instance.EnableLocalVideoStream();
-                }
-                else
-                {
-                    Conductor.Instance.DisableLocalVideoStream();
+                    if (_cameraEnabled)
+                    {
+                        Conductor.Instance.EnableLocalVideoStream();
+                    }
+                    else
+                    {
+                        Conductor.Instance.DisableLocalVideoStream();
+                    }
                 }
             }
         }
@@ -1016,13 +1018,16 @@ namespace PeerConnectionClient.ViewModels
                     return;
                 }
 
-                if (_microphoneIsOn)
+                if (IsConnectedToPeer)
                 {
-                    Conductor.Instance.UnmuteMicrophone();
-                }
-                else
-                {
-                    Conductor.Instance.MuteMicrophone();
+                    if (_microphoneIsOn)
+                    {
+                        Conductor.Instance.UnmuteMicrophone();
+                    }
+                    else
+                    {
+                        Conductor.Instance.MuteMicrophone();
+                    }
                 }
             }
         }

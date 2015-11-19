@@ -207,8 +207,13 @@ namespace PeerConnectionClient.Signalling
 
             Debug.WriteLine("Conductor: Getting user media.");
             RTCMediaStreamConstraints mediaStreamConstraints = new RTCMediaStreamConstraints();
-            mediaStreamConstraints.audioEnabled = _audioEnabled;
-            mediaStreamConstraints.videoEnabled = _videoEnabled;
+
+            // Always include audio/video enabled in the media stream,
+            // so it will be possible to enable/disable audio/video if 
+            // the call was initiated without microphone/camera
+            mediaStreamConstraints.audioEnabled = true;
+            mediaStreamConstraints.videoEnabled = true;
+
             _mediaStream = await _media.GetUserMedia(mediaStreamConstraints);
 
             Debug.WriteLine("Conductor: Adding local media stream.");
