@@ -17,7 +17,6 @@ using PeerConnectionClient.Utilities;
 using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.Activation;
 using webrtc_winrt_api;
-using System.Diagnostics;
 #if !WINDOWS_UAP // Disable on Win10 for now.
 using HockeyApp;
 using Windows.Networking.Connectivity;
@@ -1074,6 +1073,8 @@ namespace PeerConnectionClient.ViewModels
                     WebRTC.StopTracing();
                     WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
                 }
+
+                AppPerformanceCheck();
             }
         }
 
@@ -1652,6 +1653,8 @@ namespace PeerConnectionClient.ViewModels
                     Conductor.Instance.ETWStatsEnabled = value;
                     OnPropertyChanged("ETWStatsEnabled");
                 }
+
+                AppPerformanceCheck();
             }
         }
 
@@ -2417,6 +2420,45 @@ namespace PeerConnectionClient.ViewModels
             {
                 ShowLoopbackVideo = false;
             }
+        }
+
+        //timer to measure CPU/Memory usage
+        private Windows.UI.Xaml.DispatcherTimer _appPerfTimer = null;
+
+        /// <summary>
+        /// start or stop App Performance check 
+        /// </summary>
+        private void AppPerformanceCheck() {
+
+            if (!_tracingEnabled && !ETWStatsEnabled)
+            {
+                if (_appPerfTimer != null) 
+                {
+                    _appPerfTimer.Stop();
+                }
+
+                return;
+            }
+
+            if (_appPerfTimer == null)
+            {
+                _appPerfTimer = new Windows.UI.Xaml.DispatcherTimer();
+                _appPerfTimer.Tick += ReportAppPerfData;
+                _appPerfTimer.Interval = new TimeSpan(0, 0, 1); //1 seconds
+            }
+
+            _appPerfTimer.Start();
+
+        }
+
+        /// <summary>
+        /// report App performance data
+        /// </summary>
+        private void ReportAppPerfData(object sender, object e)
+        {
+            WebRTC.UpdateCPUUsage(CPUData.GetCPUUsage());
+            WebRTC.UpdateMemUsage(MEMData.GetMEMUsage());
+
         }
     }
 }
