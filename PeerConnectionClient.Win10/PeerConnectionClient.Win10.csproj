@@ -114,6 +114,9 @@
     <Compile Include="..\PeerConnectionClient.Shared\Utilities\ActionCommand.cs">
       <Link>Links\ActionCommand.cs</Link>
     </Compile>
+    <Compile Include="..\PeerConnectionClient.Shared\Utilities\AppPerf.cs">
+      <Link>Links\AppPerf.cs</Link>
+    </Compile>
     <Compile Include="..\PeerConnectionClient.Shared\Utilities\BoolToVisConverter.cs">
       <Link>Links\BoolToVisConverter.cs</Link>
     </Compile>
