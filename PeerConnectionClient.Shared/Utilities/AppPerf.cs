@@ -6,15 +6,15 @@ namespace PeerConnectionClient.Utilities
 {
     static class MEMData
     {
-#if WINDOWS_PHONE_APP
-        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+    [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
         private static extern IntPtr GetCurrentProcess();
 #else
         [DllImport("kernel32.dll")]
         private static extern IntPtr GetCurrentProcess();
 #endif
-#if WINDOWS_PHONE_APP
-        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+    [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
         private static extern bool GetProcessMemoryInfo(IntPtr hProcess, out PROCESS_MEMORY_COUNTERS_EX counters, uint size);
 #else
         [DllImport("psapi.dll", SetLastError = true)]
@@ -63,16 +63,16 @@ namespace PeerConnectionClient.Utilities
             return ((UInt64)time.High << 32) + time.Low;
         }
 
-#if WINDOWS_PHONE_APP
-        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+    [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
         private static extern IntPtr GetCurrentProcess();
 #else
         [DllImport("kernel32.dll")]
         private static extern IntPtr GetCurrentProcess();
 #endif
 
-#if WINDOWS_PHONE_APP
-        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+    [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetProcessTimes(
             IntPtr hProcess,
@@ -212,8 +212,8 @@ namespace PeerConnectionClient.Utilities
         [DllImport("ntdll.dll", SetLastError = false)]
         private static extern NtStatus NtQuerySystemInformation(SYSTEM_INFORMATION_CLASS InfoClass, IntPtr Info, UInt32 Size, out UInt32 Length);
 
-#if WINDOWS_PHONE_APP
-        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+    [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
         private static extern void GetSystemInfo(out SystemInfo Info);
 #else
         [DllImport("kernel32.dll", SetLastError = false)]
