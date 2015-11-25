@@ -9,25 +9,25 @@ namespace PeerConnectionClient.Utilities
     // Todo: added by ling, WINDOWS_PHONE_APP is not available for vs2015 when build win10 for arm
     // check USE_WIN10_PHONE_DLL (defined by us) until vs2015 fix this
 #if WINDOWS_PHONE_APP || USE_WIN10_PHONE_DLL
-        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
+        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = true)]
         private static extern IntPtr GetCurrentProcess();
 #else
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32.dll", ExactSpelling = true)]
         private static extern IntPtr GetCurrentProcess();
 #endif
 #if WINDOWS_PHONE_APP || USE_WIN10_PHONE_DLL
-        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
+    [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = true)]
         private static extern bool GetProcessMemoryInfo(IntPtr hProcess, out PROCESS_MEMORY_COUNTERS_EX counters, uint size);
 #else
-        [DllImport("psapi.dll", SetLastError = true)]
+        [DllImport("psapi.dll", ExactSpelling = true, SetLastError = true)]
         private static extern bool GetProcessMemoryInfo(IntPtr hProcess, out PROCESS_MEMORY_COUNTERS_EX counters, uint size);
 #endif
 
 
-        /// <summary>
-        /// Get the current memory usage
-        /// </summary>
-        public static Int64 GetMEMUsage()
+    /// <summary>
+    /// Get the current memory usage
+    /// </summary>
+    public static Int64 GetMEMUsage()
         {
             Int64 ret = 0;
 
@@ -66,15 +66,15 @@ namespace PeerConnectionClient.Utilities
         }
 
 #if WINDOWS_PHONE_APP || USE_WIN10_PHONE_DLL
-        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
+        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = true)]
         private static extern IntPtr GetCurrentProcess();
 #else
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32.dll", ExactSpelling = true)]
         private static extern IntPtr GetCurrentProcess();
 #endif
 
 #if WINDOWS_PHONE_APP || USE_WIN10_PHONE_DLL
-        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
+    [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetProcessTimes(
             IntPtr hProcess,
@@ -83,7 +83,7 @@ namespace PeerConnectionClient.Utilities
             out FileTime lpKernelTime,
             out FileTime lpUserTime);
 #else
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32.dll", ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetProcessTimes(
             IntPtr hProcess,
@@ -94,7 +94,7 @@ namespace PeerConnectionClient.Utilities
 #endif
 
 
-        public struct ProcessTimes
+    public struct ProcessTimes
         {
             public UInt64 CreationTime;
             public UInt64 ExitTime;
@@ -204,27 +204,29 @@ namespace PeerConnectionClient.Utilities
             public ulong Reserved2;
         }
 
-        /// <summary>Retrieves the specified system information.</summary>
-        /// <param name="InfoClass">indicate the kind of system information to be retrieved</param>
-        /// <param name="Info">a buffer that receives the requested information</param>
-        /// <param name="Size">The allocation size of the buffer pointed to by Info</param>
-        /// <param name="Length">If null, ignored.  Otherwise tells you the size of the information returned by the kernel.</param>
-        /// <returns>Status Information</returns>
-        /// http://msdn.microsoft.com/en-us/library/windows/desktop/ms724509%28v=vs.85%29.aspx
-        [DllImport("ntdll.dll", SetLastError = false)]
+    /// <summary>Retrieves the specified system information.</summary>
+    /// <param name="InfoClass">indicate the kind of system information to be retrieved</param>
+    /// <param name="Info">a buffer that receives the requested information</param>
+    /// <param name="Size">The allocation size of the buffer pointed to by Info</param>
+    /// <param name="Length">If null, ignored.  Otherwise tells you the size of the information returned by the kernel.</param>
+    /// <returns>Status Information</returns>
+    /// http://msdn.microsoft.com/en-us/library/windows/desktop/ms724509%28v=vs.85%29.aspx
+
+        [DllImport("ntdll.dll", SetLastError = false, ExactSpelling = true)]
         private static extern NtStatus NtQuerySystemInformation(SYSTEM_INFORMATION_CLASS InfoClass, IntPtr Info, UInt32 Size, out UInt32 Length);
 
+
 #if WINDOWS_PHONE_APP || USE_WIN10_PHONE_DLL
-        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = false, PreserveSig = true)]
+        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = true)]
         private static extern void GetSystemInfo(out SystemInfo Info);
 #else
-        [DllImport("kernel32.dll", SetLastError = false)]
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = false)]
 
         private static extern void GetSystemInfo(out SystemInfo Info);
 #endif
 
 
-        private static uint numberOfProcessors = 0;
+    private static uint numberOfProcessors = 0;
         private static UInt64 previousProcessTime = 0;
         private static UInt64 previousSystemTIme = 0;
 
