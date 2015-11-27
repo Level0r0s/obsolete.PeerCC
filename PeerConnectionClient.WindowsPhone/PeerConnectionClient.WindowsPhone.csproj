@@ -139,7 +139,7 @@
       <HintPath>..\packages\HockeySDK.Core.2.2.2\lib\portable-net45+win8+wp8+wpa81+win81\HockeyAppPCL.dll</HintPath>
     </Reference>
     <Reference Include="webrtc_winrt_api">
-      <HintPath>..\packages\WebRTC.1.1.71\lib\portable-wpa81\webrtc_winrt_api.winmd</HintPath>
+      <HintPath>..\packages\WebRTC.1.1.191\lib\portable-wpa81\webrtc_winrt_api.winmd</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
