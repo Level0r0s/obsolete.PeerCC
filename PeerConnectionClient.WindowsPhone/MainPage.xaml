@@ -12,10 +12,32 @@
     <Page.Resources>
         <utilities:BoolToVisConverter x:Key="BoolToVisConverter" />
         <utilities:BoolToVisConverter Negated="True"  x:Key="BoolToVisConverterNegated" />
+        <utilities:InvertedBoolenConverter x:Key="InvertedBoolenConverter"/>
+        <utilities:ToggleImageConverter x:Key="ToggleImageConverter"/>
     </Page.Resources>
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.PrimaryCommands>
+                <AppBarToggleButton Label="Microphone" 
+                                    IsChecked="{Binding MicrophoneIsOn, Converter={StaticResource InvertedBoolenConverter}, Mode=TwoWay}"
+                                    IsEnabled="{Binding IsMicrophoneEnabled, Mode=OneWay}">
+                    <AppBarToggleButton.Icon>
+                        <BitmapIcon UriSource="{Binding MicrophoneIsOn, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Microphone-76.png'}"></BitmapIcon>
+                    </AppBarToggleButton.Icon>
+                </AppBarToggleButton>
+                <AppBarToggleButton Label="Video" 
+                                    IsChecked="{Binding CameraEnabled, Converter={StaticResource InvertedBoolenConverter}, Mode=TwoWay}"
+                                    IsEnabled="{Binding IsCameraEnabled, Mode=OneWay}">
+                    <AppBarToggleButton.Icon>
+                        <BitmapIcon UriSource="{Binding CameraEnabled, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Video-76.png'}"></BitmapIcon>
+                    </AppBarToggleButton.Icon>
+                </AppBarToggleButton>
+                <AppBarToggleButton Label="Show self" 
+                                    IsChecked="{Binding VideoLoopbackEnabled, Converter={StaticResource InvertedBoolenConverter}, Mode=TwoWay}">
+                    <AppBarToggleButton.Icon>
+                        <BitmapIcon UriSource="{Binding VideoLoopbackEnabled, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Selfie-76.png'}"></BitmapIcon>
+                    </AppBarToggleButton.Icon>
+                </AppBarToggleButton>
                 <AppBarButton Icon="Setting"
                               IsCompact="False"
                               Label="Settings"
@@ -28,36 +50,6 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid Name="CommonControlsGrid"
-              Grid.Row="0"
-              Grid.ColumnSpan="2"
-                HorizontalAlignment="Center">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <ToggleSwitch Header="Microphone"
-                          IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"
-                          IsEnabled="{Binding IsMicrophoneEnabled, Mode=OneWay}"
-                          Margin="5,0,0,0"
-                          Grid.Row="0"
-                          Grid.Column="0"/>
-            <ToggleSwitch Header="Camera"
-                          IsOn="{Binding CameraEnabled, Mode=TwoWay}"
-                          IsEnabled="{Binding IsCameraEnabled, Mode=OneWay}"
-                          Margin="0,0,5,0"
-                          Grid.Row="0"
-                          Grid.Column="1"/>
-            <ToggleSwitch Header="Video loopback"
-                          IsOn="{Binding VideoLoopbackEnabled, Mode=TwoWay}"
-                          Margin="5,0,0,0"
-                          Grid.Row="1"
-                          Grid.Column="0"/>
-        </Grid>
         <Grid Name="VideoGrid" 
               Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
               Grid.Row="1">

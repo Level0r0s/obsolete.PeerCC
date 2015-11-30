@@ -11,6 +11,8 @@
     <Page.Resources>
         <utilities:BoolToVisConverter x:Key="BoolToVisConverter" />
         <utilities:BoolToVisConverter Negated="True"  x:Key="BoolToVisConverterNegated" />
+        <utilities:ToggleImageConverter x:Key="ToggleImageConverter"/>
+        <utilities:InvertedBoolenConverter x:Key="InvertedBoolenConverter"/>
     </Page.Resources>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.ColumnDefinitions>
@@ -83,23 +85,32 @@
                    </Border>
                 </Grid>
             </Border>
-            <ToggleSwitch Header="Microphone"
-                          HorizontalAlignment="Right"
-                          VerticalAlignment="Top"
-                          IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"
-                          IsEnabled="{Binding IsMicrophoneEnabled, Mode=OneWay}"/>
-            <ToggleSwitch Header="Camera" 
-                          HorizontalAlignment="Right"
-                          VerticalAlignment="Top"
-                          IsOn="{Binding CameraEnabled, Mode=TwoWay}"
-                          IsEnabled="{Binding IsCameraEnabled, Mode=OneWay}"/>
-            <ToggleSwitch Header="Video loopback" 
-                          HorizontalAlignment="Right"
-                          VerticalAlignment="Top"
-                          IsOn="{Binding VideoLoopbackEnabled, Mode=TwoWay}"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <ToggleButton Padding="10"
+                              IsChecked="{Binding MicrophoneIsOn, Converter={StaticResource InvertedBoolenConverter}, Mode=TwoWay}"
+                              IsEnabled="{Binding IsMicrophoneEnabled, Mode=OneWay}">
+                    <Image
+                        Source="{Binding MicrophoneIsOn, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Microphone-100.png'}"
+                        Height="25" Width="25" />                    
+                </ToggleButton>
+                <ToggleButton Padding="10"
+                              IsChecked="{Binding CameraEnabled, Converter={StaticResource InvertedBoolenConverter}, Mode=TwoWay}"
+                              IsEnabled="{Binding IsCameraEnabled, Mode=OneWay}">
+                    <Image
+                        Source="{Binding CameraEnabled, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Video-100.png'}"
+                        Height="25" Width="25" />                    
+                </ToggleButton>
+                <ToggleButton Padding="10"
+                              IsChecked="{Binding VideoLoopbackEnabled, Converter={StaticResource InvertedBoolenConverter}, Mode=TwoWay}">
+                    <Image
+                        Source="{Binding VideoLoopbackEnabled, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Selfie-100.png'}"
+                        Height="25" Width="25" />
+                </ToggleButton>
+            </StackPanel>
             <Button Content="Send Feedback"
                     Margin="5,30,5,0"
-                    HorizontalAlignment="Right"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
                     Command="{Binding SendFeedbackCommand}" />
     </StackPanel>
         <Border BorderThickness="1"
