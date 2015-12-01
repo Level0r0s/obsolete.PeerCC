@@ -26,6 +26,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\InvertedBooleanConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\NullToVisibleConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\SdpUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\ToggleImageConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\UI\ErrorControl.xaml.cs">
       <DependentUpon>ErrorControl.xaml</DependentUpon>
     </Compile>
