@@ -6,7 +6,7 @@ namespace PeerConnectionClient.Utilities
     /// <summary>
     /// Class to invert the boolean value.
     /// </summary>
-    public class InvertedBoolenConverter : IValueConverter
+    public class InvertedBooleanConverter : IValueConverter
     {
         /// <summary>
         /// See IValueConverter.Convert().

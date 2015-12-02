@@ -12,7 +12,7 @@
         <utilities:BoolToVisConverter x:Key="BoolToVisConverter" />
         <utilities:BoolToVisConverter Negated="True"  x:Key="BoolToVisConverterNegated" />
         <utilities:ToggleImageConverter x:Key="ToggleImageConverter"/>
-        <utilities:InvertedBoolenConverter x:Key="InvertedBoolenConverter"/>
+        <utilities:InvertedBooleanConverter x:Key="InvertedBooleanConverter"/>
     </Page.Resources>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.ColumnDefinitions>
@@ -87,21 +87,21 @@
             </Border>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <ToggleButton Padding="10"
-                              IsChecked="{Binding MicrophoneIsOn, Converter={StaticResource InvertedBoolenConverter}, Mode=TwoWay}"
+                              IsChecked="{Binding MicrophoneIsOn, Converter={StaticResource InvertedBooleanConverter}, Mode=TwoWay}"
                               IsEnabled="{Binding IsMicrophoneEnabled, Mode=OneWay}">
                     <Image
                         Source="{Binding MicrophoneIsOn, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Microphone-100.png'}"
                         Height="25" Width="25" />                    
                 </ToggleButton>
                 <ToggleButton Padding="10"
-                              IsChecked="{Binding CameraEnabled, Converter={StaticResource InvertedBoolenConverter}, Mode=TwoWay}"
+                              IsChecked="{Binding CameraEnabled, Converter={StaticResource InvertedBooleanConverter}, Mode=TwoWay}"
                               IsEnabled="{Binding IsCameraEnabled, Mode=OneWay}">
                     <Image
                         Source="{Binding CameraEnabled, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Video-100.png'}"
                         Height="25" Width="25" />                    
                 </ToggleButton>
                 <ToggleButton Padding="10"
-                              IsChecked="{Binding VideoLoopbackEnabled, Converter={StaticResource InvertedBoolenConverter}, Mode=TwoWay}">
+                              IsChecked="{Binding VideoLoopbackEnabled, Converter={StaticResource InvertedBooleanConverter}, Mode=TwoWay}">
                     <Image
                         Source="{Binding VideoLoopbackEnabled, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Selfie-100.png'}"
                         Height="25" Width="25" />

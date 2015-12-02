@@ -13,11 +13,25 @@
         <Utilities:BoolToVisConverter x:Key="BoolToVisConverterNegated" Negated="true"/>
         <Utilities:BoolToVisConverter x:Key="BoolToVisConverter" Negated="false"/>
         <Utilities:NullToVisibleConverter x:Key="NullToVisibleConverter" />
+        <Utilities:ToggleImageConverter x:Key="ToggleImageConverter"/>
+        <Utilities:InvertedBooleanConverter x:Key="InvertedBooleanConverter"/>
+
         <Style TargetType="TextBlock" x:Name="TextBlockHeader">
             <Setter Property="FontWeight" Value="{ThemeResource ComboBoxHeaderThemeFontWeight}" />
             <Setter Property="Margin" Value="{ThemeResource ComboBoxHeaderThemeMargin}" />
             <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}"/>
             <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}"/>
+        </Style>
+        <Style TargetType="Image" x:Name="CallActionImage">
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Width" Value="25"/>            
+        </Style>
+        <Style TargetType="Button" x:Name="CallActionButton">
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+        <Style TargetType="ToggleButton" 
+               x:Name="CallActionToggleButton">
+            <Setter Property="Padding" Value="5"/>
         </Style>
     </Page.Resources>
     <ScrollViewer 
@@ -115,27 +129,32 @@
                         ItemsSource="{Binding Peers}"
                         BorderThickness="1"
                         BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"/>
-                    <Button 
-                        Content="&#xE13A;"
-                        FontFamily="Segoe UI Symbol"
-                        Margin="5"
-                        Command="{Binding ConnectToPeerCommand}"
-                        HorizontalAlignment="Right" />
 
-                    <ToggleSwitch Header="Microphone"
-                          HorizontalAlignment="Right"
-                          VerticalAlignment="Top"
-                          IsOn="{Binding MicrophoneIsOn, Mode=TwoWay}"
-                          IsEnabled="{Binding IsMicrophoneEnabled, Mode=OneWay}"
-                          Margin="5"
-                          FlowDirection="RightToLeft" />
-                    <ToggleSwitch Header="Camera"
-                          HorizontalAlignment="Right"
-                          VerticalAlignment="Top"
-                          IsOn="{Binding CameraEnabled, Mode=TwoWay}"
-                          IsEnabled="{Binding IsCameraEnabled, Mode=OneWay}"
-                          Margin="5"
-                          FlowDirection="RightToLeft" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <ToggleButton Style="{StaticResource CallActionToggleButton}"
+                              IsChecked="{Binding MicrophoneIsOn, Converter={StaticResource InvertedBooleanConverter}, Mode=TwoWay}"
+                              IsEnabled="{Binding IsMicrophoneEnabled, Mode=OneWay}">
+                            <Image Style="{StaticResource CallActionImage}"
+                                   Source="{Binding MicrophoneIsOn, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Microphone-100.png'}"/>
+                        </ToggleButton>
+                        <ToggleButton Style="{StaticResource CallActionToggleButton}"
+                              IsChecked="{Binding CameraEnabled, Converter={StaticResource InvertedBooleanConverter}, Mode=TwoWay}"
+                              IsEnabled="{Binding IsCameraEnabled, Mode=OneWay}">
+                            <Image
+                        Source="{Binding CameraEnabled, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Video-100.png'}"
+                        Style="{StaticResource CallActionImage}" />
+                        </ToggleButton>
+                        <ToggleButton Style="{StaticResource CallActionToggleButton}"
+                              IsChecked="{Binding VideoLoopbackEnabled, Converter={StaticResource InvertedBooleanConverter}, Mode=TwoWay}">
+                            <Image
+                        Source="{Binding VideoLoopbackEnabled, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Selfie-100.png'}"
+                        Style="{StaticResource CallActionImage}" />
+                        </ToggleButton>
+                        <Button Command="{Binding ConnectToPeerCommand}"
+                                Style="{StaticResource CallActionButton}">
+                            <Image Source="/Assets/Phone-100.png" Style="{StaticResource CallActionImage}"></Image>
+                        </Button>
+                    </StackPanel>
                 </StackPanel>
             </RelativePanel>
 
