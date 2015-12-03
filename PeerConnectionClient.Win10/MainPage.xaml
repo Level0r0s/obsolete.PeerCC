@@ -29,9 +29,14 @@
         <Style TargetType="Button" x:Name="CallActionButton">
             <Setter Property="Padding" Value="5"/>
         </Style>
+        <Style TargetType="Button" x:Name="GrayButton">
+            <Setter Property="Background" Value="Gray"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
         <Style TargetType="ToggleButton" 
                x:Name="CallActionToggleButton">
             <Setter Property="Padding" Value="5"/>
+            <Setter Property="Background" Value="Gray"/>
         </Style>
     </Page.Resources>
     <ScrollViewer 
@@ -40,35 +45,10 @@
         VerticalScrollMode="Auto" 
         VerticalScrollBarVisibility="{Binding ScrollBarVisibilityType}">
         <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
             <RelativePanel 
                 Name="ControlPanel"
                 RelativePanel.AlignBottomWithPanel="True"
                 RelativePanel.AlignTopWithPanel="True">
-                <RelativePanel
-                    Name="ControlPanelInCall"
-                    Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
-                    RelativePanel.AlignBottomWithPanel="True">
-                    <Button 
-                        Name="DisconnectFromPeerButton_Incall"
-                        Content="&#xE137;"
-                        FontFamily="Segoe UI Symbol"
-                        HorizontalAlignment="Center"
-                        Command="{Binding DisconnectFromPeerCommand}"
-                        RelativePanel.Above="ToggletSettingsButton_InCall"
-                        RelativePanel.AlignLeftWithPanel="True"
-                        Margin="10,5,0,5"/>
-                    <ToggleButton 
-                        Name="ToggletSettingsButton_InCall"
-                        Content="&#xE115;"
-                        FontFamily="Segoe UI Symbol"
-                        HorizontalAlignment="Right"
-                        Margin="10,5,0,5"
-                        IsChecked="{Binding SettingsButtonChecked, Mode=TwoWay}"
-                        RelativePanel.AlignBottomWithPanel="True"
-                        RelativePanel.AlignLeftWithPanel="True"
-                        Command="{Binding SettingsButtonCommand}"/>
-                </RelativePanel>
                 <StackPanel
                     x:Name="ConnectionStackPanel"
                     Visibility="{Binding Path=IsConnectedToPeer, Converter={StaticResource BoolToVisConverterNegated}}"
@@ -80,12 +60,15 @@
                     Margin="10">
                     <ToggleButton 
                         Name="ToggletSettingsButton"
-                        Content="&#xE115;"
-                        FontFamily="Segoe UI Symbol"
                         HorizontalAlignment="Right"
                         Margin="5"
+                        Style="{StaticResource CallActionToggleButton}"
                         IsChecked="{Binding SettingsButtonChecked, Mode=TwoWay}"
-                        Command="{Binding SettingsButtonCommand}"/>
+                        Command="{Binding SettingsButtonCommand}"
+                        Background="Gray">
+                        <Image Source="/Assets/Settings-100.png"
+                               Style="{StaticResource CallActionImage}"/>
+                    </ToggleButton>
                     <TextBlock 
                         Margin="5"
                         Foreground="Red" 
@@ -108,12 +91,14 @@
                         <Button
                             Grid.Column="1"
                             Content="Connect" 
+                            Style="{StaticResource GrayButton}"
                             Command="{Binding ConnectCommand}"
                             HorizontalAlignment="Right"
                             Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverterNegated}}"/>
                         <Button 
                             Grid.Column="1"
                             Content="Disconnect" 
+                            Style="{StaticResource GrayButton}"
                             Command="{Binding DisconnectFromServerCommand}"
                             HorizontalAlignment="Right"
                             Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisConverter}}"/>
@@ -151,7 +136,9 @@
                         Style="{StaticResource CallActionImage}" />
                         </ToggleButton>
                         <Button Command="{Binding ConnectToPeerCommand}"
-                                Style="{StaticResource CallActionButton}">
+                                Style="{StaticResource CallActionButton}"
+                                Background="Green"
+                                Margin="10,0,0,0">
                             <Image Source="/Assets/Phone-100.png" Style="{StaticResource CallActionImage}"></Image>
                         </Button>
                     </StackPanel>
@@ -178,6 +165,42 @@
                         RelativePanel.AlignBottomWithPanel="True"
                         RelativePanel.AlignTopWithPanel="True"
                         MediaFailed="PeerVideo_MediaFailed"/>
+                    <Border Width="38" Background="White">
+                        <StackPanel VerticalAlignment="Bottom"
+                                    Visibility="{Binding IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}"
+                                    RelativePanel.AlignBottomWithPanel="True">
+                            <ToggleButton Style="{StaticResource CallActionToggleButton}"
+                              IsChecked="{Binding MicrophoneIsOn, Converter={StaticResource InvertedBooleanConverter}, Mode=TwoWay}"
+                              IsEnabled="{Binding IsMicrophoneEnabled, Mode=OneWay}">
+                                <Image Style="{StaticResource CallActionImage}"
+                                   Source="{Binding MicrophoneIsOn, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Microphone-100.png'}"/>
+                            </ToggleButton>
+                            <ToggleButton Style="{StaticResource CallActionToggleButton}"
+                              IsChecked="{Binding CameraEnabled, Converter={StaticResource InvertedBooleanConverter}, Mode=TwoWay}"
+                              IsEnabled="{Binding IsCameraEnabled, Mode=OneWay}">
+                                <Image Style="{StaticResource CallActionImage}"
+                                       Source="{Binding CameraEnabled, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Video-100.png'}"/>
+                            </ToggleButton>
+                            <ToggleButton Style="{StaticResource CallActionToggleButton}"
+                              IsChecked="{Binding VideoLoopbackEnabled, Converter={StaticResource InvertedBooleanConverter}, Mode=TwoWay}">
+                                <Image Style="{StaticResource CallActionImage}"
+                                       Source="{Binding VideoLoopbackEnabled, Converter={StaticResource ToggleImageConverter}, ConverterParameter='Selfie-100.png'}"/>
+                            </ToggleButton>
+                            <Button Style="{StaticResource CallActionButton}"
+                                    Background="Red"
+                                    Command="{Binding DisconnectFromPeerCommand}">
+                                <Image Style="{StaticResource CallActionImage}"
+                                       Source="/Assets/Phone Disconnected-100.png"/>
+                            </Button>
+                            <ToggleButton Name="ToggletSettingsButton_InCall"
+                                          Style="{StaticResource CallActionToggleButton}"
+                                          IsChecked="{Binding SettingsButtonChecked, Mode=TwoWay}"
+                                          Command="{Binding SettingsButtonCommand}">
+                                <Image Style="{StaticResource CallActionImage}"
+                                       Source="/Assets/Settings-100.png"/>
+                            </ToggleButton>
+                        </StackPanel>
+                    </Border>
                     <Border Background="White" Width="110"
                             RelativePanel.AlignBottomWithPanel="True"
                             RelativePanel.AlignLeftWithPanel="True"
@@ -245,11 +268,25 @@
                 RelativePanel.AlignTopWithPanel="True"
                 Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}"
                 Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
+                <RelativePanel Margin="10,10,5,12" 
+                               Name="InCallSettingsExit"
+                               RelativePanel.AlignBottomWithPanel="True"
+                               RelativePanel.AlignTopWithPanel="True">
+                    <StackPanel Visibility="{Binding Path=IsConnectedToPeer, Converter={StaticResource BoolToVisConverter}}">
+                        <ToggleButton Style="{StaticResource CallActionToggleButton}"
+                              IsChecked="{Binding SettingsButtonChecked, Mode=TwoWay}"
+                              Command="{Binding SettingsButtonCommand}">
+                            <Image Style="{StaticResource CallActionImage}"
+                                       Source="/Assets/Settings-100.png"/>
+                        </ToggleButton>
+                    </StackPanel>
+                </RelativePanel>
                 <RelativePanel 
                     Name="ConnectionSettingsPanel"
                     BorderThickness="1"
                     Margin="10,10,5,12"
                     BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
+                    RelativePanel.RightOf="InCallSettingsExit"
                     RelativePanel.AlignBottomWithPanel="True"
                     RelativePanel.AlignTopWithPanel="True"
                     Visibility="{Binding IsChecked,ElementName=ToggletSettingsButton, Converter={StaticResource BoolToVisConverter}}"
@@ -537,14 +574,6 @@
                         ItemsSource="{Binding AllCapFPS, Mode=OneWay}"
                         SelectedItem="{Binding SelectedCapFPSItem, Mode=TwoWay}"
                         RelativePanel.Below="VideoResolutionCombo"
-                        RelativePanel.AlignRightWithPanel="True"
-                        RelativePanel.AlignLeftWithPanel="True"/>
-                    <ToggleSwitch
-                        Name="VideoLoopbackSwitch"
-                        Header="Video loopback"
-                        HorizontalAlignment="Left"
-                        IsOn="{Binding VideoLoopbackEnabled, Mode=TwoWay}"
-                        RelativePanel.Below="VideoFrameRateCombo"
                         RelativePanel.AlignRightWithPanel="True"
                         RelativePanel.AlignLeftWithPanel="True"/>
                 </RelativePanel>

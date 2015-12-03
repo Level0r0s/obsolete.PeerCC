@@ -175,8 +175,10 @@
     <Content Include="Assets\No Microphone-100.png" />
     <Content Include="Assets\No Selfie-100.png" />
     <Content Include="Assets\No Video-100.png" />
+    <Content Include="Assets\Phone Disconnected-100.png" />
     <Content Include="Assets\Phone-100.png" />
     <Content Include="Assets\Selfie-100.png" />
+    <Content Include="Assets\Settings-100.png" />
     <Content Include="Assets\splashscreen.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
     <Content Include="Assets\Square150x150Logo.scale-200.png" />
