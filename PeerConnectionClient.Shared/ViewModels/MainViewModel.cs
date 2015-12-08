@@ -1373,8 +1373,18 @@ namespace PeerConnectionClient.ViewModels
                     }
                     else
                     {
-                            SelfVideo.Source = null;
-                            GC.Collect(); // Ensure all references are truly dropped.
+                        // This is a hack/workaround for destroying the internal stream source (RTMediaStreamSource)
+                        // instance inside webrtc winrt api when loopback is disabled.
+                        // For some reason, the RTMediaStreamSource instance is not destroyed when only SelfVideo.Source
+                        // is set to null.
+                        // For unknown reasons, when executing the above sequence (set to null, stop, set to null), the
+                        // internal stream source is destroyed.
+                        // Apparently, with webrtc package version < 1.1.175, the internal stream source was destroyed
+                        // corectly, only by setting SelfVideo.Source to null.
+                        SelfVideo.Source = null;
+                        SelfVideo.Stop();
+                        SelfVideo.Source = null;
+                        GC.Collect(); // Ensure all references are truly dropped.
                     }
                 }
                 UpdateLoopbackVideoVisibilityHelper();
