@@ -213,6 +213,26 @@ namespace PeerConnectionClient.ViewModels
                 });
             };
 
+            AudioPlayoutDevices = new ObservableCollection<MediaDevice>();
+            string savedAudioPlayoutDeviceId = null;
+            if(settings.Values["SelectedAudioPlayoutDeviceId"] != null)
+            {
+                savedAudioPlayoutDeviceId = (string)settings.Values["SelectedAudioPlayoutDeviceId"];
+            }
+            foreach (MediaDevice audioPlayoutDevice in Conductor.Instance.Media.GetAudioPlayoutDevices())
+            {
+                if (savedAudioPlayoutDeviceId != null && savedAudioPlayoutDeviceId == audioPlayoutDevice.Id)
+                {
+                    SelectedAudioPlayoutDevice = audioPlayoutDevice;
+                }
+
+                AudioPlayoutDevices.Add(audioPlayoutDevice);
+            }
+            if (SelectedAudioPlayoutDevice == null && AudioPlayoutDevices.Count > 0)
+            {
+                SelectedAudioPlayoutDevice = AudioPlayoutDevices.First();
+            }
+
             // Handler for Peer/Self video frame rate changed event
             FrameCounterHelper.FramesPerSecondChanged += (id, frameRate) =>
             {
@@ -1254,6 +1274,45 @@ namespace PeerConnectionClient.ViewModels
                 Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
                 var localSettings = ApplicationData.Current.LocalSettings;
                 localSettings.Values["SelectedMicrophoneId"] = _selectedMicrophone.Id;
+            }
+        }
+
+        private ObservableCollection<MediaDevice> _audioPlayoutDevices;
+
+        /// <summary>
+        /// The list of available audio playout devices.
+        public ObservableCollection<MediaDevice> AudioPlayoutDevices
+        {
+            get
+            {
+                return _audioPlayoutDevices;
+            }
+            set
+            {
+                SetProperty(ref _audioPlayoutDevices, value);
+            }
+        }
+
+        private MediaDevice _selectedAudioPlayoutDevice;
+
+        /// <summary>
+        /// The selected audio playout device.
+        /// </summary>
+        public MediaDevice SelectedAudioPlayoutDevice
+        {
+            get { return _selectedAudioPlayoutDevice; }
+            set
+            {
+                if (SetProperty(ref _selectedAudioPlayoutDevice, value))
+                {
+                    Conductor.Instance.Media.SelectAudioPlayoutDevice(_selectedAudioPlayoutDevice);
+                    if (_selectedAudioPlayoutDevice != null)
+                    {
+                        var localSettings = ApplicationData.Current.LocalSettings;
+                        localSettings.Values["SelectedAudioPlayoutDeviceId"] = _selectedAudioPlayoutDevice.Id;
+                        Debug.WriteLine("Save SelectedAudioPlayoutDeviceId=" + _selectedAudioPlayoutDevice.Id);
+                    }
+                }
             }
         }
 
