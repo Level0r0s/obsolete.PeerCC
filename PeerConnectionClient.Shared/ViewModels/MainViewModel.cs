@@ -516,7 +516,7 @@ namespace PeerConnectionClient.ViewModels
         private void Conductor_OnAddLocalStream(MediaStreamEvent evt)
         {
           _selfVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
-          if (_selfVideoTrack != null && VideoLoopbackEnabled)
+          if (_selfVideoTrack != null)
           {
             Media.CreateMediaAsync().AsTask().ContinueWith(media => 
             {
@@ -540,7 +540,10 @@ namespace PeerConnectionClient.ViewModels
                   {
                     Conductor.Instance.MuteMicrophone();
                   }
-                  SelfVideo.SetMediaStreamSource(source);
+                  if (VideoLoopbackEnabled)
+                  {
+                    SelfVideo.SetMediaStreamSource(source);
+                  }
                 });
             });
           }
