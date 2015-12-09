@@ -1,8 +1,7 @@
 ﻿{
   "dependencies": {
     "HockeySDK.WINRT": "2.2.2",
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0",
-    "WebRTC": "1.1.191"
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0"
   },
   "frameworks": {
     "uap10.0": {}

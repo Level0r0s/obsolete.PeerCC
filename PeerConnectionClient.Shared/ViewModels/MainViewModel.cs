@@ -16,7 +16,7 @@ using PeerConnectionClient.Signalling;
 using PeerConnectionClient.Utilities;
 using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.Activation;
-using webrtc_winrt_api;
+using OrtcWrapper;
 #if !WINDOWS_UAP // Disable on Win10 for now.
 using HockeyApp;
 using Windows.Networking.Connectivity;

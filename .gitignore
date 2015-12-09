@@ -1,0 +1,12 @@
+*.pyc
+[Dd]ebug/
+[Rr]elease/
+*.opensdf
+*.sdf
+*.suo
+*.user
+*.bak
+
+
+
+

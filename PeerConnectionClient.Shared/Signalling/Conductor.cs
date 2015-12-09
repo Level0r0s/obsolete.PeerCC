@@ -5,7 +5,7 @@ using System.Text;
 using Windows.Networking.Connectivity;
 using Windows.Networking;
 using Windows.Data.Json;
-using webrtc_winrt_api;
+using OrtcWrapper;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using PeerConnectionClient.Model;
@@ -163,7 +163,7 @@ namespace PeerConnectionClient.Signalling
         {
           if (VideoCaptureProfile != null)
           {
-            webrtc_winrt_api.WebRTC.SetPreferredVideoCaptureFormat(
+            WebRTC.SetPreferredVideoCaptureFormat(
               (int)VideoCaptureProfile.Width, (int)VideoCaptureProfile.Height, (int)VideoCaptureProfile.FrameRate);
           }
         }
