@@ -285,7 +285,7 @@
         </ComboBox>
 
         <ToggleSwitch Header="Tracing"
-                      Grid.Row="12"
+                      Grid.Row="13"
                       IsOn="{Binding TracingEnabled, Mode=TwoWay}"
                       Width="Auto"
                       MinWidth="200"/>
