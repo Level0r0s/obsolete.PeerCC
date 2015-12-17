@@ -32,7 +32,6 @@ namespace PeerConnectionClient.Signalling
         public event PeerDisonnectedDelegate OnPeerDisconnected;
         public event PeerHangupDelegate OnPeerHangup;
         public event MessageFromPeerDelegate OnMessageFromPeer;
-        public event MessageSentDelegate OnMessageSent;
         public event ServerConnectionFailureDelegate OnServerConnectionFailure;
 
         /// <summary>
@@ -50,7 +49,6 @@ namespace PeerConnectionClient.Signalling
             OnPeerConnected += (a, b) => { };
             OnPeerDisconnected += (a) => { };
             OnMessageFromPeer += (a, b) => { };
-            OnMessageSent += (a) => { };
             OnServerConnectionFailure += () => { };
         }
 
@@ -108,7 +106,7 @@ namespace PeerConnectionClient.Signalling
                 if (_state == State.CONNECTED)
                 {
                     // Start the long polling loop without await
-                    HangingGetReadLoopAsync();
+                    var task = HangingGetReadLoopAsync();
                 }
                 else
                 {

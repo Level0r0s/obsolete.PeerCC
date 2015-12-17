@@ -100,8 +100,8 @@ namespace PeerConnectionClient.Signalling
         List<RTCIceServer> _iceServers;
 
         private int _peerId = -1;
-        bool _videoEnabled = true;
-        bool _audioEnabled = true;
+        protected bool _videoEnabled = true;
+        protected bool _audioEnabled = true;
 
         bool _etwStatsEnabled = false;
 
@@ -149,7 +149,6 @@ namespace PeerConnectionClient.Signalling
 
         // Public events for adding and removing the local stream
         public event Action<MediaStreamEvent> OnAddLocalStream;
-        public event Action<MediaStreamEvent> OnRemoveLocalStream;
 
         // Public events to notify about connection status
         public event Action OnPeerConnectionCreated;
@@ -334,7 +333,6 @@ namespace PeerConnectionClient.Signalling
 
             Signaller.OnDisconnected += Signaller_OnDisconnected;
             Signaller.OnMessageFromPeer += Signaller_OnMessageFromPeer;
-            Signaller.OnMessageSent += Signaller_OnMessageSent;
             Signaller.OnPeerConnected += Signaller_OnPeerConnected;
             Signaller.OnPeerHangup += Signaller_OnPeerHangup;
             Signaller.OnPeerDisconnected += Signaller_OnPeerDisconnected;
@@ -392,14 +390,6 @@ namespace PeerConnectionClient.Signalling
         /// <param name="id">ID of the connected peer.</param>
         /// <param name="name">Name of the connected peer.</param>
         private void Signaller_OnPeerConnected(int id, string name)
-        {
-        }
-
-        /// <summary>
-        /// Handler for Signaller's OnMessageSent event.
-        /// </summary>
-        /// <param name="err">Error code.</param>
-        private void Signaller_OnMessageSent(int err)
         {
         }
 
@@ -618,7 +608,7 @@ namespace PeerConnectionClient.Signalling
         private void SendMessage(IJsonValue json)
         {
             // Don't await, send it async.
-            _signaller.SendToPeer(_peerId, json);
+            var task = _signaller.SendToPeer(_peerId, json);
         }
 
         /// <summary>
