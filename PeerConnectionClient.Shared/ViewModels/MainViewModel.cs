@@ -2460,7 +2460,7 @@ namespace PeerConnectionClient.ViewModels
                 IsDisconnecting = true;
                 await Conductor.Instance.DisconnectFromServer();
             }
-            Conductor.Instance.Media.OnAppSuspending();
+            Media.OnAppSuspending();
             if (Peers != null)
             {
                 Peers.Clear();
