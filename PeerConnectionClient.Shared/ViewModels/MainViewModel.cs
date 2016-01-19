@@ -268,7 +268,7 @@ namespace PeerConnectionClient.ViewModels
               };
 
             // Enumerate available audio and video devices
-            Conductor.Instance.Media.EnumerateAudioVideoCaptureDevices();
+            var asyncOp = Conductor.Instance.Media.EnumerateAudioVideoCaptureDevices();
 
             // A Peer is connected to the server event handler
             Conductor.Instance.Signaller.OnPeerConnected += (peerId, peerName) =>
@@ -1341,7 +1341,7 @@ namespace PeerConnectionClient.ViewModels
                 else
                 {
                   WebRTC.DisableLogging();
-                  SavingLogging();
+                  var task = SavingLogging();
                 }
             }
         }
@@ -1428,7 +1428,7 @@ namespace PeerConnectionClient.ViewModels
                 // Prompt user to select destination to save
                 StorageFile targetFile = await savePicker.PickSaveFileAsync();
 
-                saveLogFileToUserSelectedFile(logFile, targetFile);
+                var task = saveLogFileToUserSelectedFile(logFile, targetFile);
 #endif
             }
         }
@@ -1456,7 +1456,7 @@ namespace PeerConnectionClient.ViewModels
                 FileSavePickerContinuationEventArgs fileArgs = args as FileSavePickerContinuationEventArgs;
                 if (fileArgs != null && fileArgs.File != null)
                 {
-                    saveLogFileToUserSelectedFile(webrtcLoggingFile, fileArgs.File);
+                    var task = saveLogFileToUserSelectedFile(webrtcLoggingFile, fileArgs.File);
                 }
             }
             CoreApplication.GetCurrentView().Activated -= ViewActivated;
@@ -1871,7 +1871,7 @@ namespace PeerConnectionClient.ViewModels
         {
             new Task(() =>
             {
-                Conductor.Instance.DisconnectFromPeer();
+                var task = Conductor.Instance.DisconnectFromPeer();
             }).Start();
         }
 
@@ -1899,7 +1899,7 @@ namespace PeerConnectionClient.ViewModels
             new Task(() =>
             {
                 IsDisconnecting = true;
-                Conductor.Instance.DisconnectFromServer();
+                var task = Conductor.Instance.DisconnectFromServer();
             }).Start();
 
             if (Peers != null)
@@ -2188,7 +2188,7 @@ namespace PeerConnectionClient.ViewModels
             var localSettings = ApplicationData.Current.LocalSettings;
             localSettings.Values["PeerCCServerPort"] = _port.Value;
         }
-        private StorageFile webrtcLoggingFile = null;
+        protected StorageFile webrtcLoggingFile = null;
 
 
         //Todo, refractoring the code to move NTP syn related logic to a separate file
@@ -2334,6 +2334,7 @@ namespace PeerConnectionClient.ViewModels
             }
             catch (Exception e)
             {
+                Debug.WriteLine("Failed to connect to NTP server (ex=" + e.Message + ")");
                 ntpResponseMonitor.Stop();
                 ReportNtpSyncStatus(false);
                 NtpSyncEnabled = false;
@@ -2353,7 +2354,7 @@ namespace PeerConnectionClient.ViewModels
             ntpQueryTimer.Start();
 
             ntpResponseMonitor.Restart();
-            ntpSocket.OutputStream.WriteAsync(ntpData.AsBuffer());
+            var asyncOp = ntpSocket.OutputStream.WriteAsync(ntpData.AsBuffer());
 
         }
 
