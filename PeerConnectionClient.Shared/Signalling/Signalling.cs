@@ -131,6 +131,8 @@ namespace PeerConnectionClient.Signalling
         {
             try
             {
+                // TODO: buffer.IndexOf returns -1 if header not found, without throwing
+                // exception and returns wrong result!
                 int index = buffer.IndexOf(header) + header.Length;
                 value = buffer.Substring(index).ParseLeadingInt();
                 return true;

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using PeerConnectionClient.Model;
 using System.Collections.ObjectModel;
 using PeerConnectionClient.Utilities;
+using System.Threading;
 
 namespace PeerConnectionClient.Signalling
 {
@@ -147,6 +148,9 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
+        CancellationTokenSource connectToPeerCancelationTokenSource = null;
+        Task<bool> connectToPeerTask = null;
+
         // Public events for adding and removing the local stream
         public event Action<MediaStreamEvent> OnAddLocalStream;
 
@@ -171,10 +175,14 @@ namespace PeerConnectionClient.Signalling
         /// Creates a peer connection.
         /// </summary>
         /// <returns>True if connection to a peer is successfully created.</returns>
-        private async Task<bool> CreatePeerConnection()
+        private async Task<bool> CreatePeerConnection(CancellationToken cancelationToken)
         {
             Debug.Assert(_peerConnection == null);
-
+            if(cancelationToken.IsCancellationRequested)
+            {
+                return false;
+            }
+            
             var config = new RTCConfiguration()
             {
                 BundlePolicy = RTCBundlePolicy.Balanced,
@@ -193,7 +201,11 @@ namespace PeerConnectionClient.Signalling
             _peerConnection = new RTCPeerConnection(config);
             _peerConnection.ToggleETWStats(_etwStatsEnabled);
             _peerConnection.ToggleConnectionHealthStats(_peerConnectionStatsEnabled);
-
+            if (cancelationToken.IsCancellationRequested)
+            {
+                return false;
+            }
+            
             if (OnPeerConnectionCreated != null)
             {
                 OnPeerConnectionCreated();
@@ -213,7 +225,15 @@ namespace PeerConnectionClient.Signalling
             mediaStreamConstraints.audioEnabled = true;
             mediaStreamConstraints.videoEnabled = true;
 
+            if (cancelationToken.IsCancellationRequested)
+            {
+                return false;
+            }
             _mediaStream = await _media.GetUserMedia(mediaStreamConstraints);
+            if (cancelationToken.IsCancellationRequested)
+            {
+                return false;
+            }
 
             Debug.WriteLine("Conductor: Adding local media stream.");
             _peerConnection.AddStream(_mediaStream);
@@ -222,6 +242,10 @@ namespace PeerConnectionClient.Signalling
                 OnAddLocalStream(new MediaStreamEvent() { Stream = _mediaStream });
             }
 
+            if (cancelationToken.IsCancellationRequested)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -235,7 +259,6 @@ namespace PeerConnectionClient.Signalling
                 if (_peerConnection != null)
                 {
                     _peerId = -1;
-
                     if (_mediaStream != null)
                     {
                         foreach (var track in _mediaStream.GetTracks())
@@ -433,7 +456,12 @@ namespace PeerConnectionClient.Signalling
                                 Debug.Assert(_peerId == -1);
                                 _peerId = peerId;
 
-                                if (!await CreatePeerConnection())
+                                connectToPeerCancelationTokenSource = new CancellationTokenSource();
+                                connectToPeerTask = CreatePeerConnection(connectToPeerCancelationTokenSource.Token);
+                                bool connectResult = await connectToPeerTask;
+                                connectToPeerTask = null;
+                                connectToPeerCancelationTokenSource.Dispose();
+                                if (!connectResult)
                                 {
                                     Debug.WriteLine("Conductor: Failed to initialize our PeerConnection instance");
                                     await Signaller.SignOut();
@@ -553,8 +581,13 @@ namespace PeerConnectionClient.Signalling
                 Debug.WriteLine("Error: We only support connecting to one peer at a time");
                 return;
             }
+            connectToPeerCancelationTokenSource = new System.Threading.CancellationTokenSource();
+            connectToPeerTask = CreatePeerConnection(connectToPeerCancelationTokenSource.Token);
+            bool connectResult = await connectToPeerTask;
+            connectToPeerTask = null;
+            connectToPeerCancelationTokenSource.Dispose();
 
-            if (await CreatePeerConnection())
+            if (connectResult)
             {
                 _peerId = peerId;
                 var offer = await _peerConnection.CreateOffer();
@@ -672,6 +705,9 @@ namespace PeerConnectionClient.Signalling
         {
             if (_mediaStream != null)
             {
+                // TODO: check this assumption: in case peer connection is closed after this
+                // conditional and before the next lines are executed, mediastream may be null,
+                // causing a crash!
                 var audioTracks = _mediaStream.GetAudioTracks();
                 foreach (MediaAudioTrack audioTrack in _mediaStream.GetAudioTracks())
                 {
@@ -707,6 +743,21 @@ namespace PeerConnectionClient.Signalling
                     server.Username = iceServer.Username;
                 }
                 _iceServers.Add(server);
+            }
+        }
+
+        /// <summary>
+        /// If a connection to a peer is establishing, requests it's
+        /// cancelation and wait the operation to cancel (blocks curren thread).
+        /// </summary>
+        public void CancelConnectingToPeer()
+        {
+            if(connectToPeerTask != null)
+            {
+                Debug.WriteLine("Conductor: Connecting to peer in progress, canceling");
+                connectToPeerCancelationTokenSource.Cancel();
+                connectToPeerTask.Wait();
+                Debug.WriteLine("Conductor: Connecting to peer flow canceled");
             }
         }
     }

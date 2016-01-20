@@ -2452,6 +2452,9 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         public async Task OnAppSuspending()
         {
+            Debug.WriteLine("OnAppSuspending: starting");
+            Conductor.Instance.CancelConnectingToPeer();
+
             if (IsConnectedToPeer)
             {
                 await Conductor.Instance.DisconnectFromPeer();
@@ -2462,10 +2465,7 @@ namespace PeerConnectionClient.ViewModels
                 await Conductor.Instance.DisconnectFromServer();
             }
             Media.OnAppSuspending();
-            if (Peers != null)
-            {
-                Peers.Clear();
-            }
+            Debug.WriteLine("OnAppSuspending: work done");
         }
 
         /// <summary>
@@ -2524,7 +2524,6 @@ namespace PeerConnectionClient.ViewModels
             }
 
             _appPerfTimer.Start();
-
         }
 
         /// <summary>
@@ -2534,7 +2533,6 @@ namespace PeerConnectionClient.ViewModels
         {
             WebRTC.UpdateCPUUsage(CPUData.GetCPUUsage());
             WebRTC.UpdateMemUsage(MEMData.GetMEMUsage());
-
         }
     }
 }
