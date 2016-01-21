@@ -239,6 +239,7 @@ namespace PeerConnectionClient.Signalling
         }
         #endregion
 
+#pragma warning disable 1998
         /// <summary>
         /// Helper to read the information into a buffer.
         /// </summary>
@@ -308,6 +309,7 @@ namespace PeerConnectionClient.Signalling
             }
             return ret ? Tuple.Create(data, content_length) : null;
         }
+#pragma warning restore 1998
 
         /// <summary>
         /// Sends a request to the server, waits for response and parses it.

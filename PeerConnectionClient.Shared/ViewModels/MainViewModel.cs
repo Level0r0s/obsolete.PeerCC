@@ -2389,7 +2389,7 @@ namespace PeerConnectionClient.ViewModels
                     averageNtpRTT = 1;
                 }
 
-                RunOnUiThread(async () =>
+                RunOnUiThread(() =>
                 {
                     ntpQueryTimer.Stop();
                     ntpRTTIntervalTimer.Start();
