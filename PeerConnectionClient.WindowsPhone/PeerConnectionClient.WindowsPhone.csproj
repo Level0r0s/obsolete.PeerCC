@@ -144,8 +144,9 @@
     <Reference Include="HockeyAppPCL">
       <HintPath>..\packages\HockeySDK.Core.2.2.2\lib\portable-net45+win8+wp8+wpa81+win81\HockeyAppPCL.dll</HintPath>
     </Reference>
-    <Reference Include="webrtc_winrt_api">
-      <HintPath>..\packages\WebRTC.1.1.236\lib\portable-wpa81\webrtc_winrt_api.winmd</HintPath>
+    <Reference Include="webrtc_winrt_api, Version=255.255.255.255, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebRTC.1.1.253\lib\portable-wpa81\webrtc_winrt_api.winmd</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
