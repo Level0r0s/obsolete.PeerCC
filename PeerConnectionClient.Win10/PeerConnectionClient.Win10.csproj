@@ -210,9 +210,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\winrt\projects\vs2013\api\ortc-wrapper\OrtcWrapper.csproj">
-      <Project>{7483010d-2477-48c6-b511-9405ad35eec8}</Project>
-      <Name>OrtcWrapper</Name>
+    <ProjectReference Include="..\..\..\winrt\projects\api\ortc-wrapper\ortc-wrapper.Windows.Universal\ortc-wrapper.Windows.Universal.csproj">
+      <Project>{7d09a933-37b7-4192-ac97-f88d139b70cd}</Project>
+      <Name>ortc-wrapper.Windows.Universal</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

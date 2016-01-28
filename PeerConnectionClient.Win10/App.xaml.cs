@@ -109,11 +109,16 @@ namespace PeerConnectionClient.Win10
         /// </summary>
         /// <param name="sender">The source of the suspend request.</param>
         /// <param name="e">Details about the suspend request.</param>
-        private async void OnSuspending(object sender, SuspendingEventArgs e)
+        private void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
-            await mainViewModel.OnAppSuspending();
-            deferral.Complete();
+            // Perform suspending logic on non UI thread to avoid deadlocks
+            // since some ongoing flows may need access to UI thread
+            new System.Threading.Tasks.Task(async () =>
+            {
+                await mainViewModel.OnAppSuspending();
+                deferral.Complete();
+            }).Start();
         }
 
         /// <summary>

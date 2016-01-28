@@ -19,7 +19,7 @@
         </Style>
     </SettingsFlyout.Resources>
 
-    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Height="784" >
+    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
             <TextBlock Text="Available cameras"
                        Style="{StaticResource TextBlockHeader}"/>
@@ -34,63 +34,77 @@
             </ListBox>
         </StackPanel>
 
-    <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
-      <TextBlock Text="Available Microphones"
+        <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
+            <TextBlock Text="Available Microphones"
                        Style="{StaticResource TextBlockHeader}"/>
-      <ListBox MinHeight="200" Width="250"
+            <ListBox MinHeight="200" Width="250"
                      ItemsSource="{Binding Microphones}"
                      SelectedItem="{Binding SelectedMicrophone, Mode=TwoWay}">
-        <ListBox.ItemTemplate>
-          <DataTemplate>
-            <TextBlock Text="{Binding Name}"/>
-          </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
-      <ComboBox Header="Audio codec"
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <ComboBox Header="Speakers"
+                      Margin="0,10,0,0"
+                      ItemsSource="{Binding AudioPlayoutDevices}"
+                      SelectedItem="{Binding SelectedAudioPlayoutDevice, Mode=TwoWay}"
+                      Width="250"
+                      HorizontalAlignment="Left">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox Header="Audio codec"
                       Margin="0,10,0,0"
                       ItemsSource="{Binding AudioCodecs}"
                       SelectedItem="{Binding SelectedAudioCodec, Mode=TwoWay}"
                       Width="200"
                       HorizontalAlignment="Left">
-        <ComboBox.ItemTemplate>
-          <DataTemplate>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-              <TextBlock Text="{Binding Name}"/>
-              <TextBlock Text="|"/>
-              <TextBlock Text="{Binding Clockrate}"/>
-            </StackPanel>
-          </DataTemplate>
-        </ComboBox.ItemTemplate>
-      </ComboBox>
-      <ComboBox Header="Video codec"
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock Text="|"/>
+                            <TextBlock Text="{Binding Clockrate}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox Header="Video codec"
                       Margin="0,10,0,0"
                       ItemsSource="{Binding VideoCodecs}"
                       SelectedItem="{Binding SelectedVideoCodec, Mode=TwoWay}"
                       Width="200"
                       HorizontalAlignment="Left">
-        <ComboBox.ItemTemplate>
-          <DataTemplate>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-              <TextBlock Text="{Binding Name}"/>
-              <TextBlock Text="|"/>
-              <TextBlock Text="{Binding Clockrate}"/>
-            </StackPanel>
-          </DataTemplate>
-        </ComboBox.ItemTemplate>
-      </ComboBox>
-      <ComboBox Width="200"
-                Margin="0,10,0,0"
-                HorizontalAlignment="Left" 
-                Header="Capture resolution:"
-                ItemsSource="{Binding AllCapRes, Mode=OneWay}"
-                SelectedItem="{Binding SelectedCapResItem, Mode=TwoWay}" />
-      <ComboBox Width="200"
-                Margin="0,10,0,0"
-                HorizontalAlignment="Left"
-                Header="Capture frame rate:"
-                DisplayMemberPath="FrameRateDescription" 
-                ItemsSource="{Binding AllCapFPS, Mode=OneWay}"
-                SelectedItem="{Binding SelectedCapFPSItem, Mode=TwoWay}" />
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock Text="|"/>
+                            <TextBlock Text="{Binding Clockrate}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox Width="200"
+                      Margin="0,10,0,0"
+                      HorizontalAlignment="Left" 
+                      Header="Capture resolution:"
+                      ItemsSource="{Binding AllCapRes, Mode=OneWay}"
+                      SelectedItem="{Binding SelectedCapResItem, Mode=TwoWay}" />
+            <ComboBox Width="200"
+                      Margin="0,10,0,0"
+                      HorizontalAlignment="Left"
+                      Header="Capture frame rate:"
+                      DisplayMemberPath="FrameRateDescription" 
+                      ItemsSource="{Binding AllCapFPS, Mode=OneWay}"
+                      SelectedItem="{Binding SelectedCapFPSItem, Mode=TwoWay}" />
+        </StackPanel>
     </StackPanel>
-  </StackPanel>
 </SettingsFlyout>

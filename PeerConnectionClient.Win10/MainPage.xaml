@@ -487,7 +487,7 @@
                     </ListBox>
                     <TextBlock 
                         Name="MicrophoneListBoxHeader"
-                        Text="Available Microphones"
+                        Text="Available microphones"
                         Style="{StaticResource TextBlockHeader}"
                         Margin="5"
                         RelativePanel.Below="CameraListBox"/>
@@ -512,6 +512,27 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                     <ComboBox
+                        Name="SpeakersCombo"
+                        Header="Speakers"
+                        Margin="5"
+                        ItemsSource="{Binding AudioPlayoutDevices}"
+                        SelectedItem="{Binding SelectedAudioPlayoutDevice, Mode=TwoWay}"
+                        Width="300"
+                        HorizontalAlignment="Left"
+                        RelativePanel.Below="MicrophoneListBox"
+                        RelativePanel.AlignRightWithPanel="True"
+                        RelativePanel.AlignLeftWithPanel="True">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock
+                                        Text="{Binding Name}"
+                                        Style="{StaticResource CaptionTextBlockStyle}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <ComboBox
                         Name="AudioCodecCombo"
                         Header="Audio codec"
                         Margin="5"
@@ -519,7 +540,7 @@
                         SelectedItem="{Binding SelectedAudioCodec, Mode=TwoWay}"
                         Width="200"
                         HorizontalAlignment="Left"
-                        RelativePanel.Below="MicrophoneListBox"
+                        RelativePanel.Below="SpeakersCombo"
                         RelativePanel.AlignRightWithPanel="True"
                         RelativePanel.AlignLeftWithPanel="True">
                         <ComboBox.ItemTemplate>
@@ -651,17 +672,24 @@
                           Name="NtpSyncToggleSwitch"
                           Header="NTP Sync"
                           IsOn="{Binding NtpSyncEnabled, Mode=TwoWay}"
+                          IsEnabled="{Binding NtpSyncInProgress, Mode=OneWay, Converter={StaticResource InvertedBooleanConverter}}"
                           HorizontalAlignment="Left"
                           HorizontalContentAlignment="Left"
                           RelativePanel.Below="NTPServerAddressTextBox"
-                          Margin="5"/>
+                          Margin="5,5,5,0"/>
+                    <TextBlock 
+                        Name="NtpSyncInProgressLabel"
+                        Text="NTP sync in progress..."
+                        Visibility="{Binding NtpSyncInProgress, Mode=OneWay, Converter={StaticResource BoolToVisConverter}}"
+                        RelativePanel.Below="NtpSyncToggleSwitch"
+                        Margin="5,0,5,5"/>
                     <ToggleSwitch 
                           Name="EtwStatsToggleSwitch"
                           Header="ETW Statistics"
                           IsOn="{Binding ETWStatsEnabled, Mode=TwoWay}"
                           HorizontalAlignment="Left"
                           HorizontalContentAlignment="Left"
-                          RelativePanel.Below="NtpSyncToggleSwitch"
+                          RelativePanel.Below="NtpSyncInProgressLabel"
                           Margin="5"/>
                     <ToggleSwitch 
                           Name="ConnectionHealtStatsToggleSwitch"

@@ -168,8 +168,7 @@ namespace PeerConnectionClient.Utilities
             var systemProcInfoData = systemProcessInfoBuff;
             for (int i = 0; i < numberOfProcessors; i++)
             {
-                SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION processPerInfo = (SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION)Marshal.PtrToStructure(systemProcInfoData,
-                    typeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION));
+                SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION processPerInfo = (SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION)Marshal.PtrToStructure<SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION>(systemProcInfoData);
 
                 currentSystemTime += processPerInfo.KernelTime + processPerInfo.UserTime;
             }

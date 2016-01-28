@@ -32,7 +32,6 @@ namespace PeerConnectionClient.Signalling
         public event PeerDisonnectedDelegate OnPeerDisconnected;
         public event PeerHangupDelegate OnPeerHangup;
         public event MessageFromPeerDelegate OnMessageFromPeer;
-        public event MessageSentDelegate OnMessageSent;
         public event ServerConnectionFailureDelegate OnServerConnectionFailure;
 
         /// <summary>
@@ -50,7 +49,6 @@ namespace PeerConnectionClient.Signalling
             OnPeerConnected += (a, b) => { };
             OnPeerDisconnected += (a) => { };
             OnMessageFromPeer += (a, b) => { };
-            OnMessageSent += (a) => { };
             OnServerConnectionFailure += () => { };
         }
 
@@ -108,7 +106,7 @@ namespace PeerConnectionClient.Signalling
                 if (_state == State.CONNECTED)
                 {
                     // Start the long polling loop without await
-                    HangingGetReadLoopAsync();
+                    var task = HangingGetReadLoopAsync();
                 }
                 else
                 {
@@ -133,6 +131,8 @@ namespace PeerConnectionClient.Signalling
         {
             try
             {
+                // TODO: buffer.IndexOf returns -1 if header not found, without throwing
+                // exception and returns wrong result!
                 int index = buffer.IndexOf(header) + header.Length;
                 value = buffer.Substring(index).ParseLeadingInt();
                 return true;
@@ -241,6 +241,7 @@ namespace PeerConnectionClient.Signalling
         }
         #endregion
 
+#pragma warning disable 1998
         /// <summary>
         /// Helper to read the information into a buffer.
         /// </summary>
@@ -310,6 +311,7 @@ namespace PeerConnectionClient.Signalling
             }
             return ret ? Tuple.Create(data, content_length) : null;
         }
+#pragma warning restore 1998
 
         /// <summary>
         /// Sends a request to the server, waits for response and parses it.

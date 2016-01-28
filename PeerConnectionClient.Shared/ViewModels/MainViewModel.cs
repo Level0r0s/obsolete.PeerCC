@@ -213,6 +213,26 @@ namespace PeerConnectionClient.ViewModels
                 });
             };
 
+            AudioPlayoutDevices = new ObservableCollection<MediaDevice>();
+            string savedAudioPlayoutDeviceId = null;
+            if(settings.Values["SelectedAudioPlayoutDeviceId"] != null)
+            {
+                savedAudioPlayoutDeviceId = (string)settings.Values["SelectedAudioPlayoutDeviceId"];
+            }
+            foreach (MediaDevice audioPlayoutDevice in Conductor.Instance.Media.GetAudioPlayoutDevices())
+            {
+                if (savedAudioPlayoutDeviceId != null && savedAudioPlayoutDeviceId == audioPlayoutDevice.Id)
+                {
+                    SelectedAudioPlayoutDevice = audioPlayoutDevice;
+                }
+
+                AudioPlayoutDevices.Add(audioPlayoutDevice);
+            }
+            if (SelectedAudioPlayoutDevice == null && AudioPlayoutDevices.Count > 0)
+            {
+                SelectedAudioPlayoutDevice = AudioPlayoutDevices.First();
+            }
+
             // Handler for Peer/Self video frame rate changed event
             FrameCounterHelper.FramesPerSecondChanged += (id, frameRate) =>
             {
@@ -248,7 +268,7 @@ namespace PeerConnectionClient.ViewModels
               };
 
             // Enumerate available audio and video devices
-            Conductor.Instance.Media.EnumerateAudioVideoCaptureDevices();
+            var asyncOp = Conductor.Instance.Media.EnumerateAudioVideoCaptureDevices();
 
             // A Peer is connected to the server event handler
             Conductor.Instance.Signaller.OnPeerConnected += (peerId, peerName) =>
@@ -516,7 +536,7 @@ namespace PeerConnectionClient.ViewModels
         private void Conductor_OnAddLocalStream(MediaStreamEvent evt)
         {
           _selfVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
-          if (_selfVideoTrack != null && VideoLoopbackEnabled)
+          if (_selfVideoTrack != null)
           {
             Media.CreateMediaAsync().AsTask().ContinueWith(media => 
             {
@@ -540,7 +560,10 @@ namespace PeerConnectionClient.ViewModels
                   {
                     Conductor.Instance.MuteMicrophone();
                   }
-                  SelfVideo.SetMediaStreamSource(source);
+                  if (VideoLoopbackEnabled)
+                  {
+                    SelfVideo.SetMediaStreamSource(source);
+                  }
                 });
             });
           }
@@ -1257,6 +1280,45 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
+        private ObservableCollection<MediaDevice> _audioPlayoutDevices;
+
+        /// <summary>
+        /// The list of available audio playout devices.
+        public ObservableCollection<MediaDevice> AudioPlayoutDevices
+        {
+            get
+            {
+                return _audioPlayoutDevices;
+            }
+            set
+            {
+                SetProperty(ref _audioPlayoutDevices, value);
+            }
+        }
+
+        private MediaDevice _selectedAudioPlayoutDevice;
+
+        /// <summary>
+        /// The selected audio playout device.
+        /// </summary>
+        public MediaDevice SelectedAudioPlayoutDevice
+        {
+            get { return _selectedAudioPlayoutDevice; }
+            set
+            {
+                if (SetProperty(ref _selectedAudioPlayoutDevice, value))
+                {
+                    Conductor.Instance.Media.SelectAudioPlayoutDevice(_selectedAudioPlayoutDevice);
+                    if (_selectedAudioPlayoutDevice != null)
+                    {
+                        var localSettings = ApplicationData.Current.LocalSettings;
+                        localSettings.Values["SelectedAudioPlayoutDeviceId"] = _selectedAudioPlayoutDevice.Id;
+                        Debug.WriteLine("Save SelectedAudioPlayoutDeviceId=" + _selectedAudioPlayoutDevice.Id);
+                    }
+                }
+            }
+        }
+
         private bool _loggingEnabled;
 
         /// <summary>
@@ -1279,7 +1341,7 @@ namespace PeerConnectionClient.ViewModels
                 else
                 {
                   WebRTC.DisableLogging();
-                  SavingLogging();
+                  var task = SavingLogging();
                 }
             }
         }
@@ -1314,8 +1376,18 @@ namespace PeerConnectionClient.ViewModels
                     }
                     else
                     {
-                            SelfVideo.Source = null;
-                            GC.Collect(); // Ensure all references are truly dropped.
+                        // This is a hack/workaround for destroying the internal stream source (RTMediaStreamSource)
+                        // instance inside webrtc winrt api when loopback is disabled.
+                        // For some reason, the RTMediaStreamSource instance is not destroyed when only SelfVideo.Source
+                        // is set to null.
+                        // For unknown reasons, when executing the above sequence (set to null, stop, set to null), the
+                        // internal stream source is destroyed.
+                        // Apparently, with webrtc package version < 1.1.175, the internal stream source was destroyed
+                        // corectly, only by setting SelfVideo.Source to null.
+                        SelfVideo.Source = null;
+                        SelfVideo.Stop();
+                        SelfVideo.Source = null;
+                        GC.Collect(); // Ensure all references are truly dropped.
                     }
                 }
                 UpdateLoopbackVideoVisibilityHelper();
@@ -1356,7 +1428,7 @@ namespace PeerConnectionClient.ViewModels
                 // Prompt user to select destination to save
                 StorageFile targetFile = await savePicker.PickSaveFileAsync();
 
-                saveLogFileToUserSelectedFile(logFile, targetFile);
+                var task = saveLogFileToUserSelectedFile(logFile, targetFile);
 #endif
             }
         }
@@ -1384,7 +1456,7 @@ namespace PeerConnectionClient.ViewModels
                 FileSavePickerContinuationEventArgs fileArgs = args as FileSavePickerContinuationEventArgs;
                 if (fileArgs != null && fileArgs.File != null)
                 {
-                    saveLogFileToUserSelectedFile(webrtcLoggingFile, fileArgs.File);
+                    var task = saveLogFileToUserSelectedFile(webrtcLoggingFile, fileArgs.File);
                 }
             }
             CoreApplication.GetCurrentView().Activated -= ViewActivated;
@@ -1799,7 +1871,7 @@ namespace PeerConnectionClient.ViewModels
         {
             new Task(() =>
             {
-                Conductor.Instance.DisconnectFromPeer();
+                var task = Conductor.Instance.DisconnectFromPeer();
             }).Start();
         }
 
@@ -1827,7 +1899,7 @@ namespace PeerConnectionClient.ViewModels
             new Task(() =>
             {
                 IsDisconnecting = true;
-                Conductor.Instance.DisconnectFromServer();
+                var task = Conductor.Instance.DisconnectFromServer();
             }).Start();
 
             if (Peers != null)
@@ -2116,7 +2188,7 @@ namespace PeerConnectionClient.ViewModels
             var localSettings = ApplicationData.Current.LocalSettings;
             localSettings.Values["PeerCCServerPort"] = _port.Value;
         }
-        private StorageFile webrtcLoggingFile = null;
+        protected StorageFile webrtcLoggingFile = null;
 
 
         //Todo, refractoring the code to move NTP syn related logic to a separate file
@@ -2124,14 +2196,14 @@ namespace PeerConnectionClient.ViewModels
         private Windows.UI.Xaml.DispatcherTimer ntpQueryTimer = null;
 
         /// <summary>
-        /// report whether succeeded in sync with the ntp server or not
+        /// Report whether succeeded in sync with the ntp server or not.
         /// </summary>
-        private void NTPQueryTImeout(object sender, object e) 
+        private void NTPQueryTimeout(object sender, object e) 
         {
             if (ntpResponseMonitor.IsRunning)
             {
                 ntpResponseMonitor.Stop();
-                reportNtpSyncStatus(false);
+                ReportNtpSyncStatus(false);
                 NtpSyncEnabled = false;
             }
         }
@@ -2175,7 +2247,6 @@ namespace PeerConnectionClient.ViewModels
                 else
                 {
                     //do nothing
-
                 }
             }
         }
@@ -2183,14 +2254,14 @@ namespace PeerConnectionClient.ViewModels
         private Stopwatch ntpResponseMonitor = new Stopwatch();
 
         /// <summary>
-        /// report whether succeeded in sync with the ntp server or not
+        /// Report whether succeeded in sync with the ntp server or not.
         /// </summary>
-        void reportNtpSyncStatus(bool status, int rtt = 0)
+        void ReportNtpSyncStatus(bool status, int rtt = 0)
         {
             MessageDialog dialog;
             if (status)
             {
-                dialog = new MessageDialog(String.Format("Synced with ntp server. RTT time {0}ms",rtt));
+                dialog = new MessageDialog(String.Format("Synced with ntp server. RTT time {0}ms", rtt));
             }
             else
             {
@@ -2199,23 +2270,23 @@ namespace PeerConnectionClient.ViewModels
 
             RunOnUiThread(async () =>
             {
-                dialog.ShowAsync();
                 ntpRTTIntervalTimer.Stop();
                 NtpSyncInProgress = false;
+                await dialog.ShowAsync();
             });
 
         }
 
         private int averageNtpRTT = 0; //ms initialized to a invalid number
         private int minNtpRTT = -1;
-        const int MaxyNtpRTTProbeQuery = 100; // the attempt to get average RTT for NTP query/response
+        const int MaxNtpRTTProbeQuery = 100; // the attempt to get average RTT for NTP query/response
         private int currentNtpQueryCount = 0;
         private Windows.Networking.Sockets.DatagramSocket ntpSocket = null;
         private Windows.UI.Xaml.DispatcherTimer ntpRTTIntervalTimer = null;
         /// <summary>
-        /// retrieve the current network time from ntp server  "time.windows.com"
+        /// Retrieve the current network time from ntp server  "time.windows.com".
         /// </summary>
-        public async Task GetNetworkTime()
+        public async void GetNetworkTime()
         {
             NtpSyncInProgress = true;
 
@@ -2229,7 +2300,6 @@ namespace PeerConnectionClient.ViewModels
             if (localSettings.Values["NTPServer"] != null && (string)localSettings.Values["NTPServer"] != "")
             {
                 ntpServer = (string) localSettings.Values["NTPServer"];
-
             }
 
 
@@ -2241,14 +2311,14 @@ namespace PeerConnectionClient.ViewModels
             if (ntpQueryTimer == null)
             {
                 ntpQueryTimer = new Windows.UI.Xaml.DispatcherTimer();
-                ntpQueryTimer.Tick += NTPQueryTImeout;
+                ntpQueryTimer.Tick += NTPQueryTimeout;
                 ntpQueryTimer.Interval = new TimeSpan(0, 0, 5); //5 seconds
             }
 
             if (ntpRTTIntervalTimer == null)
             {
                 ntpRTTIntervalTimer = new Windows.UI.Xaml.DispatcherTimer();
-                ntpRTTIntervalTimer.Tick += sendNTPQuery;
+                ntpRTTIntervalTimer.Tick += SendNTPQuery;
                 ntpRTTIntervalTimer.Interval = new TimeSpan(0, 0, 0,0,200); //200ms
 
             }
@@ -2264,14 +2334,15 @@ namespace PeerConnectionClient.ViewModels
             }
             catch (Exception e)
             {
+                Debug.WriteLine("Failed to connect to NTP server (ex=" + e.Message + ")");
                 ntpResponseMonitor.Stop();
-                reportNtpSyncStatus(false);
+                ReportNtpSyncStatus(false);
                 NtpSyncEnabled = false;
             }
 
         }
 
-        private void sendNTPQuery(object sender, object e)
+        private void SendNTPQuery(object sender, object e)
         {
             currentNtpQueryCount++;
             // NTP message size - 16 bytes of the digest (RFC 2030)
@@ -2283,7 +2354,7 @@ namespace PeerConnectionClient.ViewModels
             ntpQueryTimer.Start();
 
             ntpResponseMonitor.Restart();
-            ntpSocket.OutputStream.WriteAsync(ntpData.AsBuffer());
+            var asyncOp = ntpSocket.OutputStream.WriteAsync(ntpData.AsBuffer());
 
         }
 
@@ -2292,13 +2363,13 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         /// <param name="socket">The udp socket object which triggered this event </param>
         /// <param name="eventArguments">event information</param>
-        async void OnNTPTimeReceived(Windows.Networking.Sockets.DatagramSocket socket, Windows.Networking.Sockets.DatagramSocketMessageReceivedEventArgs eventArguments)
+        void OnNTPTimeReceived(Windows.Networking.Sockets.DatagramSocket socket, Windows.Networking.Sockets.DatagramSocketMessageReceivedEventArgs eventArguments)
         {
             int currentRTT = (int)ntpResponseMonitor.ElapsedMilliseconds;
 
             ntpResponseMonitor.Stop();
 
-            if (currentNtpQueryCount < MaxyNtpRTTProbeQuery)
+            if (currentNtpQueryCount < MaxNtpRTTProbeQuery)
             {
                 //we only trace 'min' RTT within the RTT probe attempts
                 if (minNtpRTT == -1 || minNtpRTT > currentRTT)
@@ -2313,12 +2384,12 @@ namespace PeerConnectionClient.ViewModels
 
                 averageNtpRTT = (averageNtpRTT * (currentNtpQueryCount - 1) + currentRTT) / currentNtpQueryCount;
 
-                if (averageNtpRTT<1)
+                if (averageNtpRTT < 1)
                 {
                     averageNtpRTT = 1;
                 }
 
-                RunOnUiThread(async () =>
+                RunOnUiThread(() =>
                 {
                     ntpQueryTimer.Stop();
                     ntpRTTIntervalTimer.Start();
@@ -2331,7 +2402,7 @@ namespace PeerConnectionClient.ViewModels
             //if currentRTT is good enough, e.g.: closer to minRTT, then, we don't have to continue to query.
             if (currentRTT > (averageNtpRTT + minNtpRTT)/2)
             {
-                RunOnUiThread(async () =>
+                RunOnUiThread(() =>
                 {
                     ntpQueryTimer.Stop();
                     ntpRTTIntervalTimer.Start();
@@ -2364,7 +2435,7 @@ namespace PeerConnectionClient.ViewModels
             WebRTC.SynNTPTime((long)milliseconds + currentRTT / 2);
 
             socket.Dispose();
-            reportNtpSyncStatus(true, currentRTT);
+            ReportNtpSyncStatus(true, currentRTT);
         }
 
 
@@ -2381,6 +2452,9 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         public async Task OnAppSuspending()
         {
+            Debug.WriteLine("OnAppSuspending: starting");
+            Conductor.Instance.CancelConnectingToPeer();
+
             if (IsConnectedToPeer)
             {
                 await Conductor.Instance.DisconnectFromPeer();
@@ -2390,11 +2464,8 @@ namespace PeerConnectionClient.ViewModels
                 IsDisconnecting = true;
                 await Conductor.Instance.DisconnectFromServer();
             }
-            Conductor.Instance.Media.OnAppSuspending();
-            if (Peers != null)
-            {
-                Peers.Clear();
-            }
+            Media.OnAppSuspending();
+            Debug.WriteLine("OnAppSuspending: work done");
         }
 
         /// <summary>
@@ -2453,17 +2524,15 @@ namespace PeerConnectionClient.ViewModels
             }
 
             _appPerfTimer.Start();
-
         }
 
         /// <summary>
-        /// report App performance data
+        /// Report App performance data.
         /// </summary>
         private void ReportAppPerfData(object sender, object e)
         {
             WebRTC.UpdateCPUUsage(CPUData.GetCPUUsage());
             WebRTC.UpdateMemUsage(MEMData.GetMEMUsage());
-
         }
     }
 }

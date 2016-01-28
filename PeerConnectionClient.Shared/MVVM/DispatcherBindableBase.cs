@@ -36,7 +36,7 @@ namespace PeerConnectionClient.MVVM
         /// <param name="fn">The function to execute</param>
         protected void RunOnUiThread(Action fn)
         {
-            _uiDispatcher.RunAsync(CoreDispatcherPriority.Normal, new DispatchedHandler(fn));
+            var asyncOp = _uiDispatcher.RunAsync(CoreDispatcherPriority.Normal, new DispatchedHandler(fn));
         }
     }
 }
