@@ -21,6 +21,7 @@ namespace PeerConnectionClient.Signalling
     internal class Conductor
     {
         private static Object _instanceLock = new Object();
+        private Object _mediaLock = new object();
         private static Conductor _instance;
 
         /// <summary>
@@ -254,7 +255,7 @@ namespace PeerConnectionClient.Signalling
         /// </summary>
         private void ClosePeerConnection()
         {
-            lock (this)
+            lock (_mediaLock)
             {
                 if (_peerConnection != null)
                 {
@@ -657,14 +658,17 @@ namespace PeerConnectionClient.Signalling
         /// </summary>
         public void EnableLocalVideoStream()
         {
-            if (_mediaStream != null)
+            lock (_mediaLock)
             {
-                foreach (MediaVideoTrack videoTrack in _mediaStream.GetVideoTracks())
+                if (_mediaStream != null)
                 {
-                    videoTrack.Enabled = true;
+                    foreach (MediaVideoTrack videoTrack in _mediaStream.GetVideoTracks())
+                    {
+                        videoTrack.Enabled = true;
+                    }
                 }
+                _videoEnabled = true;
             }
-            _videoEnabled = true;
         }
 
         /// <summary>
@@ -672,14 +676,17 @@ namespace PeerConnectionClient.Signalling
         /// </summary>
         public void DisableLocalVideoStream()
         {
-            if (_mediaStream != null)
+            lock (_mediaLock)
             {
-                foreach (MediaVideoTrack videoTrack in _mediaStream.GetVideoTracks())
+                if (_mediaStream != null)
                 {
-                    videoTrack.Enabled = false;
+                    foreach (MediaVideoTrack videoTrack in _mediaStream.GetVideoTracks())
+                    {
+                        videoTrack.Enabled = false;
+                    }
                 }
+                _videoEnabled = false;
             }
-            _videoEnabled = false;
         }
 
         /// <summary>
@@ -687,15 +694,18 @@ namespace PeerConnectionClient.Signalling
         /// </summary>
         public void MuteMicrophone()
         {
-            if (_mediaStream != null)
+            lock (_mediaLock)
             {
-                var audioTracks = _mediaStream.GetAudioTracks();
-                foreach (MediaAudioTrack audioTrack in _mediaStream.GetAudioTracks())
+                if (_mediaStream != null)
                 {
-                    audioTrack.Enabled = false;
+                    var audioTracks = _mediaStream.GetAudioTracks();
+                    foreach (MediaAudioTrack audioTrack in _mediaStream.GetAudioTracks())
+                    {
+                        audioTrack.Enabled = false;
+                    }
                 }
+                _audioEnabled = false;
             }
-            _audioEnabled = false;
         }
 
         /// <summary>
@@ -703,18 +713,18 @@ namespace PeerConnectionClient.Signalling
         /// </summary>
         public void UnmuteMicrophone()
         {
-            if (_mediaStream != null)
+            lock (_mediaLock)
             {
-                // TODO: check this assumption: in case peer connection is closed after this
-                // conditional and before the next lines are executed, mediastream may be null,
-                // causing a crash!
-                var audioTracks = _mediaStream.GetAudioTracks();
-                foreach (MediaAudioTrack audioTrack in _mediaStream.GetAudioTracks())
+                if (_mediaStream != null)
                 {
-                    audioTrack.Enabled = true;
+                    var audioTracks = _mediaStream.GetAudioTracks();
+                    foreach (MediaAudioTrack audioTrack in _mediaStream.GetAudioTracks())
+                    {
+                        audioTrack.Enabled = true;
+                    }
                 }
+                _audioEnabled = true;
             }
-            _audioEnabled = true;
         }
 
         /// <summary>
