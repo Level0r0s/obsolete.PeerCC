@@ -122,8 +122,8 @@ namespace PeerConnectionClient.Utilities
         }
 
         /// <summary>
-        ///calculate CPU usage, e.g.: this process time vs system process time
-        ///return the CPU usage in percentage
+        /// Calculate CPU usage, e.g.: this process time vs system process time
+        /// Return the CPU usage in percentage
         /// </summary>
         public static double GetCPUUsage() 
         {
@@ -138,7 +138,7 @@ namespace PeerConnectionClient.Utilities
 
             UInt64 currentProcessTime = processTimes.KernelTime + processTimes.UserTime;
 
-            //retrieve system time
+            // retrieve system time
             // get number of CPU cores, then, check system time for every CPU core
             if(numberOfProcessors == 0 ) {
                 SystemInfo info;
@@ -149,7 +149,7 @@ namespace PeerConnectionClient.Utilities
                 numberOfProcessors = info.NumberOfProcessors;
             }
 
-            int size =System.Runtime.InteropServices.Marshal.SizeOf<SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION>();
+            int size = System.Runtime.InteropServices.Marshal.SizeOf<SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION>();
 
             size = (int) (size * numberOfProcessors);
 
@@ -179,15 +179,9 @@ namespace PeerConnectionClient.Utilities
                 ret = ((double)(currentProcessTime - previousProcessTime) / (double)(currentSystemTime - previousSystemTIme)) * 100.0;
             }
 
-
             previousProcessTime = currentProcessTime;
-
             previousSystemTIme = currentSystemTime;
-
             Debug.WriteLine(ret);
-
-
-
             return ret;
         }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text;
 using Windows.Networking.Connectivity;
 using Windows.Networking;
 using Windows.Data.Json;
@@ -188,13 +187,6 @@ namespace PeerConnectionClient.Signalling
                 BundlePolicy = RTCBundlePolicy.Balanced,
                 IceTransportPolicy = RTCIceTransportPolicy.All,
                 IceServers = _iceServers
-                //IceServers = new List<RTCIceServer>() {
-                //        new RTCIceServer { Url = "stun:stun.l.google.com:19302" },
-                //        new RTCIceServer { Url = "stun:stun1.l.google.com:19302" },
-                //        new RTCIceServer { Url = "stun:stun2.l.google.com:19302" },
-                //        new RTCIceServer { Url = "stun:stun3.l.google.com:19302" },
-                //        new RTCIceServer { Url = "stun:stun4.l.google.com:19302" },
-                //    }
             };
 
             Debug.WriteLine("Conductor: Creating peer connection.");
@@ -653,7 +645,7 @@ namespace PeerConnectionClient.Signalling
         }
 
         /// <summary>
-        /// Enables the local media stream.
+        /// Enables the local video stream.
         /// </summary>
         public void EnableLocalVideoStream()
         {
@@ -668,7 +660,7 @@ namespace PeerConnectionClient.Signalling
         }
 
         /// <summary>
-        /// Disables the local media stream.
+        /// Disables the local video stream.
         /// </summary>
         public void DisableLocalVideoStream()
         {
