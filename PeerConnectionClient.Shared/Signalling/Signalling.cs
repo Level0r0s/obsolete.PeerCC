@@ -299,7 +299,6 @@ namespace PeerConnectionClient.Signalling
                     }
                     else
                     {
-                        // TODO: if content length received, but content is smaller (packet is fragmented), then throw all received data?  
                         // We haven't received everything.  Just continue to accept data.
                         Debug.WriteLine("Error: incomplete response; expected to receive " + total_response_size + ", received" + data.Length);
                     }
