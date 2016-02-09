@@ -24,7 +24,9 @@ namespace PeerConnectionClient.Utilities
         private float averageNtpRTT; //ms
         private int minNtpRTT; //ms
         private int currentNtpQueryCount;
+        private int ntpProbeFaileCount;
 
+        private const int MaxNtpProbeFaileCount = 5;
         private const int MaxNtpRTTProbeQuery = 100; // the attempt to get average RTT for NTP query/response
 
         public NtpService(CoreDispatcher uiDispatcher) : base(uiDispatcher)
@@ -38,9 +40,22 @@ namespace PeerConnectionClient.Utilities
         {
             if (ntpResponseMonitor.IsRunning)
             {
-                Debug.WriteLine("NTP sync timeout");
                 ntpResponseMonitor.Stop();
-                ReportNtpSyncStatus(false);
+                ntpQueryTimer.Stop();
+                ntpProbeFaileCount++;
+                Debug.WriteLine(String.Format("NTP sync timeout ({0}/{1})", ntpProbeFaileCount, MaxNtpProbeFaileCount));
+                if (ntpProbeFaileCount >= MaxNtpProbeFaileCount)
+                {
+                    ReportNtpSyncStatus(false);
+                }
+                else
+                {
+                    // Send another NTP query
+                    RunOnUiThread(() =>
+                    {
+                        ntpRTTIntervalTimer.Start();
+                    });
+                }
             }
         }
 
@@ -94,6 +109,8 @@ namespace PeerConnectionClient.Utilities
             currentNtpQueryCount = 0; //reset
             minNtpRTT = -1; //reset
 
+            ntpProbeFaileCount = 0; //reset
+
             //NTP uses UDP
             ntpSocket = new DatagramSocket();
             ntpSocket.MessageReceived += OnNTPTimeReceived;
@@ -103,7 +120,7 @@ namespace PeerConnectionClient.Utilities
             {
                 ntpQueryTimer = new DispatcherTimer();
                 ntpQueryTimer.Tick += NTPQueryTimeout;
-                ntpQueryTimer.Interval = new TimeSpan(0, 0, 15); //5 seconds
+                ntpQueryTimer.Interval = new TimeSpan(0, 0, 5); //5 seconds
             }
 
             if (ntpRTTIntervalTimer == null)

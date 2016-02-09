@@ -2254,6 +2254,7 @@ namespace PeerConnectionClient.ViewModels
         private void HandleNtpSynFailed()
         {
             NtpSyncInProgress = false;
+            NtpSyncEnabled = false;
         }
 
         /// <summary>
