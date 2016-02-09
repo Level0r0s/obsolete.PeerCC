@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\AppPerf.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\BoolToVisConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\InvertedBooleanConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\NtpService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\NullToVisibleConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\SdpUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\ToggleImageConverter.cs" />

@@ -123,6 +123,9 @@
     <Compile Include="..\PeerConnectionClient.Shared\Utilities\InvertedBooleanConverter.cs">
       <Link>Links\InvertedBooleanConverter.cs</Link>
     </Compile>
+    <Compile Include="..\PeerConnectionClient.Shared\Utilities\NtpService.cs">
+      <Link>Links\NtpService.cs</Link>
+    </Compile>
     <Compile Include="..\PeerConnectionClient.Shared\Utilities\NullToVisibleConverter.cs">
       <Link>Links\NullToVisibleConverter.cs</Link>
     </Compile>
