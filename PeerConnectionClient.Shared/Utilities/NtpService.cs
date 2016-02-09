@@ -56,7 +56,8 @@ namespace PeerConnectionClient.Utilities
             }
             else
             {
-                OnNTPSyncFailed?.Invoke();
+                if(OnNTPSyncFailed != null)
+                    OnNTPSyncFailed.Invoke();
                 dialog = new MessageDialog("Failed To sync with ntp server.");
             }
 
@@ -88,7 +89,6 @@ namespace PeerConnectionClient.Utilities
         /// </summary>
         public async void GetNetworkTime(string ntpServer)
         {
-
             averageNtpRTT = 0; //reset
 
             currentNtpQueryCount = 0; //reset
@@ -124,7 +124,7 @@ namespace PeerConnectionClient.Utilities
             }
             catch (Exception e)
             {
-                Debug.WriteLine($"Exception when connect socket: {e.Message}");
+                Debug.WriteLine(String.Format("Exception when connect socket: {0}", e.Message));
                 ntpResponseMonitor.Stop();
                 ReportNtpSyncStatus(false);
             }
@@ -158,7 +158,7 @@ namespace PeerConnectionClient.Utilities
         {
             int currentRTT = (int)ntpResponseMonitor.ElapsedMilliseconds;
 
-            Debug.WriteLine($"[{currentNtpQueryCount}] currentRTT={currentRTT}");
+            Debug.WriteLine(String.Format("[{0}] currentRTT={1}", currentNtpQueryCount, currentRTT));
 
             ntpResponseMonitor.Stop();
 
@@ -181,7 +181,7 @@ namespace PeerConnectionClient.Utilities
                     averageNtpRTT = 1;
                 }
 
-                Debug.WriteLine($" avg={ averageNtpRTT} min={minNtpRTT}");
+                Debug.WriteLine(String.Format(" avg={0} min={1}", averageNtpRTT, minNtpRTT));
                 
 
                 RunOnUiThread(() =>
@@ -234,7 +234,8 @@ namespace PeerConnectionClient.Utilities
 
             RunOnUiThread(() =>
             {
-                OnNTPTimeAvailable?.Invoke((long)milliseconds + currentRTT / 2);
+                if(OnNTPTimeAvailable != null)
+                    OnNTPTimeAvailable.Invoke((long)milliseconds + currentRTT / 2);
             });
         }
 

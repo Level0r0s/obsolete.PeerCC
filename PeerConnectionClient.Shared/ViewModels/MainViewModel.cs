@@ -593,14 +593,12 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         public ValidableNonEmptyString NtpServer
         {
-            get {
-                return _ntpServer; }
+            get { return _ntpServer; }
             set
             {
                 SetProperty(ref _ntpServer, value);
                 _ntpServer.PropertyChanged += NtpServer_PropertyChanged;
                 NtpSyncEnabled = false; //reset
-
             }
         }
 
@@ -2248,7 +2246,7 @@ namespace PeerConnectionClient.ViewModels
 
         private void HandleNtpTimeSync(long ntpTime)
         {
-            Debug.WriteLine($"new ntp time: {ntpTime}");
+            Debug.WriteLine(String.Format("new ntp time: {0}", ntpTime));
             WebRTC.SynNTPTime(ntpTime);
             NtpSyncInProgress = false;
         }
