@@ -37,7 +37,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\VideoCaptureFormat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\XmlSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MainViewModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\VideoRenderViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="$(MSBuildThisFileDirectory)Utilities\UI\ErrorControl.xaml">

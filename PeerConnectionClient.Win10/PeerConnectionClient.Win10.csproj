@@ -156,9 +156,6 @@
     <Compile Include="..\PeerConnectionClient.Shared\ViewModels\MainViewModel.cs">
       <Link>Links\MainViewModel.cs</Link>
     </Compile>
-    <Compile Include="..\PeerConnectionClient.Shared\ViewModels\VideoRenderViewModel.cs">
-      <Link>Links\VideoRenderViewModel.cs</Link>
-    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
