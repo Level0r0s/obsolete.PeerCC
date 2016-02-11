@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
+using Windows.ApplicationModel.Activation;
 using Windows.Storage;
 using Windows.System.Display;
 using Windows.UI.Core;
 using Windows.UI.Popups;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using PeerConnectionClient.Model;
 using PeerConnectionClient.MVVM;
 using PeerConnectionClient.Signalling;
 using PeerConnectionClient.Utilities;
-using Windows.ApplicationModel.Core;
-using Windows.ApplicationModel.Activation;
 using webrtc_winrt_api;
+
 #if !WINDOWS_UAP // Disable on Win10 for now.
 using HockeyApp;
 using Windows.Networking.Connectivity;
@@ -1976,7 +1977,10 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         public bool SettingsButtonChecked
         {
-            get { return _settingsButtonChecked; }
+            get
+            {
+                return _settingsButtonChecked;
+            }
             set
             {
                 SetProperty(ref _settingsButtonChecked, value);
@@ -2078,7 +2082,6 @@ namespace PeerConnectionClient.ViewModels
             {
                 ntpServerAddress = new ValidableNonEmptyString((string)settings.Values["NTPServer"]);
             }
-
 
             RunOnUiThread(() =>
             {
@@ -2203,13 +2206,13 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         public Boolean NtpSyncInProgress
         {
-            get { return _ntpSyncInProgress; }
+            get
+            {
+                return _ntpSyncInProgress;
+            }
             set
             {
-                if (!SetProperty(ref _ntpSyncInProgress, value))
-                {
-                    return;
-                }
+                SetProperty(ref _ntpSyncInProgress, value);
             }
         }
 
@@ -2220,7 +2223,10 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         public bool NtpSyncEnabled
         {
-            get { return _ntpSyncEnabled; }
+            get
+            {
+                return _ntpSyncEnabled;
+            }
             set
             {
                 if (!SetProperty(ref _ntpSyncEnabled, value))
@@ -2308,11 +2314,11 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-        //timer to measure CPU/Memory usage
-        private Windows.UI.Xaml.DispatcherTimer _appPerfTimer = null;
+        // Timer to measure CPU/Memory usage
+        private DispatcherTimer _appPerfTimer = null;
 
         /// <summary>
-        /// start or stop App Performance check 
+        /// Start or stop App Performance check 
         /// </summary>
         private void AppPerformanceCheck() {
 
@@ -2328,7 +2334,7 @@ namespace PeerConnectionClient.ViewModels
 
             if (_appPerfTimer == null)
             {
-                _appPerfTimer = new Windows.UI.Xaml.DispatcherTimer();
+                _appPerfTimer = new DispatcherTimer();
                 _appPerfTimer.Tick += ReportAppPerfData;
                 _appPerfTimer.Interval = new TimeSpan(0, 0, 1); //1 seconds
             }
