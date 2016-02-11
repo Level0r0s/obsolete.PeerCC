@@ -1188,8 +1188,7 @@ namespace PeerConnectionClient.ViewModels
                 }
                 if (value == null)
                 {
-                    String errorMsg = "SetSelectedCamera: Skip GetVideoCaptureCapabilities (Trying to set Null)";
-                    Debug.WriteLine(errorMsg);
+                    Debug.WriteLine("[Warn] SetSelectedCamera: Skip obtaining VideoCaptureCapabilities.");
                     isInitializingCamera = false;
                     return;
                 }
@@ -1204,7 +1203,7 @@ namespace PeerConnectionClient.ViewModels
                             while (ex is AggregateException && ex.InnerException != null)
                                 ex = ex.InnerException;
                             String errorMsg = "SetSelectedCamera: Failed to GetVideoCaptureCapabilities (Error: " + ex.Message + ")";
-                            Debug.WriteLine(errorMsg);
+                            Debug.WriteLine("[Error] " + errorMsg);
                             var msgDialog = new MessageDialog(errorMsg);
                             await msgDialog.ShowAsync();
                             isInitializingCamera = false;
@@ -1213,7 +1212,7 @@ namespace PeerConnectionClient.ViewModels
                         if (resolutions.Result == null)
                         {
                             String errorMsg = "SetSelectedCamera: Failed to GetVideoCaptureCapabilities (Result is null)";
-                            Debug.WriteLine(errorMsg);
+                            Debug.WriteLine("[Error] " + errorMsg);
                             var msgDialog = new MessageDialog(errorMsg);
                             await msgDialog.ShowAsync();
                             isInitializingCamera = false;
@@ -1319,7 +1318,6 @@ namespace PeerConnectionClient.ViewModels
                     {
                         var localSettings = ApplicationData.Current.LocalSettings;
                         localSettings.Values["SelectedAudioPlayoutDeviceId"] = _selectedAudioPlayoutDevice.Id;
-                        Debug.WriteLine("Save SelectedAudioPlayoutDeviceId=" + _selectedAudioPlayoutDevice.Id);
                     }
                 }
             }
@@ -2064,7 +2062,7 @@ namespace PeerConnectionClient.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine("Failed to load IceServer from config, using defaults (ex=" + ex.Message + ")");
+                    Debug.WriteLine("[Error] Failed to load IceServer from config, using defaults (ex=" + ex.Message + ")");
                 }
             }
             if (useDefaultIceServers)
@@ -2252,7 +2250,7 @@ namespace PeerConnectionClient.ViewModels
 
         private void HandleNtpTimeSync(long ntpTime)
         {
-            Debug.WriteLine(String.Format("new ntp time: {0}", ntpTime));
+            Debug.WriteLine(String.Format("New NTP time: {0}", ntpTime));
             WebRTC.SynNTPTime(ntpTime);
             NtpSyncInProgress = false;
         }
@@ -2268,7 +2266,6 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         public async Task OnAppSuspending()
         {
-            Debug.WriteLine("OnAppSuspending: starting");
             Conductor.Instance.CancelConnectingToPeer();
 
             if (IsConnectedToPeer)
@@ -2281,7 +2278,6 @@ namespace PeerConnectionClient.ViewModels
                 await Conductor.Instance.DisconnectFromServer();
             }
             Media.OnAppSuspending();
-            Debug.WriteLine("OnAppSuspending: work done");
         }
 
         /// <summary>
