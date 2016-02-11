@@ -15,7 +15,6 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-//using Microsoft.ApplicationInsights;
 
 namespace PeerConnectionClient.Win10
 {
@@ -69,11 +68,6 @@ namespace PeerConnectionClient.Win10
                 rootFrame.Language = Windows.Globalization.ApplicationLanguages.Languages[0];
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
-
-                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
-                {
-                    //TODO: Load state from previously suspended application
-                }
 
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;

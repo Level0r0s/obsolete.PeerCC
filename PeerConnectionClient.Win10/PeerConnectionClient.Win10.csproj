@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PeerConnectionClient.Win10</RootNamespace>
     <AssemblyName>PeerConnectionClient.Win10</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
+    <DefaultLanguage>en</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10240.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
@@ -123,6 +123,9 @@
     <Compile Include="..\PeerConnectionClient.Shared\Utilities\InvertedBooleanConverter.cs">
       <Link>Links\InvertedBooleanConverter.cs</Link>
     </Compile>
+    <Compile Include="..\PeerConnectionClient.Shared\Utilities\NtpService.cs">
+      <Link>Links\NtpService.cs</Link>
+    </Compile>
     <Compile Include="..\PeerConnectionClient.Shared\Utilities\NullToVisibleConverter.cs">
       <Link>Links\NullToVisibleConverter.cs</Link>
     </Compile>
@@ -152,9 +155,6 @@
     </Compile>
     <Compile Include="..\PeerConnectionClient.Shared\ViewModels\MainViewModel.cs">
       <Link>Links\MainViewModel.cs</Link>
-    </Compile>
-    <Compile Include="..\PeerConnectionClient.Shared\ViewModels\VideoRenderViewModel.cs">
-      <Link>Links\VideoRenderViewModel.cs</Link>
     </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
