@@ -1342,12 +1342,16 @@ namespace PeerConnectionClient.ViewModels
 
                 if (_loggingEnabled)
                 {
-                  WebRTC.EnableLogging(LogLevel.LOGLVL_INFO);
+                    WebRTC.EnableLogging(LogLevel.LOGLVL_INFO);
+
+                    var msgDialog = new MessageDialog(
+                            "WebRTC logging enabled, connect to TCP port 47003 to receive log stream.");
+                    var asyncOp = msgDialog.ShowAsync();
                 }
                 else
                 {
-                  WebRTC.DisableLogging();
-                  var task = SavingLogging();
+                    WebRTC.DisableLogging();
+                    var task = SavingLogging();
                 }
             }
         }
