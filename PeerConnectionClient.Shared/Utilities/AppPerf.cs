@@ -40,7 +40,7 @@ namespace PeerConnectionClient.Utilities
                 ret = memoryCounters.PrivateUsage.ToInt64();
 
             }
-            Debug.WriteLine(ret);
+            Debug.WriteLine(String.Format("Memory usage:{0}", ret));
 
             return ret;
         }
@@ -130,11 +130,8 @@ namespace PeerConnectionClient.Utilities
 
             double ret = 0.0;
 
-            //retrieve process time
+            // retrieve process time
             ProcessTimes processTimes = GetProcessTimes();
-
-            Debug.WriteLine(processTimes.KernelTime);
-            Debug.WriteLine(processTimes.UserTime);
 
             UInt64 currentProcessTime = processTimes.KernelTime + processTimes.UserTime;
 
@@ -143,9 +140,6 @@ namespace PeerConnectionClient.Utilities
             if(numberOfProcessors == 0 ) {
                 SystemInfo info;
                 GetSystemInfo(out info);
-
-                Debug.WriteLine(info.NumberOfProcessors);
-
                 numberOfProcessors = info.NumberOfProcessors;
             }
 
@@ -159,8 +153,7 @@ namespace PeerConnectionClient.Utilities
 
             if (result != NtStatus.Success)
             {
-                Debug.WriteLine(result);
-
+                Debug.WriteLine(String.Format("[Error] Failed to obtain processor performance info ({0}", result));
                 return ret;
             }
             UInt64 currentSystemTime = 0;
@@ -181,7 +174,7 @@ namespace PeerConnectionClient.Utilities
 
             previousProcessTime = currentProcessTime;
             previousSystemTIme = currentSystemTime;
-            Debug.WriteLine(ret);
+            Debug.WriteLine(String.Format("CPU usage:{0}%", ret));
             return ret;
         }
 

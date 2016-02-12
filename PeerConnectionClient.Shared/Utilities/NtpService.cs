@@ -43,7 +43,7 @@ namespace PeerConnectionClient.Utilities
                 ntpResponseMonitor.Stop();
                 ntpQueryTimer.Stop();
                 ntpProbeFaileCount++;
-                Debug.WriteLine(String.Format("NTP sync timeout ({0}/{1})", ntpProbeFaileCount, MaxNtpProbeFaileCount));
+                Debug.WriteLine(String.Format("NTPSync: timeout ({0}/{1})", ntpProbeFaileCount, MaxNtpProbeFaileCount));
                 if (ntpProbeFaileCount >= MaxNtpProbeFaileCount)
                 {
                     ReportNtpSyncStatus(false);
@@ -141,7 +141,7 @@ namespace PeerConnectionClient.Utilities
             }
             catch (Exception e)
             {
-                Debug.WriteLine(String.Format("Exception when connect socket: {0}", e.Message));
+                Debug.WriteLine(String.Format("[Error] NTPSync: exception when connect socket: {0}", e.Message));
                 ntpResponseMonitor.Stop();
                 ReportNtpSyncStatus(false);
             }
@@ -175,7 +175,7 @@ namespace PeerConnectionClient.Utilities
         {
             int currentRTT = (int)ntpResponseMonitor.ElapsedMilliseconds;
 
-            Debug.WriteLine(String.Format("[{0}] currentRTT={1}", currentNtpQueryCount, currentRTT));
+            Debug.WriteLine(String.Format("NTPSync: probe {0} currentRTT={1}", currentNtpQueryCount, currentRTT));
 
             ntpResponseMonitor.Stop();
 
@@ -197,9 +197,6 @@ namespace PeerConnectionClient.Utilities
                 {
                     averageNtpRTT = 1;
                 }
-
-                Debug.WriteLine(String.Format(" avg={0} min={1}", averageNtpRTT, minNtpRTT));
-                
 
                 RunOnUiThread(() =>
                 {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.Data.Json;
@@ -116,7 +115,7 @@ namespace PeerConnectionClient.Signalling
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Failed to connect: " + ex.Message);
+                Debug.WriteLine("[Error] Signaling: Failed to connect to server: " + ex.Message);
             }
         }
 
@@ -212,7 +211,7 @@ namespace PeerConnectionClient.Signalling
                 {
                     if (status == 500 && buffer.Contains("Peer most likely gone."))
                     {
-                        Debug.WriteLine("[Info] Peer most likely gone. Closing peer connection.");
+                        Debug.WriteLine("Peer most likely gone. Closing peer connection.");
                         //As Peer Id doesn't exist in buffer using 0
                         OnPeerDisconnected(0);
                         return false;
@@ -284,7 +283,7 @@ namespace PeerConnectionClient.Signalling
                 bool succeeded = loadTask.AsTask().Wait(20000);
                 if (!succeeded)
                 {
-                    throw new Exception("Timed out long polling, re-trying.");
+                    throw new TimeoutException("Timed out long polling, re-trying.");
                 }
 
                 var count = loadTask.GetResults();
@@ -299,9 +298,18 @@ namespace PeerConnectionClient.Signalling
                     throw new Exception("ReadString operation failed.");
                 }
             }
+            catch (TimeoutException ex)
+            {
+                Debug.WriteLine(ex.Message);
+                if (loadTask != null && loadTask.Status == Windows.Foundation.AsyncStatus.Started)
+                {
+                    loadTask.Cancel();
+                }
+                return null;
+            }
             catch (Exception ex)
             {
-                Debug.WriteLine("Couldn't read from socket. " + ex.Message);
+                Debug.WriteLine("[Error] Signaling: Failed to read from socket. " + ex.Message);
                 if (loadTask != null && loadTask.Status == Windows.Foundation.AsyncStatus.Started)
                 {
                     loadTask.Cancel();
@@ -314,7 +322,7 @@ namespace PeerConnectionClient.Signalling
             int i = data.IndexOf("\r\n\r\n");
             if (i != -1)
             {
-                Debug.WriteLine("Headers received [i=" + i + " data(" + data.Length + ")"/*=" + data*/ + "]");
+                Debug.WriteLine("Signaling: Headers received [i=" + i + " data(" + data.Length + ")"/*=" + data*/ + "]");
                 if (GetHeaderValue(data, false, "\r\nContent-Length: ", out content_length))
                 {
                     int total_response_size = (i + 4) + content_length;
@@ -325,12 +333,12 @@ namespace PeerConnectionClient.Signalling
                     else
                     {
                         // We haven't received everything.  Just continue to accept data.
-                        Debug.WriteLine("Error: incomplete response; expected to receive " + total_response_size + ", received" + data.Length);
+                        Debug.WriteLine("[Error] Singaling: Incomplete response; expected to receive " + total_response_size + ", received" + data.Length);
                     }
                 }
                 else
                 {
-                    Debug.WriteLine("Error: No content length field specified by the server.");
+                    Debug.WriteLine("[Error] Signaling: No content length field specified by the server.");
                 }
             }
             return ret ? Tuple.Create(data, content_length) : null;
@@ -354,7 +362,7 @@ namespace PeerConnectionClient.Signalling
                 catch (Exception e)
                 {
                     // This could be a connection failure like a timeout
-                    Debug.WriteLine("[Error] Failed to connect to " + _server + ":" + _port + " : " + e.Message);
+                    Debug.WriteLine("[Error] Signaling: Failed to connect to " + _server + ":" + _port + " : " + e.Message);
                     return false;
                 }
                 // Send the request
@@ -501,7 +509,7 @@ namespace PeerConnectionClient.Signalling
                     }
                     catch (Exception e)
                     {
-                        Debug.WriteLine("SIGNALLING LONG-POLLING EXCEPTION: {0}", e.Message);
+                        Debug.WriteLine("[Error] Signaling: Long-polling exception: {0}", e.Message);
                     }
                 }
             }
@@ -612,7 +620,7 @@ namespace PeerConnectionClient.Signalling
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Couldn't write to socket : " + ex.Message);
+                Debug.WriteLine("[Error] Singnaling: Couldn't write to socket : " + ex.Message);
             }
         }
 

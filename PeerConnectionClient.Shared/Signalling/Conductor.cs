@@ -383,7 +383,7 @@ namespace PeerConnectionClient.Signalling
         /// </summary>
         private void Signaller_OnServerConnectionFailure()
         {
-            Debug.WriteLine("ERROR: Connection to server failed!");
+            Debug.WriteLine("[Error]: Connection to server failed!");
         }
 
         /// <summary>
@@ -423,14 +423,14 @@ namespace PeerConnectionClient.Signalling
 
                 if (_peerId != peerId && _peerId != -1)
                 {
-                    Debug.WriteLine("Conductor: Received a message from unknown peer while already in a conversation with a different peer.");
+                    Debug.WriteLine("[Error] Conductor: Received a message from unknown peer while already in a conversation with a different peer.");
                     return;
                 }
 
                 JsonObject jMessage;
                 if (!JsonObject.TryParse(message, out jMessage))
                 {
-                    Debug.WriteLine("Conductor: Received unknown message." + message);
+                    Debug.WriteLine("[Error] Conductor: Received unknown message." + message);
                     return;
                 }
 
@@ -456,20 +456,20 @@ namespace PeerConnectionClient.Signalling
                             connectToPeerCancelationTokenSource.Dispose();
                             if (!connectResult)
                             {
-                                Debug.WriteLine("Conductor: Failed to initialize our PeerConnection instance");
+                                Debug.WriteLine("[Error] Conductor: Failed to initialize our PeerConnection instance");
                                 await Signaller.SignOut();
                                 return;
                             }
                             else if (_peerId != peerId)
                             {
-                                Debug.WriteLine("Conductor: Received a message from unknown peer while already in a conversation with a different peer.");
+                                Debug.WriteLine("[Error] Conductor: Received a message from unknown peer while already in a conversation with a different peer.");
                                 return;
                             }
                         }
                     }
                     else
                     {
-                        Debug.WriteLine("Conductor: Received an untyped message after closing peer connection.");
+                        Debug.WriteLine("[Warn] Conductor: Received an untyped message after closing peer connection.");
                         return;
                     }
                 }
@@ -485,7 +485,7 @@ namespace PeerConnectionClient.Signalling
                     string sdp = jMessage.ContainsKey(kSessionDescriptionSdpName) ? jMessage.GetNamedString(kSessionDescriptionSdpName) : null;
                     if (String.IsNullOrEmpty(sdp))
                     {
-                        Debug.WriteLine("Conductor: Can't parse received session description message.");
+                        Debug.WriteLine("[Error] Conductor: Can't parse received session description message.");
                         return;
                     }
 
@@ -516,7 +516,7 @@ namespace PeerConnectionClient.Signalling
                     var sdp = jMessage.ContainsKey(kCandidateSdpName) ? jMessage.GetNamedString(kCandidateSdpName) : null;
                     if (String.IsNullOrEmpty(sdpMid) || sdpMlineIndex == -1 || String.IsNullOrEmpty(sdp))
                     {
-                        Debug.WriteLine("Conductor: Can't parse received message.\n" + message);
+                        Debug.WriteLine("[Error] Conductor: Can't parse received message.\n" + message);
                         return;
                     }
 
@@ -571,7 +571,7 @@ namespace PeerConnectionClient.Signalling
 
             if (_peerConnection != null)
             {
-                Debug.WriteLine("Error: We only support connecting to one peer at a time");
+                Debug.WriteLine("[Error] Conductor: We only support connecting to one peer at a time");
                 return;
             }
             connectToPeerCancelationTokenSource = new System.Threading.CancellationTokenSource();
