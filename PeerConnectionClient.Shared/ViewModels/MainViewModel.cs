@@ -169,68 +169,45 @@ namespace PeerConnectionClient.ViewModels
 
             // Get information of cameras attached to the device
             Cameras = new ObservableCollection<MediaDevice>();
-            Conductor.Instance.Media.OnVideoCaptureDeviceFound += deviceInfo =>
+            string savedVideoRecordingDeviceId = null;
+            if (settings.Values["SelectedCameraId"] != null)
             {
-                RunOnUiThread(() =>
+                savedVideoRecordingDeviceId = (string)settings.Values["SelectedCameraId"];
+            }
+            foreach (MediaDevice videoCaptureDevice in Conductor.Instance.Media.GetVideoCaptureDevices())
+            {
+                if (savedVideoRecordingDeviceId != null && savedVideoRecordingDeviceId == videoCaptureDevice.Id)
                 {
-                    Cameras.Add(deviceInfo);
-                    if (SelectedCamera == null)
-                    {
-                        isInitializingCamera = true;
-                        SelectedCamera = Cameras[0];
-                    }
-                    if (settings.Values["SelectedCameraId"] != null)
-                    {
-                        string Id = (String)settings.Values["SelectedCameraId"];
-                        if (SelectedCamera.Id != Id)
-                        {
-                            foreach (var camera in Cameras)
-                            {
-                                if (camera.Id == Id)
-                                {
-                                    SelectedCamera = camera;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                       
-                });
-            };
+                    SelectedCamera = videoCaptureDevice;
+                }
+                Cameras.Add(videoCaptureDevice);
+            }
+            if (SelectedCamera == null && Cameras.Count > 0)
+            {
+                SelectedCamera = Cameras.First();
+            }
 
             // Get information of microphones attached to the device
             Microphones = new ObservableCollection<MediaDevice>();
-            Conductor.Instance.Media.OnAudioCaptureDeviceFound += deviceInfo =>
+            string savedAudioRecordingDeviceId = null;
+            if (settings.Values["SelectedMicrophoneId"] != null)
             {
-                RunOnUiThread(() =>
+                savedAudioRecordingDeviceId = (string)settings.Values["SelectedMicrophoneId"];
+            }
+            foreach (MediaDevice audioCaptureDevice in Conductor.Instance.Media.GetAudioCaptureDevices())
+            {
+                if (savedAudioRecordingDeviceId != null && savedAudioRecordingDeviceId == audioCaptureDevice.Id)
                 {
-                    Microphones.Add(deviceInfo);
-                    if (SelectedMicrophone == null)
-                    {
-                        // do not call SelectedMicrophone = Microphones[0]; here
-                        // as it will change SelectedMicrophoneId setting value too
-                        _selectedMicrophone = Microphones[0];
-                        Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
-                        OnPropertyChanged("SelectedMicrophone");
-                    }
-                    if (settings.Values["SelectedMicrophoneId"] != null)
-                    {
-                        String Id = (String)settings.Values["SelectedMicrophoneId"];
-                        if (SelectedMicrophone.Id != Id)
-                        {
-                            foreach (var microphone in Microphones)
-                            {
-                                if (microphone.Id == Id)
-                                {
-                                    SelectedMicrophone = microphone;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                });
-            };
+                    SelectedMicrophone = audioCaptureDevice;
+                }
+                Microphones.Add(audioCaptureDevice);
+            }
+            if (SelectedMicrophone == null && Microphones.Count > 0)
+            {
+                SelectedMicrophone = Microphones.First();
+            }
 
+            // Get information of speakers attached to the device
             AudioPlayoutDevices = new ObservableCollection<MediaDevice>();
             string savedAudioPlayoutDeviceId = null;
             if(settings.Values["SelectedAudioPlayoutDeviceId"] != null)
@@ -284,9 +261,6 @@ namespace PeerConnectionClient.ViewModels
                     }
                 });
               };
-
-            // Enumerate available audio and video devices
-            var asyncOp = Conductor.Instance.Media.EnumerateAudioVideoCaptureDevices();
 
             // A Peer is connected to the server event handler
             Conductor.Instance.Signaller.OnPeerConnected += (peerId, peerName) =>
