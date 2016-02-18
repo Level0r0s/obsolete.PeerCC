@@ -56,8 +56,6 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid Grid.Row="0"
                   Margin="0,25,0,0">
@@ -214,34 +212,36 @@
                             Margin="5"/>
                 </Grid>
             </StackPanel>
-            <TextBlock Text="Camera"
-                       Grid.Row="6"
-                       Style="{StaticResource TextBlockHeader}"
-                       Margin="0,10,0,0"/>
-            <ListBox Grid.Row="7"
-                     ItemsSource="{Binding Cameras}"
-                     SelectedItem="{Binding SelectedCamera, Mode=TwoWay}">
-                <ListBox.ItemTemplate>
+            <ComboBox Header="Camera"
+                      Grid.Row="6"
+                      Margin="0,10,0,0"
+                      ItemsSource="{Binding Cameras}"
+                      SelectedItem="{Binding SelectedCamera, Mode=TwoWay}"
+                      HorizontalAlignment="Left">
+                <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Name}"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}"/>
+                        </StackPanel>
                     </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <TextBlock Text="Microphone"                    
-                       Grid.Row="8"
-                       Style="{StaticResource TextBlockHeader}"
-                       Margin="0,10,0,0"/>
-            <ListBox Grid.Row="9"
-                     ItemsSource="{Binding Microphones}"
-                     SelectedItem="{Binding SelectedMicrophone, Mode=TwoWay}">
-                <ListBox.ItemTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox Header="Microphone"
+                      Grid.Row="7"
+                      Margin="0,10,0,0"
+                      ItemsSource="{Binding Microphones}"
+                      SelectedItem="{Binding SelectedMicrophone, Mode=TwoWay}"
+                      HorizontalAlignment="Left">
+                <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Name}"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}"/>
+                        </StackPanel>
                     </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
             <ComboBox Header="Speakers"
-                      Grid.Row="10"
+                      Grid.Row="8"
                       Margin="0,10,0,0"
                       ItemsSource="{Binding AudioPlayoutDevices}"
                       SelectedItem="{Binding SelectedAudioPlayoutDevice, Mode=TwoWay}"
@@ -255,7 +255,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
             <ComboBox Header="Audio codec"
-                      Grid.Row="11"
+                      Grid.Row="9"
                       Margin="0,10,0,0"
                       ItemsSource="{Binding AudioCodecs}"
                       SelectedItem="{Binding SelectedAudioCodec, Mode=TwoWay}"
@@ -272,7 +272,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
             <ComboBox Header="Video codec"
-                      Grid.Row="12"
+                      Grid.Row="10"
                       Margin="0,10,0,0"
                       ItemsSource="{Binding VideoCodecs}"
                       SelectedItem="{Binding SelectedVideoCodec, Mode=TwoWay}"
@@ -290,38 +290,38 @@
             </ComboBox>
 
             <ToggleSwitch Header="Tracing"
-                          Grid.Row="13"
+                          Grid.Row="11"
                           IsOn="{Binding TracingEnabled, Mode=TwoWay}"
                           Width="Auto"
                           MinWidth="200"
                           Margin="0,10,0,0"/>
             <TextBlock TextWrapping="Wrap"
-                       Grid.Row="14"
+                       Grid.Row="12"
                        Margin="5,0,5,0"
                        Text="Note: Traces are automatically sent upon the tracing is stopped!" />
             <TextBox Header="Trace server IP"
-                     Grid.Row="15"
+                     Grid.Row="13"
                      IsEnabled="{Binding TracingEnabled, Mode=OneWay}"
                      PlaceholderText="IPv4"
                      Text="{Binding TraceServerIp, Mode=TwoWay}"/>
             <TextBox Header="Trace server port"
-                     Grid.Row="16"
+                     Grid.Row="14"
                      Text="{Binding TraceServerPort, Mode=TwoWay}"
                      IsEnabled="{Binding TracingEnabled, Mode=OneWay}"
                      PlaceholderText="Port"/>
             <ToggleSwitch Header="Logging"
-                          Grid.Row="17"
+                          Grid.Row="15"
                           IsOn="{Binding LoggingEnabled, Mode=TwoWay}"
                           Margin="0,10,0,0"/>
             <ComboBox Width="200"
-                      Grid.Row="18"
+                      Grid.Row="16"
                       HorizontalAlignment="Left" 
                       Header="Capture resolution:"
                       ItemsSource="{Binding AllCapRes, Mode=TwoWay}"
                       SelectedItem="{Binding SelectedCapResItem, Mode=TwoWay}"
                       Margin="0,10,0,0"/>
             <ComboBox Width="200"
-                      Grid.Row="19"
+                      Grid.Row="17"
                       HorizontalAlignment="Left"
                       Header="Capture frame rate:"
                       DisplayMemberPath="FrameRateDescription" 
@@ -329,21 +329,21 @@
                       SelectedItem="{Binding SelectedCapFPSItem, Mode=TwoWay}"
                       Margin="0,10,0,0"/>
             <TextBox Header="Crash report user info"
-                     Grid.Row="20"
+                     Grid.Row="18"
                      Text="{Binding CrashReportUserInfo, Mode=TwoWay}"
                      PlaceholderText="User info"/>
             <ToggleSwitch Name="NtpSyncToggleSwitch"
                           Header="NTP Sync"
                           IsOn="{Binding NtpSyncEnabled, Mode=TwoWay}"
                           IsEnabled="{Binding NtpSyncInProgress, Mode=OneWay, Converter={StaticResource InvertedBooleanConverter}}"
-                          Grid.Row="21"
+                          Grid.Row="19"
                           Margin="0,10,0,0"/>
             <TextBlock Name="NtpSyncInProgressLabel"
                        Text="NTP sync in progress..."
                        Visibility="{Binding NtpSyncInProgress, Mode=OneWay, Converter={StaticResource BoolToVisConverter}}"
-                       Grid.Row="22"/>
+                       Grid.Row="20"/>
             <Controls:ErrorControl DataContext="{Binding NtpServer}"
-                                   Grid.Row="23">
+                                   Grid.Row="21">
                 <Controls:ErrorControl.InnerContent>
                     <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              MinWidth="160"
@@ -353,12 +353,12 @@
             <ToggleSwitch Name="ETWStatsToggle"
                           Header="ETW Statistics"
                           IsOn="{Binding ETWStatsEnabled, Mode=TwoWay}"
-                          Grid.Row="24"
+                          Grid.Row="22"
                           Margin="0,10,0,0"/>
             <ToggleSwitch Name="ConnectionHealthStatsToggle"
                           Header="Connection Health Statistics"  
                           IsOn="{Binding PeerConnectionHealthStatsEnabled, Mode=TwoWay}"
-                          Grid.Row="25"
+                          Grid.Row="23"
                           Margin="0,10,0,0"/>
         </Grid>
     </ScrollViewer>

@@ -459,58 +459,48 @@
                         Text="Audio and Video"
                         Style="{StaticResource SubtitleTextBlockStyle}"
                         RelativePanel.AlignTopWithPanel="True"/>
-                    <TextBlock
-                        Name="CameraListBoxHeader"
-                        Text="Available cameras"
-                        Style="{StaticResource TextBlockHeader}"
+                    <ComboBox
+                        Name="CameraCombo"
+                        Header="Cameras"
                         Margin="5"
-                        RelativePanel.Below="AudioVideoSettingsPanelHeader"/>
-                    <ListBox 
-                        Name="CameraListBox"
-                        MinHeight="120"
-                        Width="300"
                         ItemsSource="{Binding Cameras}"
                         SelectedItem="{Binding SelectedCamera, Mode=TwoWay}"
-                        BorderThickness="1"
-                        BorderBrush="Black"
-                        RelativePanel.Below="CameraListBoxHeader"
-                        RelativePanel.AlignRightWithPanel="True"
-                        RelativePanel.AlignLeftWithPanel="True"
-                        Margin="5">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock 
-                                    Text="{Binding Name}"
-                                    Style="{StaticResource CaptionTextBlockStyle}"/>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                    <TextBlock 
-                        Name="MicrophoneListBoxHeader"
-                        Text="Available microphones"
-                        Style="{StaticResource TextBlockHeader}"
-                        Margin="5"
-                        RelativePanel.Below="CameraListBox"/>
-                    <ListBox 
-                        Name="MicrophoneListBox"
-                        MinHeight="120"
                         Width="300"
+                        HorizontalAlignment="Left"
+                        RelativePanel.Below="AudioVideoSettingsPanelHeader"
+                        RelativePanel.AlignRightWithPanel="True"
+                        RelativePanel.AlignLeftWithPanel="True">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock
+                                        Text="{Binding Name}"
+                                        Style="{StaticResource CaptionTextBlockStyle}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <ComboBox
+                        Name="MicrophonesCombo"
+                        Header="Microphones"
+                        Margin="5"
                         ItemsSource="{Binding Microphones}"
                         SelectedItem="{Binding SelectedMicrophone, Mode=TwoWay}"
-                        BorderThickness="1"
-                        BorderBrush="Black"
-                        RelativePanel.Below="MicrophoneListBoxHeader"
+                        Width="300"
+                        HorizontalAlignment="Left"
+                        RelativePanel.Below="CameraCombo"
                         RelativePanel.AlignRightWithPanel="True"
-                        RelativePanel.AlignLeftWithPanel="True"
-                        Margin="5">
-                        <ListBox.ItemTemplate>
+                        RelativePanel.AlignLeftWithPanel="True">
+                        <ComboBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock 
-                                    Text="{Binding Name}"
-                                    Style="{StaticResource CaptionTextBlockStyle}"/>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock
+                                        Text="{Binding Name}"
+                                        Style="{StaticResource CaptionTextBlockStyle}"/>
+                                </StackPanel>
                             </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                     <ComboBox
                         Name="SpeakersCombo"
                         Header="Speakers"
@@ -519,7 +509,7 @@
                         SelectedItem="{Binding SelectedAudioPlayoutDevice, Mode=TwoWay}"
                         Width="300"
                         HorizontalAlignment="Left"
-                        RelativePanel.Below="MicrophoneListBox"
+                        RelativePanel.Below="MicrophonesCombo"
                         RelativePanel.AlignRightWithPanel="True"
                         RelativePanel.AlignLeftWithPanel="True">
                         <ComboBox.ItemTemplate>
