@@ -108,11 +108,10 @@ namespace PeerConnectionClient.ViewModels
             Debug.WriteLine("Re-establishing peer video");
             Media.CreateMediaAsync().AsTask().ContinueWith(media => 
             {
-              var source = media.Result.CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
+              var source = media.Result.CreateMediaSource(_peerVideoTrack, "PEER");
               RunOnUiThread(() =>
               {
                 PeerVideo.SetMediaStreamSource(source);
-                PeerVideo.Play();
                 Debug.WriteLine("Peer video re-established");
               });
             });
@@ -133,11 +132,10 @@ namespace PeerConnectionClient.ViewModels
             Debug.WriteLine("Re-establishing self video");
             Media.CreateMediaAsync().AsTask().ContinueWith(media =>
             {
-              var source = media.Result.CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
+              var source = media.Result.CreateMediaSource(_selfVideoTrack, "SELF");
               RunOnUiThread(() =>
               {
                 SelfVideo.SetMediaStreamSource(source);
-                SelfVideo.Play();
                 Debug.WriteLine("Self video re-established");
               });
             });
@@ -499,7 +497,7 @@ namespace PeerConnectionClient.ViewModels
             {
                 Media.CreateMediaAsync().AsTask().ContinueWith(media => 
                 {
-                  var source = media.Result.CreateMediaStreamSource(_peerVideoTrack, 30, "PEER");
+                  var source = media.Result.CreateMediaSource(_peerVideoTrack, "PEER");
                   RunOnUiThread(() =>
                   {
                     PeerVideo.SetMediaStreamSource(source);
@@ -532,7 +530,7 @@ namespace PeerConnectionClient.ViewModels
           {
             Media.CreateMediaAsync().AsTask().ContinueWith(media => 
             {
-              var source = media.Result.CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
+              var source = media.Result.CreateMediaSource(_selfVideoTrack, "SELF");
               RunOnUiThread(() =>
                 {
                   if (_cameraEnabled)
@@ -1357,11 +1355,10 @@ namespace PeerConnectionClient.ViewModels
                             Debug.WriteLine("Enabling video loopback");
                             Media.CreateMediaAsync().AsTask().ContinueWith(media =>
                             {
-                                var source = media.Result.CreateMediaStreamSource(_selfVideoTrack, 30, "SELF");
+                                var source = media.Result.CreateMediaSource(_selfVideoTrack, "SELF");
                                 RunOnUiThread(() =>
                                 {
                                     SelfVideo.SetMediaStreamSource(source);
-                                    SelfVideo.Play();
                                     Debug.WriteLine("Video loopback enabled");
                                 });
                             });
