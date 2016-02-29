@@ -151,11 +151,6 @@ namespace PeerConnectionClient.ViewModels
 
         private NtpService _ntpService;
 
-        // Flag for showing whether camera fields (resolution and frame rate)
-        // are changing, because camera is initializing. This is used to
-        // prevent updating local setting values
-        bool isInitializingCamera = false;
-
         /// <summary>
         /// The initializer for MainViewModel.
         /// </summary>
@@ -225,6 +220,8 @@ namespace PeerConnectionClient.ViewModels
             {
                 SelectedAudioPlayoutDevice = AudioPlayoutDevices.First();
             }
+
+            Conductor.Instance.Media.OnMediaDevicesChanged += OnMediaDevicesChanged;
 
             // Handler for Peer/Self video frame rate changed event
             FrameCounterHelper.FramesPerSecondChanged += (id, frameRate) =>
@@ -483,6 +480,119 @@ namespace PeerConnectionClient.ViewModels
               {
                   OnInitialized();
               }
+            });
+        }
+
+        /// <summary>
+        /// Handle media devices change event triggered by WebRTC.
+        /// </summary>
+        /// <param name="mediaType">The type of devices changed</param>
+        private void OnMediaDevicesChanged(MediaDeviceType mediaType)
+        {
+            switch(mediaType)
+            {
+                case MediaDeviceType.MediaDeviceType_VideoCapture:
+                    RefreshVideoCaptureDevices();
+                    break;
+                case MediaDeviceType.MediaDeviceType_AudioCapture:
+                    RefreshAudioCaptureDevices();
+                    break;
+                case MediaDeviceType.MediaDeviceType_AudioPlayout:
+                    RefreshAudioPlayoutDevices();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Refresh video capture devices list.
+        /// </summary>
+        private void RefreshVideoCaptureDevices()
+        {
+            var videoCaptureDevices = Conductor.Instance.Media.GetVideoCaptureDevices();
+            RunOnUiThread(() => {
+                Collection<MediaDevice> videoCaptureDevicesToRemove = new Collection<MediaDevice>();
+                foreach (MediaDevice videoCaptureDevice in Cameras)
+                {
+                    if (videoCaptureDevices.FirstOrDefault(x => x.Id == videoCaptureDevice.Id) == null)
+                    {
+                        videoCaptureDevicesToRemove.Add(videoCaptureDevice);
+                    }
+                }
+                foreach (MediaDevice removedVideoCaptureDevices in videoCaptureDevicesToRemove)
+                {
+                    if (SelectedCamera.Id == removedVideoCaptureDevices.Id)
+                    {
+                        SelectedCamera = null;
+                    }
+                    Cameras.Remove(removedVideoCaptureDevices);
+                }
+                foreach (MediaDevice videoCaptureDevice in videoCaptureDevices)
+                {
+                    if (Cameras.FirstOrDefault(x => x.Id == videoCaptureDevice.Id) == null)
+                    {
+                        Cameras.Add(videoCaptureDevice);
+                    }
+                }
+
+                if (SelectedCamera == null)
+                {
+                    SelectedCamera = Cameras.FirstOrDefault();
+                }
+            });
+        }
+
+        /// <summary>
+        /// Refresh audio capture devices list.
+        /// </summary>
+        private void RefreshAudioCaptureDevices()
+        {
+            var audioCaptureDevices = Conductor.Instance.Media.GetAudioCaptureDevices();
+            RunOnUiThread(() => {
+                var SelectedMicrophoneId = SelectedMicrophone != null ? SelectedMicrophone.Id : null;
+                SelectedMicrophone = null;
+                Microphones.Clear();
+                foreach (MediaDevice audioCaptureDevice in audioCaptureDevices)
+                {
+                    Microphones.Add(audioCaptureDevice);
+                    if (audioCaptureDevice.Id == SelectedMicrophoneId)
+                    {
+                        SelectedMicrophone = Microphones.Last();
+                    }
+                }
+                if (SelectedMicrophone == null)
+                {
+                    SelectedMicrophone = Microphones.FirstOrDefault();
+                }
+
+                if (SelectedMicrophone == null)
+                {
+                    SelectedMicrophone = Microphones.FirstOrDefault();
+                }
+            });
+        }
+
+        /// <summary>
+        /// Refresh audio playout devices list.
+        /// </summary>
+        private void RefreshAudioPlayoutDevices()
+        {
+            var audioPlayoutDevices = Conductor.Instance.Media.GetAudioPlayoutDevices();
+            RunOnUiThread(() => {
+                var SelectedPlayoutDeviceId = SelectedAudioPlayoutDevice != null ? SelectedAudioPlayoutDevice.Id : null;
+                SelectedAudioPlayoutDevice = null;
+                AudioPlayoutDevices.Clear();
+                foreach (MediaDevice audioPlayoutDevice in audioPlayoutDevices)
+                {
+                    AudioPlayoutDevices.Add(audioPlayoutDevice);
+                    if (audioPlayoutDevice.Id == SelectedPlayoutDeviceId)
+                    {
+                        SelectedAudioPlayoutDevice = audioPlayoutDevice;
+                    }
+                }
+                if (SelectedAudioPlayoutDevice == null)
+                {
+                    SelectedAudioPlayoutDevice = AudioPlayoutDevices.FirstOrDefault();
+                }
             });
         }
 
@@ -1155,11 +1265,14 @@ namespace PeerConnectionClient.ViewModels
             set
             {
                 SetProperty(ref _selectedCamera, value);
-                if (!isInitializingCamera)
+
+                if (value == null)
                 {
-                    var localSettings = ApplicationData.Current.LocalSettings;
-                    localSettings.Values["SelectedCameraId"] = _selectedCamera.Id;
+                    return;
                 }
+
+                var localSettings = ApplicationData.Current.LocalSettings;
+                localSettings.Values["SelectedCameraId"] = _selectedCamera.Id;
                 Conductor.Instance.Media.SelectVideoDevice(_selectedCamera);
                 if (_allCapRes == null)
                 {
@@ -1169,12 +1282,7 @@ namespace PeerConnectionClient.ViewModels
                 {
                     _allCapRes.Clear();
                 }
-                if (value == null)
-                {
-                    Debug.WriteLine("[Warn] SetSelectedCamera: Skip obtaining VideoCaptureCapabilities.");
-                    isInitializingCamera = false;
-                    return;
-                }
+
                 var opRes = value.GetVideoCaptureCapabilities();
                 opRes.AsTask().ContinueWith(resolutions =>
                 {
@@ -1189,7 +1297,6 @@ namespace PeerConnectionClient.ViewModels
                             Debug.WriteLine("[Error] " + errorMsg);
                             var msgDialog = new MessageDialog(errorMsg);
                             await msgDialog.ShowAsync();
-                            isInitializingCamera = false;
                             return;
                         }
                         if (resolutions.Result == null)
@@ -1198,7 +1305,6 @@ namespace PeerConnectionClient.ViewModels
                             Debug.WriteLine("[Error] " + errorMsg);
                             var msgDialog = new MessageDialog(errorMsg);
                             await msgDialog.ShowAsync();
-                            isInitializingCamera = false;
                             return;
                         }
                         var uniqueRes = resolutions.Result.GroupBy(test => test.ResolutionDescription).Select(grp => grp.First()).ToList();
@@ -1261,10 +1367,12 @@ namespace PeerConnectionClient.ViewModels
             get { return _selectedMicrophone; }
             set
             {
-                SetProperty(ref _selectedMicrophone, value);
-                Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
-                var localSettings = ApplicationData.Current.LocalSettings;
-                localSettings.Values["SelectedMicrophoneId"] = _selectedMicrophone.Id;
+                if (SetProperty(ref _selectedMicrophone, value) && value != null)
+                {
+                    var localSettings = ApplicationData.Current.LocalSettings;
+                    localSettings.Values["SelectedMicrophoneId"] = _selectedMicrophone.Id;
+                    Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
+                }
             }
         }
 
@@ -1294,14 +1402,11 @@ namespace PeerConnectionClient.ViewModels
             get { return _selectedAudioPlayoutDevice; }
             set
             {
-                if (SetProperty(ref _selectedAudioPlayoutDevice, value))
+                if (SetProperty(ref _selectedAudioPlayoutDevice, value) && value != null)
                 {
+                    var localSettings = ApplicationData.Current.LocalSettings;
+                    localSettings.Values["SelectedAudioPlayoutDeviceId"] = _selectedAudioPlayoutDevice.Id;
                     Conductor.Instance.Media.SelectAudioPlayoutDevice(_selectedAudioPlayoutDevice);
-                    if (_selectedAudioPlayoutDevice != null)
-                    {
-                        var localSettings = ApplicationData.Current.LocalSettings;
-                        localSettings.Values["SelectedAudioPlayoutDeviceId"] = _selectedAudioPlayoutDevice.Id;
-                    }
                 }
             }
         }
@@ -1551,11 +1656,9 @@ namespace PeerConnectionClient.ViewModels
             get { return _selectedCapResItem; }
             set
             {
-                if (!isInitializingCamera)
-                {
-                    var localSettings = ApplicationData.Current.LocalSettings;
-                    localSettings.Values["SelectedCapResItem"] = value;
-                }
+                var localSettings = ApplicationData.Current.LocalSettings;
+                localSettings.Values["SelectedCapResItem"] = value;
+
                 if (AllCapFPS == null)
                 {
                     AllCapFPS = new ObservableCollection<CaptureCapability>();
@@ -1625,18 +1728,11 @@ namespace PeerConnectionClient.ViewModels
             {
                 if (SetProperty(ref _selectedCapFPSItem, value))
                 {
-                  Conductor.Instance.VideoCaptureProfile = value;
-                  Conductor.Instance.updatePreferredFrameFormat();
+                    Conductor.Instance.VideoCaptureProfile = value;
+                    Conductor.Instance.updatePreferredFrameFormat();
 
-                  if (!isInitializingCamera)
-                  {
-                      var localSettings = ApplicationData.Current.LocalSettings;
-                      localSettings.Values["SelectedCapFPSItemFrameRate"] = (value != null) ? value.FrameRate : 0;
-                  }
-                  else
-                  {
-                      isInitializingCamera = false;
-                  }
+                    var localSettings = ApplicationData.Current.LocalSettings;
+                    localSettings.Values["SelectedCapFPSItemFrameRate"] = (value != null) ? value.FrameRate : 0;
                 }
             }
         }
