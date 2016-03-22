@@ -132,7 +132,7 @@ namespace PeerConnectionClient.Signalling
                 _etwStatsEnabled = value;
                 if (_peerConnection != null)
                 {
-                    _peerConnection.ToggleETWStats(_etwStatsEnabled);
+                    _peerConnection.EtwStatsEnabled = value;
                 }
             }
         }
@@ -154,7 +154,7 @@ namespace PeerConnectionClient.Signalling
                 _peerConnectionStatsEnabled = value;
                 if (_peerConnection != null)
                 {
-                    _peerConnection.ToggleConnectionHealthStats(_peerConnectionStatsEnabled);
+                    _peerConnection.ConnectionHealthStatsEnabled = value;
                 }
             }
         }
@@ -203,8 +203,8 @@ namespace PeerConnectionClient.Signalling
 
             Debug.WriteLine("Conductor: Creating peer connection.");
             _peerConnection = new RTCPeerConnection(config);
-            _peerConnection.ToggleETWStats(_etwStatsEnabled);
-            _peerConnection.ToggleConnectionHealthStats(_peerConnectionStatsEnabled);
+            _peerConnection.EtwStatsEnabled = _etwStatsEnabled;
+            _peerConnection.ConnectionHealthStatsEnabled = _peerConnectionStatsEnabled;
             if (cancelationToken.IsCancellationRequested)
             {
                 return false;

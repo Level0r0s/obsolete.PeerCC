@@ -1494,9 +1494,9 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         private async Task SavingLogging()
         {
-            StorageFolder logFolder = WebRTC.LogFolder();
+            StorageFolder logFolder = WebRTC.LogFolder;
 
-            String logFileName = WebRTC.LogFileName();
+            String logFileName = WebRTC.LogFileName;
 
             StorageFile logFile= await logFolder.GetFileAsync(logFileName);
 
@@ -2425,8 +2425,8 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         private void ReportAppPerfData(object sender, object e)
         {
-            WebRTC.UpdateCPUUsage(CPUData.GetCPUUsage());
-            WebRTC.UpdateMemUsage(MEMData.GetMEMUsage());
+            WebRTC.CpuUsage = CPUData.GetCPUUsage();
+            WebRTC.MemoryUsage = MEMData.GetMEMUsage();
         }
     }
 }
