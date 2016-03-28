@@ -96,7 +96,6 @@ namespace PeerConnectionClient.ViewModels
               RunOnUiThread(() =>
               {
                 PeerVideo.SetMediaStreamSource(source);
-                PeerVideo.Play();
                 Debug.WriteLine("Peer video re-established");
               });
             });
@@ -121,7 +120,6 @@ namespace PeerConnectionClient.ViewModels
               RunOnUiThread(() =>
               {
                 SelfVideo.SetMediaStreamSource(source);
-                SelfVideo.Play();
                 Debug.WriteLine("Self video re-established");
               });
             });
@@ -1368,7 +1366,6 @@ namespace PeerConnectionClient.ViewModels
                                 RunOnUiThread(() =>
                                 {
                                     SelfVideo.SetMediaStreamSource(source);
-                                    SelfVideo.Play();
                                     Debug.WriteLine("Video loopback enabled");
                                 });
                             });
