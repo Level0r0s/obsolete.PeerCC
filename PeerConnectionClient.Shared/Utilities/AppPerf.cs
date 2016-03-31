@@ -9,12 +9,17 @@
 //
 //*********************************************************
 
+// The Windows APIs used in this file will fail WACK tests.
+// remove #define _APP_PERFORMANCE_  in the final build
+#define _APP_PERFORMANCE_
+
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace PeerConnectionClient.Utilities
 {
+#if _APP_PERFORMANCE_
     static class MEMData
     {
     // Todo: added by ling, WINDOWS_PHONE_APP is not available for vs2015 when build win10 for arm
@@ -769,4 +774,23 @@ namespace PeerConnectionClient.Utilities
         public IntPtr PeakPagefileUsage;      // The peak value in bytes of the Commit Charge during the lifetime of this process (SIZE_T).
         public IntPtr PrivateUsage;
     }
+#else
+    //Dummy implementation if _APP_PERFORMANCE_ is not defined
+    internal static class MEMData
+    {
+        public static Int64 GetMEMUsage()
+        {
+            return 0;
+        }
+    }
+
+    internal static class CPUData
+    {
+        public static double GetCPUUsage()
+        {
+            return 0;
+        }
+    }
+
+#endif
 }
