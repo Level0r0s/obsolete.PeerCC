@@ -164,11 +164,11 @@ namespace PeerConnectionClient.Signalling
         /// </summary>
         public void updatePreferredFrameFormat()
         {
-          if (VideoCaptureProfile != null)
-          {
-            WebRTC.SetPreferredVideoCaptureFormat(
-              (int)VideoCaptureProfile.Width, (int)VideoCaptureProfile.Height, (int)VideoCaptureProfile.FrameRate);
-          }
+            if (VideoCaptureProfile != null)
+            {
+                _media.SetPreferredVideoCaptureFormat(
+                    (int)VideoCaptureProfile.Width, (int)VideoCaptureProfile.Height, (int)VideoCaptureProfile.FrameRate);
+            }
         }
 
         /// <summary>
