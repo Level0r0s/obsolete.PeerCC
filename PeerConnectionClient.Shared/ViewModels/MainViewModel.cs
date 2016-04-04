@@ -106,15 +106,14 @@ namespace PeerConnectionClient.ViewModels
           if (_peerVideoTrack != null)
           {
             Debug.WriteLine("Re-establishing peer video");
-            Media.CreateMediaAsync().AsTask().ContinueWith(media => 
+
+            var source = Media.CreateMedia().CreateMediaSource(_peerVideoTrack, "PEER");
+            RunOnUiThread(() =>
             {
-              var source = media.Result.CreateMediaSource(_peerVideoTrack, "PEER");
-              RunOnUiThread(() =>
-              {
-                PeerVideo.SetMediaStreamSource(source);
-                Debug.WriteLine("Peer video re-established");
-              });
+              PeerVideo.SetMediaStreamSource(source);
+              Debug.WriteLine("Peer video re-established");
             });
+
           }
         }
 
@@ -130,15 +129,14 @@ namespace PeerConnectionClient.ViewModels
           if (_selfVideoTrack != null && VideoLoopbackEnabled)
           {
             Debug.WriteLine("Re-establishing self video");
-            Media.CreateMediaAsync().AsTask().ContinueWith(media =>
+
+            var source = Media.CreateMedia().CreateMediaSource(_selfVideoTrack, "SELF");
+            RunOnUiThread(() =>
             {
-              var source = media.Result.CreateMediaSource(_selfVideoTrack, "SELF");
-              RunOnUiThread(() =>
-              {
                 SelfVideo.SetMediaStreamSource(source);
                 Debug.WriteLine("Self video re-established");
-              });
             });
+
           }
         }
 
@@ -605,15 +603,13 @@ namespace PeerConnectionClient.ViewModels
             _peerVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
             if (_peerVideoTrack != null)
             {
-                Media.CreateMediaAsync().AsTask().ContinueWith(media => 
+                var source = Media.CreateMedia().CreateMediaSource(_peerVideoTrack, "PEER");
+                RunOnUiThread(() =>
                 {
-                  var source = media.Result.CreateMediaSource(_peerVideoTrack, "PEER");
-                  RunOnUiThread(() =>
-                  {
-                    PeerVideo.SetMediaStreamSource(source);
-                  });
+                  PeerVideo.SetMediaStreamSource(source);
                 });
             }
+
             IsReadyToDisconnect = true;
         }
 
@@ -637,36 +633,35 @@ namespace PeerConnectionClient.ViewModels
         {
           _selfVideoTrack = evt.Stream.GetVideoTracks().FirstOrDefault();
           if (_selfVideoTrack != null)
-          {
-            Media.CreateMediaAsync().AsTask().ContinueWith(media => 
             {
-              var source = media.Result.CreateMediaSource(_selfVideoTrack, "SELF");
-              RunOnUiThread(() =>
-                {
-                  if (_cameraEnabled)
-                  {
-                    Conductor.Instance.EnableLocalVideoStream();
-                  }
-                  else
-                  {
-                    Conductor.Instance.DisableLocalVideoStream();
-                  }
 
-                  if (_microphoneIsOn)
+                var source = Media.CreateMedia().CreateMediaSource(_selfVideoTrack, "SELF");
+                RunOnUiThread(() =>
                   {
-                    Conductor.Instance.UnmuteMicrophone();
-                  }
-                  else
-                  {
-                    Conductor.Instance.MuteMicrophone();
-                  }
-                  if (VideoLoopbackEnabled)
-                  {
-                    SelfVideo.SetMediaStreamSource(source);
-                  }
-                });
-            });
-          }
+                      if (_cameraEnabled)
+                      {
+                          Conductor.Instance.EnableLocalVideoStream();
+                      }
+                      else
+                      {
+                          Conductor.Instance.DisableLocalVideoStream();
+                      }
+
+                      if (_microphoneIsOn)
+                      {
+                          Conductor.Instance.UnmuteMicrophone();
+                      }
+                      else
+                      {
+                          Conductor.Instance.MuteMicrophone();
+                      }
+                      if (VideoLoopbackEnabled)
+                      {
+                          SelfVideo.SetMediaStreamSource(source);
+                      }
+                  });
+
+            }
         }
 
         /// <summary>
@@ -1371,7 +1366,7 @@ namespace PeerConnectionClient.ViewModels
                 {
                     var localSettings = ApplicationData.Current.LocalSettings;
                     localSettings.Values["SelectedMicrophoneId"] = _selectedMicrophone.Id;
-                    Conductor.Instance.Media.SelectAudioDevice(_selectedMicrophone);
+                    Conductor.Instance.Media.SelectAudioCaptureDevice(_selectedMicrophone);
                 }
             }
         }
@@ -1458,15 +1453,14 @@ namespace PeerConnectionClient.ViewModels
                         if (_selfVideoTrack != null)
                         {
                             Debug.WriteLine("Enabling video loopback");
-                            Media.CreateMediaAsync().AsTask().ContinueWith(media =>
+
+                            var source = Media.CreateMedia().CreateMediaSource(_selfVideoTrack, "SELF");
+                            RunOnUiThread(() =>
                             {
-                                var source = media.Result.CreateMediaSource(_selfVideoTrack, "SELF");
-                                RunOnUiThread(() =>
-                                {
-                                    SelfVideo.SetMediaStreamSource(source);
-                                    Debug.WriteLine("Video loopback enabled");
-                                });
+                                SelfVideo.SetMediaStreamSource(source);
+                                Debug.WriteLine("Video loopback enabled");
                             });
+ 
                         }
                     }
                     else

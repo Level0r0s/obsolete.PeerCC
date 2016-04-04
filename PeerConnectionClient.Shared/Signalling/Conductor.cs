@@ -233,6 +233,7 @@ namespace PeerConnectionClient.Signalling
             {
                 return false;
             }
+
             _mediaStream = await _media.GetUserMedia(mediaStreamConstraints);
             if (cancelationToken.IsCancellationRequested)
             {
