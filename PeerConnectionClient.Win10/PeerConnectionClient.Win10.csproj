@@ -209,12 +209,6 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\winrt\projects\api\org.ortc.adapter\org.ortc.adapter\org.ortc.adapter.csproj">
-      <Project>{7d09a933-37b7-4192-ac97-f88d139b70cd}</Project>
-      <Name>org.ortc.adapter</Name>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

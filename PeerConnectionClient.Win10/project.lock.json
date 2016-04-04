@@ -220,6 +220,34 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "ORTC/1.0.1-Beta": {
+        "compile": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        }
+      },
+      "ORTC.Adapter/1.0.1-Beta": {
+        "dependencies": {
+          "ORTC": "[1.0.1-Beta, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.IO": "[4.0.10, )",
+          "System.Linq": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices.WindowsRuntime": "[4.0.0, )",
+          "System.Runtime.WindowsRuntime": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )",
+          "System.Threading.Tasks": "[4.0.10, )"
+        },
+        "compile": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
+        },
+        "runtime": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
+        }
+      },
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.0, )",
@@ -1815,6 +1843,37 @@
         },
         "runtime": {
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
+        }
+      },
+      "ORTC/1.0.1-Beta": {
+        "compile": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "native": {
+          "runtimes/win10-arm/native/org.ortc.dll": {}
+        }
+      },
+      "ORTC.Adapter/1.0.1-Beta": {
+        "dependencies": {
+          "ORTC": "[1.0.1-Beta, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.IO": "[4.0.10, )",
+          "System.Linq": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices.WindowsRuntime": "[4.0.0, )",
+          "System.Runtime.WindowsRuntime": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )",
+          "System.Threading.Tasks": "[4.0.10, )"
+        },
+        "compile": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
+        },
+        "runtime": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
         }
       },
       "System.AppContext/4.0.0": {
@@ -3445,6 +3504,37 @@
         },
         "runtime": {
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
+        }
+      },
+      "ORTC/1.0.1-Beta": {
+        "compile": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "native": {
+          "runtimes/win10-arm/native/org.ortc.dll": {}
+        }
+      },
+      "ORTC.Adapter/1.0.1-Beta": {
+        "dependencies": {
+          "ORTC": "[1.0.1-Beta, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.IO": "[4.0.10, )",
+          "System.Linq": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices.WindowsRuntime": "[4.0.0, )",
+          "System.Runtime.WindowsRuntime": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )",
+          "System.Threading.Tasks": "[4.0.10, )"
+        },
+        "compile": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
+        },
+        "runtime": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
         }
       },
       "System.AppContext/4.0.0": {
@@ -5082,6 +5172,37 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "ORTC/1.0.1-Beta": {
+        "compile": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "native": {
+          "runtimes/win10-x64/native/org.ortc.dll": {}
+        }
+      },
+      "ORTC.Adapter/1.0.1-Beta": {
+        "dependencies": {
+          "ORTC": "[1.0.1-Beta, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.IO": "[4.0.10, )",
+          "System.Linq": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices.WindowsRuntime": "[4.0.0, )",
+          "System.Runtime.WindowsRuntime": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )",
+          "System.Threading.Tasks": "[4.0.10, )"
+        },
+        "compile": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
+        },
+        "runtime": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
+        }
+      },
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.0, )",
@@ -6710,6 +6831,37 @@
         },
         "runtime": {
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
+        }
+      },
+      "ORTC/1.0.1-Beta": {
+        "compile": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "native": {
+          "runtimes/win10-x64/native/org.ortc.dll": {}
+        }
+      },
+      "ORTC.Adapter/1.0.1-Beta": {
+        "dependencies": {
+          "ORTC": "[1.0.1-Beta, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.IO": "[4.0.10, )",
+          "System.Linq": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices.WindowsRuntime": "[4.0.0, )",
+          "System.Runtime.WindowsRuntime": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )",
+          "System.Threading.Tasks": "[4.0.10, )"
+        },
+        "compile": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
+        },
+        "runtime": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
         }
       },
       "System.AppContext/4.0.0": {
@@ -8347,6 +8499,37 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "ORTC/1.0.1-Beta": {
+        "compile": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "native": {
+          "runtimes/win10-x86/native/org.ortc.dll": {}
+        }
+      },
+      "ORTC.Adapter/1.0.1-Beta": {
+        "dependencies": {
+          "ORTC": "[1.0.1-Beta, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.IO": "[4.0.10, )",
+          "System.Linq": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices.WindowsRuntime": "[4.0.0, )",
+          "System.Runtime.WindowsRuntime": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )",
+          "System.Threading.Tasks": "[4.0.10, )"
+        },
+        "compile": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
+        },
+        "runtime": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
+        }
+      },
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.0, )",
@@ -9975,6 +10158,37 @@
         },
         "runtime": {
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
+        }
+      },
+      "ORTC/1.0.1-Beta": {
+        "compile": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "runtime": {
+          "lib/uap10.0/org.ortc.winmd": {}
+        },
+        "native": {
+          "runtimes/win10-x86/native/org.ortc.dll": {}
+        }
+      },
+      "ORTC.Adapter/1.0.1-Beta": {
+        "dependencies": {
+          "ORTC": "[1.0.1-Beta, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.IO": "[4.0.10, )",
+          "System.Linq": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices.WindowsRuntime": "[4.0.0, )",
+          "System.Runtime.WindowsRuntime": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )",
+          "System.Threading.Tasks": "[4.0.10, )"
+        },
+        "compile": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
+        },
+        "runtime": {
+          "lib/.NETCore50/org.ortc.adapter.dll": {}
         }
       },
       "System.AppContext/4.0.0": {
@@ -12046,6 +12260,32 @@
         "ref/net46/Microsoft.Win32.Primitives.dll",
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._"
+      ]
+    },
+    "ORTC/1.0.1-Beta": {
+      "sha512": "douisal661jalB9is7sIFoh2JuChywTzF0Vbfa8oEoup6wor46iwELKo2nvoT+C6NQN2jrSjtRAkam/mPrzhhA==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "build/native/org.ortc.targets",
+        "lib/uap10.0/org.ortc.winmd",
+        "ORTC.nuspec",
+        "package/services/metadata/core-properties/ea23b8bfbb7d457091f72167d63b1c9f.psmdcp",
+        "runtimes/win10-arm/native/org.ortc.dll",
+        "runtimes/win10-x64/native/org.ortc.dll",
+        "runtimes/win10-x86/native/org.ortc.dll"
+      ]
+    },
+    "ORTC.Adapter/1.0.1-Beta": {
+      "sha512": "6w5tqohfIoFc43N8zk+T9ZlcsiD+5Tnx26y13MlkIwuXNxXtEdYrdT2X2JnJ6yBQrt+FIETUJTg8doG3oQS4fA==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/.NETCore50/org.ortc.adapter.dll",
+        "ORTC.Adapter.nuspec",
+        "package/services/metadata/core-properties/ec1e0be2dbd645efa50369db6d805cfc.psmdcp"
       ]
     },
     "System.AppContext/4.0.0": {
@@ -14747,7 +14987,8 @@
   "projectFileDependencyGroups": {
     "": [
       "HockeySDK.WINRT >= 2.2.2",
-      "Microsoft.NETCore.UniversalWindowsPlatform >= 5.0.0"
+      "Microsoft.NETCore.UniversalWindowsPlatform >= 5.0.0",
+      "ORTC.Adapter >= 1.0.1-Beta"
     ],
     "UAP,Version=v10.0": []
   }
