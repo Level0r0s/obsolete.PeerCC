@@ -228,7 +228,7 @@
           "lib/uap10.0/org.ortc.winmd": {}
         }
       },
-      "ORTC.Adapter/1.0.1-Beta": {
+      "ORTC.Adapter/1.0.2-Beta": {
         "dependencies": {
           "ORTC": "[1.0.1-Beta, )",
           "System.Collections": "[4.0.10, )",
@@ -1856,7 +1856,7 @@
           "runtimes/win10-arm/native/org.ortc.dll": {}
         }
       },
-      "ORTC.Adapter/1.0.1-Beta": {
+      "ORTC.Adapter/1.0.2-Beta": {
         "dependencies": {
           "ORTC": "[1.0.1-Beta, )",
           "System.Collections": "[4.0.10, )",
@@ -3517,7 +3517,7 @@
           "runtimes/win10-arm/native/org.ortc.dll": {}
         }
       },
-      "ORTC.Adapter/1.0.1-Beta": {
+      "ORTC.Adapter/1.0.2-Beta": {
         "dependencies": {
           "ORTC": "[1.0.1-Beta, )",
           "System.Collections": "[4.0.10, )",
@@ -5183,7 +5183,7 @@
           "runtimes/win10-x64/native/org.ortc.dll": {}
         }
       },
-      "ORTC.Adapter/1.0.1-Beta": {
+      "ORTC.Adapter/1.0.2-Beta": {
         "dependencies": {
           "ORTC": "[1.0.1-Beta, )",
           "System.Collections": "[4.0.10, )",
@@ -6844,7 +6844,7 @@
           "runtimes/win10-x64/native/org.ortc.dll": {}
         }
       },
-      "ORTC.Adapter/1.0.1-Beta": {
+      "ORTC.Adapter/1.0.2-Beta": {
         "dependencies": {
           "ORTC": "[1.0.1-Beta, )",
           "System.Collections": "[4.0.10, )",
@@ -8510,7 +8510,7 @@
           "runtimes/win10-x86/native/org.ortc.dll": {}
         }
       },
-      "ORTC.Adapter/1.0.1-Beta": {
+      "ORTC.Adapter/1.0.2-Beta": {
         "dependencies": {
           "ORTC": "[1.0.1-Beta, )",
           "System.Collections": "[4.0.10, )",
@@ -10171,7 +10171,7 @@
           "runtimes/win10-x86/native/org.ortc.dll": {}
         }
       },
-      "ORTC.Adapter/1.0.1-Beta": {
+      "ORTC.Adapter/1.0.2-Beta": {
         "dependencies": {
           "ORTC": "[1.0.1-Beta, )",
           "System.Collections": "[4.0.10, )",
@@ -12263,7 +12263,7 @@
       ]
     },
     "ORTC/1.0.1-Beta": {
-      "sha512": "douisal661jalB9is7sIFoh2JuChywTzF0Vbfa8oEoup6wor46iwELKo2nvoT+C6NQN2jrSjtRAkam/mPrzhhA==",
+      "sha512": "nYFkRAOueLVm1vPyHZQmjThP3t7BrU4Mx48MfvrAxYHQK3NlNqC1BbmF4zJxvDSvrYDKyuJf9Hhebg/DVu/lXw==",
       "type": "Package",
       "files": [
         "[Content_Types].xml",
@@ -12271,21 +12271,21 @@
         "build/native/org.ortc.targets",
         "lib/uap10.0/org.ortc.winmd",
         "ORTC.nuspec",
-        "package/services/metadata/core-properties/ea23b8bfbb7d457091f72167d63b1c9f.psmdcp",
+        "package/services/metadata/core-properties/bd0935325cfa48eda056c87ba255754e.psmdcp",
         "runtimes/win10-arm/native/org.ortc.dll",
         "runtimes/win10-x64/native/org.ortc.dll",
         "runtimes/win10-x86/native/org.ortc.dll"
       ]
     },
-    "ORTC.Adapter/1.0.1-Beta": {
-      "sha512": "6w5tqohfIoFc43N8zk+T9ZlcsiD+5Tnx26y13MlkIwuXNxXtEdYrdT2X2JnJ6yBQrt+FIETUJTg8doG3oQS4fA==",
+    "ORTC.Adapter/1.0.2-Beta": {
+      "sha512": "DH1NAAUx1d7LEm4bviqkGkNHrJxt9iB3/fn0i2OPJaXoxyrEeqivJ2nFXGCiq5MWTYk6tiqw5oOz1YVyQ/OWCA==",
       "type": "Package",
       "files": [
         "[Content_Types].xml",
         "_rels/.rels",
         "lib/.NETCore50/org.ortc.adapter.dll",
         "ORTC.Adapter.nuspec",
-        "package/services/metadata/core-properties/ec1e0be2dbd645efa50369db6d805cfc.psmdcp"
+        "package/services/metadata/core-properties/cf2012e0c9404eb182ce7e49fbc00b01.psmdcp"
       ]
     },
     "System.AppContext/4.0.0": {
@@ -14988,7 +14988,7 @@
     "": [
       "HockeySDK.WINRT >= 2.2.2",
       "Microsoft.NETCore.UniversalWindowsPlatform >= 5.0.0",
-      "ORTC.Adapter >= 1.0.1-Beta"
+      "ORTC.Adapter >= 1.0.2-Beta"
     ],
     "UAP,Version=v10.0": []
   }
