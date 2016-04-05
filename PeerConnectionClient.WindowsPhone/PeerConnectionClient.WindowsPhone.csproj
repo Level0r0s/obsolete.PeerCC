@@ -146,7 +146,7 @@
     </Reference>
     <Reference Include="webrtc_winrt_api, Version=255.255.255.255, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WebRTC.1.1.311\lib\portable-wpa81\webrtc_winrt_api.winmd</HintPath>
+      <HintPath>..\packages\WebRTC.1.1.325\lib\portable-wpa81\webrtc_winrt_api.winmd</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

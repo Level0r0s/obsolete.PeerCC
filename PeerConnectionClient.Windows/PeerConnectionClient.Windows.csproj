@@ -185,7 +185,7 @@
     </Reference>
     <Reference Include="webrtc_winrt_api, Version=255.255.255.255, Culture=neutral, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\packages\WebRTC.1.1.311\lib\netcore45\webrtc_winrt_api.winmd</HintPath>
+      <HintPath>..\packages\WebRTC.1.1.325\lib\netcore45\webrtc_winrt_api.winmd</HintPath>
     </Reference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
@@ -193,12 +193,12 @@
   </PropertyGroup>
   <Import Project="..\PeerConnectionClient.Shared\PeerConnectionClient.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-  <Import Project="..\packages\WebRTC.1.1.311\build\netcore45\WebRTC.targets" Condition="Exists('..\packages\WebRTC.1.1.311\build\netcore45\WebRTC.targets')" />
+  <Import Project="..\packages\WebRTC.1.1.325\build\netcore45\WebRTC.targets" Condition="Exists('..\packages\WebRTC.1.1.325\build\netcore45\WebRTC.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\WebRTC.1.1.311\build\netcore45\WebRTC.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WebRTC.1.1.311\build\netcore45\WebRTC.targets'))" />
+    <Error Condition="!Exists('..\packages\WebRTC.1.1.325\build\netcore45\WebRTC.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WebRTC.1.1.325\build\netcore45\WebRTC.targets'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
