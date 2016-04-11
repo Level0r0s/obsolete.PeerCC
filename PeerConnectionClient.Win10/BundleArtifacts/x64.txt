@@ -1,0 +1,2 @@
+MainPackage=D:\webrtc\RTC_PeerCC\PeerConnectionClient.Win10\bin\x64\Release\PeerConnectionClient.Win10_1.1.999.0_x64.appx
+ResourcePack=D:\webrtc\RTC_PeerCC\PeerConnectionClient.Win10\bin\x64\Release\PeerConnectionClient.Win10_1.1.999.0_scale-100.appx
