@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Package IgnorableNamespaces="uap mp" xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10">
-  <Identity Name="MacadamianTechnologies.PeerCCWin10" Publisher="CN=0BF51448-0221-4D5C-A9D3-036C6B759273" Version="1.1.22.0" />
+  <Identity Name="MacadamianTechnologies.PeerCCWin10" Publisher="CN=0BF51448-0221-4D5C-A9D3-036C6B759273" Version="9.9.9.9" />
   <mp:PhoneIdentity PhoneProductId="8157982a-c28b-4ab7-b391-c4418a74c072" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>PeerCC Win10</DisplayName>

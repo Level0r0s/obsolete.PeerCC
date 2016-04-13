@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
-  <Identity Name="a27cede3-0df8-4c31-a32a-72db124c5ffe" Publisher="CN=GodAdmin" Version="1.1.0.20" />
+  <Identity Name="a27cede3-0df8-4c31-a32a-72db124c5ffe" Publisher="CN=GodAdmin" Version="9.9.9.9" />
   <Properties>
     <DisplayName>PeerConnectionClient.Windows</DisplayName>
     <PublisherDisplayName>GodAdmin</PublisherDisplayName>
