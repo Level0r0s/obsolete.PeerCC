@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+#if USE_ORTC
+using org.ortc.adapter;
+#else
 using webrtc_winrt_api;
+#endif
 
 namespace PeerConnectionClient.Utilities
 {

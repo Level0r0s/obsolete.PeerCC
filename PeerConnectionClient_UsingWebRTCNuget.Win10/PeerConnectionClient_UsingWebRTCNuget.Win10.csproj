@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{46D1B3CB-DAE0-4AA9-A56E-C2B6EC534C1C}</ProjectGuid>
+    <ProjectGuid>{C33D6A0D-B27A-4723-A98D-E4708CBAB023}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PeerConnectionClient.Win10</RootNamespace>
