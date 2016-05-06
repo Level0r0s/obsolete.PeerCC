@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 #if USE_ORTC
-using org.ortc.adapter;
+using org.ortc;
 #else
 using webrtc_winrt_api;
 #endif

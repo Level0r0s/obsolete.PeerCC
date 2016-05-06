@@ -6,7 +6,9 @@ using Windows.Networking.Connectivity;
 using Windows.Networking;
 using Windows.Data.Json;
 #if USE_ORTC
+using org.ortc;
 using org.ortc.adapter;
+using RtcRtpCodecCapability = org.ortc.RTCRtpCodecCapability;
 #else
 using webrtc_winrt_api;
 #endif
@@ -65,12 +67,12 @@ namespace PeerConnectionClient.Signalling
         /// <summary>
         /// Video codec used in WebRTC session.
         /// </summary>
-        public CodecInfo VideoCodec { get; set; }
+        public RtcRtpCodecCapability VideoCodec { get; set; }
 
         /// <summary>
         /// Audio codec used in WebRTC session.
         /// </summary>
-        public CodecInfo AudioCodec { get; set; }
+        public RtcRtpCodecCapability AudioCodec { get; set; }
         public CaptureCapability VideoCaptureProfile;
         /// <summary>
         /// Video frames per second property.

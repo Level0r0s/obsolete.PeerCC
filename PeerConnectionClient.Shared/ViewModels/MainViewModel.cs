@@ -17,7 +17,8 @@ using PeerConnectionClient.Utilities;
 using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.Activation;
 #if USE_ORTC
-using org.ortc.adapter;
+using org.ortc;
+using RtcRtpCodecCapability = org.ortc.RTCRtpCodecCapability;
 #else
 using webrtc_winrt_api;
 #endif
@@ -1251,7 +1252,7 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-        private ObservableCollection<MediaDevice> _microphones;
+        private ObservableCollection<MediaDevices> _microphones;
 
         /// <summary>
         /// The list of available microphones.
@@ -1666,7 +1667,7 @@ namespace PeerConnectionClient.ViewModels
         /// <summary>
         /// The selected video codec.
         /// </summary>
-        public CodecInfo SelectedVideoCodec
+        public RtcRtpCodecCapability SelectedVideoCodec
         {
             get { return Conductor.Instance.VideoCodec; }
             set
