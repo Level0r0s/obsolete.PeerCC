@@ -157,18 +157,9 @@
     <Compile Include="..\PeerConnectionClient.Shared\ViewModels\MainViewModel.cs">
       <Link>Links\MainViewModel.cs</Link>
     </Compile>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MainPage.xaml.cs">
-      <DependentUpon>MainPage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <AppxManifest Include="Package.appxmanifest">
-      <SubType>Designer</SubType>
-    </AppxManifest>
     <None Include="PeerConnectionClient.Win10_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
@@ -193,22 +184,13 @@
     <Content Include="Assets\WideLogo.scale-100.png" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Page Include="MainPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
     <Page Include="..\PeerConnectionClient.Shared\Utilities\UI\ErrorControl.xaml">
       <Link>Links\ErrorControl.xaml</Link>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+  <Import Project="..\PeerConnectionClient.Win10.Shared\PeerConnectionClient.Win10.Shared.projitems" Label="Shared" />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

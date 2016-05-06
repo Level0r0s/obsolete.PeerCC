@@ -177,8 +177,14 @@ namespace PeerConnectionClient.Signalling
         {
           if (VideoCaptureProfile != null)
           {
+
+#if USE_ORTC
+                _media.SetPreferredVideoCaptureFormat(
+                    (int)VideoCaptureProfile.Width, (int)VideoCaptureProfile.Height, (int)VideoCaptureProfile.FrameRate);
+#else
             webrtc_winrt_api.WebRTC.SetPreferredVideoCaptureFormat(
               (int)VideoCaptureProfile.Width, (int)VideoCaptureProfile.Height, (int)VideoCaptureProfile.FrameRate);
+#endif
           }
         }
 
