@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PeerConnectionClient</RootNamespace>
     <AssemblyName>PeerConnectionClient.WindowsPhone</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
+    <DefaultLanguage>en</DefaultLanguage>
     <TargetPlatformVersion>8.1</TargetPlatformVersion>
     <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -145,8 +145,8 @@
       <HintPath>..\packages\HockeySDK.Core.2.2.2\lib\portable-net45+win8+wp8+wpa81+win81\HockeyAppPCL.dll</HintPath>
     </Reference>
     <Reference Include="webrtc_winrt_api, Version=255.255.255.255, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\WebRTC.1.1.253\lib\portable-wpa81\webrtc_winrt_api.winmd</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\WebRTC.1.2.23\lib\portable-wpa81\webrtc_winrt_api.winmd</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

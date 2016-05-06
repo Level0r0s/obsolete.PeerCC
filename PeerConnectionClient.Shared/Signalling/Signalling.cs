@@ -1,7 +1,17 @@
-﻿using System;
+﻿//*********************************************************
+//
+// Copyright (c) Microsoft. All rights reserved.
+// This code is licensed under the MIT License (MIT).
+// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.Data.Json;
@@ -116,7 +126,7 @@ namespace PeerConnectionClient.Signalling
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Failed to connect: " + ex.Message);
+                Debug.WriteLine("[Error] Signaling: Failed to connect to server: " + ex.Message);
             }
         }
 
@@ -126,22 +136,41 @@ namespace PeerConnectionClient.Signalling
         /// <summary>
         /// Gets the integer value from the message header.
         /// </summary>
-        /// <returns>False if fails to find header in the message.</returns>
-        private static bool GetHeaderValue(string buffer, int eoh, string header, out int value)
+        /// <param name="buffer">The message.</param>
+        /// <param name="optional">Lack of an optional header is not considered an error.</param>
+        /// <param name="header">Header name.</param>
+        /// <param name="value">Header value.</param>
+        /// <returns>False if fails to find header in the message and header is not optional.</returns>
+        private static bool GetHeaderValue(string buffer, bool optional, string header, out int value)
         {
             try
             {
-                // TODO: buffer.IndexOf returns -1 if header not found, without throwing
-                // exception and returns wrong result!
-                int index = buffer.IndexOf(header) + header.Length;
+                int index = buffer.IndexOf(header);
+                if(index == -1)
+                {
+                    if (optional)
+                    {
+                        value = -1;
+                        return true;
+                    }
+                    throw new KeyNotFoundException();
+                }
+                index += header.Length;
                 value = buffer.Substring(index).ParseLeadingInt();
                 return true;
             }
             catch
             {
-                Debug.WriteLine("[Error] Failed to find header <" + header + "> in buffer(" + buffer.Length + ")=<" + buffer + ">");
                 value = -1;
-                return false;
+                if (!optional)
+                {
+                    Debug.WriteLine("[Error] Failed to find header <" + header + "> in buffer(" + buffer.Length + ")=<" + buffer + ">");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
             }
         }
        
@@ -149,15 +178,20 @@ namespace PeerConnectionClient.Signalling
         /// Gets the string value from the message header.
         /// </summary>
         /// <param name="buffer">The message.</param>
-        /// <param name="eoh">End of header position.</param>
         /// <param name="header">Header name.</param>
         /// <param name="value">Header value.</param>
         /// <returns>False if fails to find header in the message.</returns>
-        private static bool GetHeaderValue(string buffer, int eoh, string header, out string value)
+        private static bool GetHeaderValue(string buffer, string header, out string value)
         {
             try
             {
-                int startIndex = buffer.IndexOf(header) + header.Length;
+                int startIndex = buffer.IndexOf(header);
+                if(startIndex == -1)
+                {
+                    value = null;
+                    return false;
+                }
+                startIndex += header.Length;
                 int endIndex = buffer.IndexOf("\r\n", startIndex);
                 value = buffer.Substring(startIndex, endIndex - startIndex);
                 return true;
@@ -188,7 +222,7 @@ namespace PeerConnectionClient.Signalling
                 {
                     if (status == 500 && buffer.Contains("Peer most likely gone."))
                     {
-                        Debug.WriteLine("[Info] Peer most likely gone. Closing peer connection.");
+                        Debug.WriteLine("Peer most likely gone. Closing peer connection.");
                         //As Peer Id doesn't exist in buffer using 0
                         OnPeerDisconnected(0);
                         return false;
@@ -206,7 +240,8 @@ namespace PeerConnectionClient.Signalling
                     return false;
                 }
 
-                return GetHeaderValue(buffer, eoh, "\r\nPragma: ", out peer_id);
+                GetHeaderValue(buffer, true, "\r\nPragma: ", out peer_id);
+                return true;
             }
             catch (Exception ex)
             {
@@ -259,7 +294,7 @@ namespace PeerConnectionClient.Signalling
                 bool succeeded = loadTask.AsTask().Wait(20000);
                 if (!succeeded)
                 {
-                    throw new Exception("Timed out long polling, re-trying.");
+                    throw new TimeoutException("Timed out long polling, re-trying.");
                 }
 
                 var count = loadTask.GetResults();
@@ -274,9 +309,18 @@ namespace PeerConnectionClient.Signalling
                     throw new Exception("ReadString operation failed.");
                 }
             }
+            catch (TimeoutException ex)
+            {
+                Debug.WriteLine(ex.Message);
+                if (loadTask != null && loadTask.Status == Windows.Foundation.AsyncStatus.Started)
+                {
+                    loadTask.Cancel();
+                }
+                return null;
+            }
             catch (Exception ex)
             {
-                Debug.WriteLine("Couldn't read from socket. " + ex.Message);
+                Debug.WriteLine("[Error] Signaling: Failed to read from socket. " + ex.Message);
                 if (loadTask != null && loadTask.Status == Windows.Foundation.AsyncStatus.Started)
                 {
                     loadTask.Cancel();
@@ -289,8 +333,8 @@ namespace PeerConnectionClient.Signalling
             int i = data.IndexOf("\r\n\r\n");
             if (i != -1)
             {
-                Debug.WriteLine("Headers received [i=" + i + " data(" + data.Length + ")"/*=" + data*/ + "]");
-                if (GetHeaderValue(data, i, "\r\nContent-Length: ", out content_length))
+                Debug.WriteLine("Signaling: Headers received [i=" + i + " data(" + data.Length + ")"/*=" + data*/ + "]");
+                if (GetHeaderValue(data, false, "\r\nContent-Length: ", out content_length))
                 {
                     int total_response_size = (i + 4) + content_length;
                     if (data.Length >= total_response_size)
@@ -299,14 +343,13 @@ namespace PeerConnectionClient.Signalling
                     }
                     else
                     {
-                        // TODO: if content length received, but content is smaller (packet is fragmented), then throw all received data?  
                         // We haven't received everything.  Just continue to accept data.
-                        Debug.WriteLine("Error: incomplete response; expected to receive " + total_response_size + ", received" + data.Length);
+                        Debug.WriteLine("[Error] Singaling: Incomplete response; expected to receive " + total_response_size + ", received" + data.Length);
                     }
                 }
                 else
                 {
-                    Debug.WriteLine("Error: No content length field specified by the server.");
+                    Debug.WriteLine("[Error] Signaling: No content length field specified by the server.");
                 }
             }
             return ret ? Tuple.Create(data, content_length) : null;
@@ -330,7 +373,7 @@ namespace PeerConnectionClient.Signalling
                 catch (Exception e)
                 {
                     // This could be a connection failure like a timeout
-                    Debug.WriteLine("[Error] Failed to connect to " + _server + ":" + _port + " : " + e.Message);
+                    Debug.WriteLine("[Error] Signaling: Failed to connect to " + _server + ":" + _port + " : " + e.Message);
                     return false;
                 }
                 // Send the request
@@ -477,7 +520,7 @@ namespace PeerConnectionClient.Signalling
                     }
                     catch (Exception e)
                     {
-                        Debug.WriteLine("SIGNALLING LONG-POLLING EXCEPTION: {0}", e.Message);
+                        Debug.WriteLine("[Error] Signaling: Long-polling exception: {0}", e.Message);
                     }
                 }
             }
@@ -588,7 +631,7 @@ namespace PeerConnectionClient.Signalling
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Couldn't write to socket : " + ex.Message);
+                Debug.WriteLine("[Error] Singnaling: Couldn't write to socket : " + ex.Message);
             }
         }
 

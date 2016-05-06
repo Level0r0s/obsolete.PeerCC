@@ -1,4 +1,15 @@
-﻿using System;
+﻿//*********************************************************
+//
+// Copyright (c) Microsoft. All rights reserved.
+// This code is licensed under the MIT License (MIT).
+// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
+
+using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Core;
@@ -62,15 +73,8 @@ namespace PeerConnectionClient
                 // Create a Frame to act as the navigation context and navigate to the first page
                 rootFrame = new Frame
                 {
-                    // TODO: change this value to a cache size that is appropriate for your application
                     CacheSize = 1
                 };
-
-
-                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
-                {
-                    // TODO: Load state from previously suspended application
-                }
 
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;

@@ -62,7 +62,6 @@
                           IsOn="{Binding NtpSyncEnabled, Mode=TwoWay}"
                           HorizontalAlignment="Left"
                           HorizontalContentAlignment="Left"
-                          IsEnabled="{Binding NtpSyncInProgress, Mode=OneWay, Converter={StaticResource InvertedBooleanConverter}}"
                           Margin="-6,5,5,0"/>
             <TextBlock Name="NtpSyncInProgressLabel"
                        Text="NTP sync in progress..."

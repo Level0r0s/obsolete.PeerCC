@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\AppPerf.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\BoolToVisConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\InvertedBooleanConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\NtpService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\NullToVisibleConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\SdpUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\ToggleImageConverter.cs" />
@@ -36,7 +37,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\VideoCaptureFormat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\XmlSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MainViewModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\VideoRenderViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="$(MSBuildThisFileDirectory)Utilities\UI\ErrorControl.xaml">

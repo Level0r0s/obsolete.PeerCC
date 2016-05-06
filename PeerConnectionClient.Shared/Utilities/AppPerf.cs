@@ -1,9 +1,25 @@
-﻿using System;
+﻿//*********************************************************
+//
+// Copyright (c) Microsoft. All rights reserved.
+// This code is licensed under the MIT License (MIT).
+// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
+
+// The Windows APIs used in this file will fail WACK tests.
+// remove #define _APP_PERFORMANCE_  in the final build
+#define _APP_PERFORMANCE_
+
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace PeerConnectionClient.Utilities
 {
+#if _APP_PERFORMANCE_
     static class MEMData
     {
     // Todo: added by ling, WINDOWS_PHONE_APP is not available for vs2015 when build win10 for arm
@@ -16,7 +32,7 @@ namespace PeerConnectionClient.Utilities
         private static extern IntPtr GetCurrentProcess();
 #endif
 #if WINDOWS_PHONE_APP || USE_WIN10_PHONE_DLL
-    [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = true)]
+        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = true)]
         private static extern bool GetProcessMemoryInfo(IntPtr hProcess, out PROCESS_MEMORY_COUNTERS_EX counters, uint size);
 #else
         [DllImport("psapi.dll", ExactSpelling = true, SetLastError = true)]
@@ -24,10 +40,10 @@ namespace PeerConnectionClient.Utilities
 #endif
 
 
-    /// <summary>
-    /// Get the current memory usage
-    /// </summary>
-    public static Int64 GetMEMUsage()
+        /// <summary>
+        /// Get the current memory usage
+        /// </summary>
+        public static Int64 GetMEMUsage()
         {
             Int64 ret = 0;
 
@@ -40,7 +56,7 @@ namespace PeerConnectionClient.Utilities
                 ret = memoryCounters.PrivateUsage.ToInt64();
 
             }
-            Debug.WriteLine(ret);
+            Debug.WriteLine(String.Format("Memory usage:{0}", ret));
 
             return ret;
         }
@@ -73,7 +89,7 @@ namespace PeerConnectionClient.Utilities
 #endif
 
 #if WINDOWS_PHONE_APP || USE_WIN10_PHONE_DLL
-    [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = true)]
+        [DllImport("api-ms-win-core-sysinfo-l1-2-0.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetProcessTimes(
             IntPtr hProcess,
@@ -93,7 +109,7 @@ namespace PeerConnectionClient.Utilities
 #endif
 
 
-    public struct ProcessTimes
+        public struct ProcessTimes
         {
             public UInt64 CreationTime;
             public UInt64 ExitTime;
@@ -122,34 +138,28 @@ namespace PeerConnectionClient.Utilities
         }
 
         /// <summary>
-        ///calculate CPU usage, e.g.: this process time vs system process time
-        ///return the CPU usage in percentage
+        /// Calculate CPU usage, e.g.: this process time vs system process time
+        /// Return the CPU usage in percentage
         /// </summary>
         public static double GetCPUUsage() 
         {
 
             double ret = 0.0;
 
-            //retrieve process time
+            // retrieve process time
             ProcessTimes processTimes = GetProcessTimes();
-
-            Debug.WriteLine(processTimes.KernelTime);
-            Debug.WriteLine(processTimes.UserTime);
 
             UInt64 currentProcessTime = processTimes.KernelTime + processTimes.UserTime;
 
-            //retrieve system time
+            // retrieve system time
             // get number of CPU cores, then, check system time for every CPU core
             if(numberOfProcessors == 0 ) {
                 SystemInfo info;
                 GetSystemInfo(out info);
-
-                Debug.WriteLine(info.NumberOfProcessors);
-
                 numberOfProcessors = info.NumberOfProcessors;
             }
 
-            int size =System.Runtime.InteropServices.Marshal.SizeOf<SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION>();
+            int size = System.Runtime.InteropServices.Marshal.SizeOf<SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION>();
 
             size = (int) (size * numberOfProcessors);
 
@@ -159,8 +169,7 @@ namespace PeerConnectionClient.Utilities
 
             if (result != NtStatus.Success)
             {
-                Debug.WriteLine(result);
-
+                Debug.WriteLine(String.Format("[Error] Failed to obtain processor performance info ({0}", result));
                 return ret;
             }
             UInt64 currentSystemTime = 0;
@@ -172,22 +181,16 @@ namespace PeerConnectionClient.Utilities
                 currentSystemTime += processPerInfo.KernelTime + processPerInfo.UserTime;
             }
 
-            //we need to at least measure twice 
+            // we need to at least measure twice 
             if (previousProcessTime != 0 && previousSystemTIme != 0)
             {
 
                 ret = ((double)(currentProcessTime - previousProcessTime) / (double)(currentSystemTime - previousSystemTIme)) * 100.0;
             }
 
-
             previousProcessTime = currentProcessTime;
-
             previousSystemTIme = currentSystemTime;
-
-            Debug.WriteLine(ret);
-
-
-
+            Debug.WriteLine(String.Format("CPU usage:{0}%", ret));
             return ret;
         }
 
@@ -202,14 +205,13 @@ namespace PeerConnectionClient.Utilities
             public ulong Reserved2;
         }
 
-    /// <summary>Retrieves the specified system information.</summary>
-    /// <param name="InfoClass">indicate the kind of system information to be retrieved</param>
-    /// <param name="Info">a buffer that receives the requested information</param>
-    /// <param name="Size">The allocation size of the buffer pointed to by Info</param>
-    /// <param name="Length">If null, ignored.  Otherwise tells you the size of the information returned by the kernel.</param>
-    /// <returns>Status Information</returns>
-    /// http://msdn.microsoft.com/en-us/library/windows/desktop/ms724509%28v=vs.85%29.aspx
-
+        /// <summary>Retrieves the specified system information.</summary>
+        /// <param name="InfoClass">indicate the kind of system information to be retrieved</param>
+        /// <param name="Info">a buffer that receives the requested information</param>
+        /// <param name="Size">The allocation size of the buffer pointed to by Info</param>
+        /// <param name="Length">If null, ignored.  Otherwise tells you the size of the information returned by the kernel.</param>
+        /// <returns>Status Information</returns>
+        /// http://msdn.microsoft.com/en-us/library/windows/desktop/ms724509%28v=vs.85%29.aspx
         [DllImport("ntdll.dll", SetLastError = false, ExactSpelling = true)]
         private static extern NtStatus NtQuerySystemInformation(SYSTEM_INFORMATION_CLASS InfoClass, IntPtr Info, UInt32 Size, out UInt32 Length);
 
@@ -224,7 +226,7 @@ namespace PeerConnectionClient.Utilities
 #endif
 
 
-    private static uint numberOfProcessors = 0;
+        private static uint numberOfProcessors = 0;
         private static UInt64 previousProcessTime = 0;
         private static UInt64 previousSystemTIme = 0;
 
@@ -581,7 +583,6 @@ namespace PeerConnectionClient.Utilities
 
     public enum SYSTEM_INFORMATION_CLASS
     {
-
         SystemBasicInformation = 0x0000,
         SystemProcessorInformation = 0x0001,
         SystemPerformanceInformation = 0x0002,
@@ -732,49 +733,64 @@ namespace PeerConnectionClient.Utilities
         SystemPortableWorkspaceEfiLauncherInformation = 0x0093,
         SystemFullProcessInformation = 0x0094,
         MaxSystemInfoClass = 0x0095
-
-
     }
 
-
     public enum ProcessorArchitecture
-     {
-         X86 = 0,
-         X64 = 9,
-         @Arm = -1,
-         Itanium = 6,
-         Unknown = 0xFFFF,
-     }
+    {
+        X86 = 0,
+        X64 = 9,
+        @Arm = -1,
+        Itanium = 6,
+        Unknown = 0xFFFF,
+    }
 
-     [StructLayout(LayoutKind.Sequential)]
-     public struct SystemInfo
-     {
-         public ProcessorArchitecture ProcessorArchitecture; // WORD
-         public uint PageSize; // DWORD
-         public IntPtr MinimumApplicationAddress; // (long)void*
-         public IntPtr MaximumApplicationAddress; // (long)void*
-         public IntPtr ActiveProcessorMask; // DWORD*
-         public uint NumberOfProcessors; // DWORD (WTF)
-         public uint ProcessorType; // DWORD
-         public uint AllocationGranularity; // DWORD
-         public ushort ProcessorLevel; // WORD
-         public ushort ProcessorRevision; // WORD
-     }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SystemInfo
+    {
+        public ProcessorArchitecture ProcessorArchitecture; // WORD
+        public uint PageSize; // DWORD
+        public IntPtr MinimumApplicationAddress; // (long)void*
+        public IntPtr MaximumApplicationAddress; // (long)void*
+        public IntPtr ActiveProcessorMask; // DWORD*
+        public uint NumberOfProcessors; // DWORD (WTF)
+        public uint ProcessorType; // DWORD
+        public uint AllocationGranularity; // DWORD
+        public ushort ProcessorLevel; // WORD
+        public ushort ProcessorRevision; // WORD
+    }
 
-     [StructLayout(LayoutKind.Sequential, Size = 40)]
-     public struct PROCESS_MEMORY_COUNTERS_EX
-     {
-         public uint cb;             // The size of the structure, in bytes (DWORD).
-         public uint PageFaultCount;         // The number of page faults (DWORD).
-         public IntPtr PeakWorkingSetSize;     // The peak working set size, in bytes (SIZE_T).
-         public IntPtr WorkingSetSize;         // The current working set size, in bytes (SIZE_T).
-         public IntPtr QuotaPeakPagedPoolUsage;    // The peak paged pool usage, in bytes (SIZE_T).
-         public IntPtr QuotaPagedPoolUsage;    // The current paged pool usage, in bytes (SIZE_T).
-         public IntPtr QuotaPeakNonPagedPoolUsage; // The peak nonpaged pool usage, in bytes (SIZE_T).
-         public IntPtr QuotaNonPagedPoolUsage;     // The current nonpaged pool usage, in bytes (SIZE_T).
-         public IntPtr PagefileUsage;          // The Commit Charge value in bytes for this process (SIZE_T). Commit Charge is the total amount of memory that the memory manager has committed for a running process.
-         public IntPtr PeakPagefileUsage;      // The peak value in bytes of the Commit Charge during the lifetime of this process (SIZE_T).
-         public IntPtr PrivateUsage;
-     }
+    [StructLayout(LayoutKind.Sequential, Size = 40)]
+    public struct PROCESS_MEMORY_COUNTERS_EX
+    {
+        public uint cb;             // The size of the structure, in bytes (DWORD).
+        public uint PageFaultCount;         // The number of page faults (DWORD).
+        public IntPtr PeakWorkingSetSize;     // The peak working set size, in bytes (SIZE_T).
+        public IntPtr WorkingSetSize;         // The current working set size, in bytes (SIZE_T).
+        public IntPtr QuotaPeakPagedPoolUsage;    // The peak paged pool usage, in bytes (SIZE_T).
+        public IntPtr QuotaPagedPoolUsage;    // The current paged pool usage, in bytes (SIZE_T).
+        public IntPtr QuotaPeakNonPagedPoolUsage; // The peak nonpaged pool usage, in bytes (SIZE_T).
+        public IntPtr QuotaNonPagedPoolUsage;     // The current nonpaged pool usage, in bytes (SIZE_T).
+        public IntPtr PagefileUsage;          // The Commit Charge value in bytes for this process (SIZE_T). Commit Charge is the total amount of memory that the memory manager has committed for a running process.
+        public IntPtr PeakPagefileUsage;      // The peak value in bytes of the Commit Charge during the lifetime of this process (SIZE_T).
+        public IntPtr PrivateUsage;
+    }
+#else
+    //Dummy implementation if _APP_PERFORMANCE_ is not defined
+    internal static class MEMData
+    {
+        public static Int64 GetMEMUsage()
+        {
+            return 0;
+        }
+    }
 
+    internal static class CPUData
+    {
+        public static double GetCPUUsage()
+        {
+            return 0;
+        }
+    }
+
+#endif
 }

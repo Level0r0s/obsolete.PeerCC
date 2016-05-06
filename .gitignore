@@ -1,14 +1,8 @@
-*.pyc
-[Dd]ebug/
-[Rr]elease/
-*.opensdf
-*.sdf
-*.suo
-*.user
-*.bak
-obj/
-
 bin/
-
-
+obj/
+packages/
+*.suo
+*.csproj.user
+project.lock.json
+*.sdf
 
