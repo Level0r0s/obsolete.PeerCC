@@ -12,7 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using webrtc_winrt_api;
+using org.ortc;
 
 namespace PeerConnectionClient.Utilities
 {
@@ -28,7 +28,7 @@ namespace PeerConnectionClient.Utilities
         /// <param name="audioCodec">Audio codec.</param>
         /// <param name="videoCodec">Video codec.</param>
         /// <returns>True if succeeds to force to use the selected audio/video codecs.</returns>
-        public static bool SelectCodecs(ref string sdp, CodecInfo audioCodec, CodecInfo videoCodec)
+        public static bool SelectCodecs(ref string sdp, RTCRtpCodecCapability audioCodec, RTCRtpCodecCapability videoCodec)
         {
             Regex mfdRegex = new Regex("\r\nm=audio.*RTP.*?( .\\d*)+\r\n");
             Match mfdMatch = mfdRegex.Match(sdp);
@@ -47,7 +47,7 @@ namespace PeerConnectionClient.Utilities
                         mfdListToErase.Add(mfdMatch.Groups[groupCtr].Captures[captureCtr].Value.TrimStart());
                     }
                 }
-                if (!mfdListToErase.Remove(audioCodec.Id.ToString()))
+                if (!mfdListToErase.Remove(audioCodec.PreferredPayloadType.ToString()))
                 {
                     return false;
                 }
@@ -69,7 +69,7 @@ namespace PeerConnectionClient.Utilities
                         mfdListToErase.Add(mfdMatch.Groups[groupCtr].Captures[captureCtr].Value.TrimStart());
                     }
                 }
-                if (!mfdListToErase.Remove(videoCodec.Id.ToString()))
+                if (!mfdListToErase.Remove(videoCodec.PreferredPayloadType.ToString()))
                 {
                     return false;
                 }
@@ -79,14 +79,14 @@ namespace PeerConnectionClient.Utilities
             {
                 // Alter audio entry
                 Regex audioRegex = new Regex("\r\n(m=audio.*RTP.*?)( .\\d*)+");
-                sdp = audioRegex.Replace(sdp, "\r\n$1 " + audioCodec.Id);
+                sdp = audioRegex.Replace(sdp, "\r\n$1 " + audioCodec.PreferredPayloadType);
             }
 
             if (videoMediaDescFound)
             {
                 // Alter video entry
                 Regex videoRegex = new Regex("\r\n(m=video.*RTP.*?)( .\\d*)+");
-                sdp = videoRegex.Replace(sdp, "\r\n$1 " + videoCodec.Id);
+                sdp = videoRegex.Replace(sdp, "\r\n$1 " + videoCodec.PreferredPayloadType);
             }
 
             // Remove associated rtp mapping, format parameters, feedback parameters

@@ -27,7 +27,8 @@ using PeerConnectionClient.Model;
 using PeerConnectionClient.MVVM;
 using PeerConnectionClient.Signalling;
 using PeerConnectionClient.Utilities;
-using webrtc_winrt_api;
+using PeerConnectionClient.Media_Extension;
+using org.ortc;
 
 #if !WINDOWS_UAP // Disable on Win10 for now.
 using HockeyApp;
@@ -1595,12 +1596,12 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-        private ObservableCollection<CodecInfo> _audioCodecs;
+        private ObservableCollection<RTCRtpCodecCapability> _audioCodecs;
 
         /// <summary>
         /// The list of audio codecs.
         /// </summary>
-        public ObservableCollection<CodecInfo> AudioCodecs
+        public ObservableCollection<RTCRtpCodecCapability> AudioCodecs
         {
             get { return _audioCodecs; }
             set { SetProperty(ref _audioCodecs, value); }
@@ -1609,7 +1610,7 @@ namespace PeerConnectionClient.ViewModels
         /// <summary>
         /// The selected Audio codec.
         /// </summary>
-        public CodecInfo SelectedAudioCodec
+        public RTCRtpCodecCapability SelectedAudioCodec
         {
             get { return Conductor.Instance.AudioCodec; }
             set
@@ -1731,12 +1732,12 @@ namespace PeerConnectionClient.ViewModels
             }
         }
 
-        private ObservableCollection<CodecInfo> _videoCodecs;
+        private ObservableCollection<RTCRtpCodecCapability> _videoCodecs;
 
         /// <summary>
         /// The list of video codecs.
         /// </summary>
-        public ObservableCollection<CodecInfo> VideoCodecs
+        public ObservableCollection<RTCRtpCodecCapability> VideoCodecs
         {
             get { return _videoCodecs; }
             set { SetProperty(ref _videoCodecs, value); }
@@ -1745,7 +1746,7 @@ namespace PeerConnectionClient.ViewModels
         /// <summary>
         /// The selected video codec.
         /// </summary>
-        public CodecInfo SelectedVideoCodec
+        public RTCRtpCodecCapability SelectedVideoCodec
         {
             get { return Conductor.Instance.VideoCodec; }
             set

@@ -15,13 +15,17 @@ using System.Collections.Generic;
 using Windows.Networking.Connectivity;
 using Windows.Networking;
 using Windows.Data.Json;
-using webrtc_winrt_api;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using PeerConnectionClient.Model;
 using System.Collections.ObjectModel;
 using PeerConnectionClient.Utilities;
 using System.Threading;
+using org.ortc;
+using org.ortc.adapter;
+using RTCRtpCodecCapability = org.ortc.RTCRtpCodecCapability;
+using PeerConnectionClient.Media_Extension;
+
 
 namespace PeerConnectionClient.Signalling
 {
@@ -72,12 +76,12 @@ namespace PeerConnectionClient.Signalling
         /// <summary>
         /// Video codec used in WebRTC session.
         /// </summary>
-        public CodecInfo VideoCodec { get; set; }
+        public RTCRtpCodecCapability VideoCodec { get; set; }
 
         /// <summary>
         /// Audio codec used in WebRTC session.
         /// </summary>
-        public CodecInfo AudioCodec { get; set; }
+        public RTCRtpCodecCapability AudioCodec { get; set; }
         public CaptureCapability VideoCaptureProfile;
         /// <summary>
         /// Video frames per second property.

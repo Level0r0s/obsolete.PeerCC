@@ -190,6 +190,12 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\winrt\projects\api\org.ortc\org.ortc\org.ortc.vcxproj">
+      <Project>{f12c67f3-12a0-4532-bdde-4be043dbc140}</Project>
+      <Name>org.ortc</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="..\PeerConnectionClient.Win10.Shared\PeerConnectionClient.Win10.Shared.projitems" Label="Shared" />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
