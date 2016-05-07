@@ -10,6 +10,23 @@ using Windows.Media.Capture;
 
 namespace PeerConnectionClient.Media_Extension
 {
+    public enum MediaDeviceType
+    {
+        MediaDeviceType_AudioCapture,
+        MediaDeviceType_AudioPlayout,
+        MediaDeviceType_VideoCapture
+    };
+
+    public class CaptureCapability
+    {
+        public uint Width { get; set; }
+        public uint Height { get; set; }
+        public uint FrameRate { get; set; }
+        public String FullDescription { get; set; }
+        public String ResolutionDescription { get; set; }
+        public String FrameRateDescription { get; set; }
+        public MediaRatio PixelAspectRatio { get; set; }
+    }
     public class MediaDevice
     {
         public MediaDevice(string id, string name)

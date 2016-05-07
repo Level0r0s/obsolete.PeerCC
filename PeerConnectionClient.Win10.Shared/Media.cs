@@ -9,9 +9,23 @@ using org.ortc;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using org.ortc.adapter;
 
 namespace PeerConnectionClient.Media_Extension
-{ 
+{
+    public class RTCPeerConnectionHealthStats
+    {
+    }
+    public class MediaStreamEvent
+    {
+        public MediaStream Stream;
+    }
+
+    public class RTCMediaStreamConstraints
+    {
+        public Boolean audioEnabled;
+        public Boolean videoEnabled;
+    }
     public class Media
     {
         private IList<MediaDeviceInfo> AudioCaptureDevices { get;  set; } = new List<MediaDeviceInfo>();
@@ -78,7 +92,7 @@ namespace PeerConnectionClient.Media_Extension
         }
 
 
-        public IMediaSource CreateMediaStreamSource(MediaVideoTrack track, uint framerate, string id)
+        public IMediaSource CreateMediaStreamSource(MediaStreamTrack track, uint framerate, string id)
         {
             var useTrack = track.Track;
 

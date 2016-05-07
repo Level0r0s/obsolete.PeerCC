@@ -145,8 +145,8 @@ namespace PeerConnectionClient.ViewModels
         readonly DisplayRequest _keepScreenOnRequest = new DisplayRequest();
         private bool _keepOnScreenRequested = false;
 
-        private MediaVideoTrack _peerVideoTrack;
-        private MediaVideoTrack _selfVideoTrack;
+        private MediaStreamTrack _peerVideoTrack;
+        private MediaStreamTrack _selfVideoTrack;
 
         private NtpService _ntpService;
 

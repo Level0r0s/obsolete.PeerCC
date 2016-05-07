@@ -136,7 +136,7 @@ namespace PeerConnectionClient.Signalling
                 _etwStatsEnabled = value;
                 if (_peerConnection != null)
                 {
-                    _peerConnection.EtwStatsEnabled = value;
+                    //_peerConnection.EtwStatsEnabled = value;
                 }
             }
         }
@@ -158,7 +158,7 @@ namespace PeerConnectionClient.Signalling
                 _peerConnectionStatsEnabled = value;
                 if (_peerConnection != null)
                 {
-                    _peerConnection.ConnectionHealthStatsEnabled = value;
+                    //_peerConnection.ConnectionHealthStatsEnabled = value;
                 }
             }
         }
@@ -182,13 +182,13 @@ namespace PeerConnectionClient.Signalling
           if (VideoCaptureProfile != null)
           {
 
-#if USE_ORTC
+
                 _media.SetPreferredVideoCaptureFormat(
                     (int)VideoCaptureProfile.Width, (int)VideoCaptureProfile.Height, (int)VideoCaptureProfile.FrameRate);
-#else
-            webrtc_winrt_api.WebRTC.SetPreferredVideoCaptureFormat(
+/*#else
+            WebRTC.SetPreferredVideoCaptureFormat(
               (int)VideoCaptureProfile.Width, (int)VideoCaptureProfile.Height, (int)VideoCaptureProfile.FrameRate);
-#endif
+#endif*/
           }
         }
 
@@ -207,14 +207,17 @@ namespace PeerConnectionClient.Signalling
             var config = new RTCConfiguration()
             {
                 BundlePolicy = RTCBundlePolicy.Balanced,
-                IceTransportPolicy = RTCIceTransportPolicy.All,
-                IceServers = _iceServers
+                //IceTransportPolicy = RTCIceTransportPolicy.All,
+                GatherOptions = new RTCIceGatherOptions()
+                { 
+                    IceServers = _iceServers,
+                }
             };
 
             Debug.WriteLine("Conductor: Creating peer connection.");
             _peerConnection = new RTCPeerConnection(config);
-            _peerConnection.EtwStatsEnabled = _etwStatsEnabled;
-            _peerConnection.ConnectionHealthStatsEnabled = _peerConnectionStatsEnabled;
+            //_peerConnection.EtwStatsEnabled = _etwStatsEnabled;
+            //_peerConnection.ConnectionHealthStatsEnabled = _peerConnectionStatsEnabled;
             if (cancelationToken.IsCancellationRequested)
             {
                 return false;
@@ -511,19 +514,19 @@ namespace PeerConnectionClient.Signalling
                         return;
                     }
 
-                    RTCSdpType sdpType = RTCSdpType.Offer;
+                    RTCSdpType sdpType = RTCSdpType.SdpOffer;
                     switch (type)
                     {
-                        case "offer": sdpType = RTCSdpType.Offer; break;
-                        case "answer": sdpType = RTCSdpType.Answer; break;
-                        case "pranswer": sdpType = RTCSdpType.Pranswer; break;
+                        case "offer": sdpType = RTCSdpType.SdpOffer; break;
+                        case "answer": sdpType = RTCSdpType.SdpAnswer; break;
+                        case "pranswer": sdpType = RTCSdpType.SdpPreanswer; break;
                         default: Debug.Assert(false, type); break;
                     }
 
                     Debug.WriteLine("Conductor: Received session description: " + message);
                     await _peerConnection.SetRemoteDescription(new RTCSessionDescription(sdpType, sdp));
 
-                    if (sdpType == RTCSdpType.Offer)
+                    if (sdpType == RTCSdpType.SdpOffer)
                     {
                         var answer = await _peerConnection.CreateAnswer();
                         await _peerConnection.SetLocalDescription(answer);
@@ -676,7 +679,7 @@ namespace PeerConnectionClient.Signalling
             {
                 if (_mediaStream != null)
                 {
-                    foreach (MediaVideoTrack videoTrack in _mediaStream.GetVideoTracks())
+                    foreach (MediaStreamTrack videoTrack in _mediaStream.GetVideoTracks())
                     {
                         videoTrack.Enabled = true;
                     }
@@ -694,7 +697,7 @@ namespace PeerConnectionClient.Signalling
             {
                 if (_mediaStream != null)
                 {
-                    foreach (MediaVideoTrack videoTrack in _mediaStream.GetVideoTracks())
+                    foreach (MediaStreamTrack videoTrack in _mediaStream.GetVideoTracks())
                     {
                         videoTrack.Enabled = false;
                     }
@@ -713,7 +716,7 @@ namespace PeerConnectionClient.Signalling
                 if (_mediaStream != null)
                 {
                     var audioTracks = _mediaStream.GetAudioTracks();
-                    foreach (MediaAudioTrack audioTrack in _mediaStream.GetAudioTracks())
+                    foreach (MediaStreamTrack audioTrack in _mediaStream.GetAudioTracks())
                     {
                         audioTrack.Enabled = false;
                     }
@@ -732,7 +735,7 @@ namespace PeerConnectionClient.Signalling
                 if (_mediaStream != null)
                 {
                     var audioTracks = _mediaStream.GetAudioTracks();
-                    foreach (MediaAudioTrack audioTrack in _mediaStream.GetAudioTracks())
+                    foreach (MediaStreamTrack audioTrack in _mediaStream.GetAudioTracks())
                     {
                         audioTrack.Enabled = true;
                     }
