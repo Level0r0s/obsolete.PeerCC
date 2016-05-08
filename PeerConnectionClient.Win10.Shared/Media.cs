@@ -80,11 +80,12 @@ namespace PeerConnectionClient.Media_Extension
                 Task<IList<MediaStreamTrack>> task = MediaDevices.GetUserMedia(constraints).AsTask();
                 return task.ContinueWith(temp =>
                 {
-                    var audioTracks = Helper.InsertAudioIfValid(mediaStreamConstraints.audioEnabled, null,
+                    /*var audioTracks = Helper.InsertAudioIfValid(mediaStreamConstraints.audioEnabled, null,
                         temp.Result, _audioCaptureDevice);
                     var videoTracks = Helper.InsertVideoIfValid(mediaStreamConstraints.videoEnabled, null,
                         temp.Result, _videoDevice);
-                    return new MediaStream(audioTracks, videoTracks);
+                    return new MediaStream(audioTracks, videoTracks);*/
+                    return new MediaStream(temp.Result);
                 });
             });
 
@@ -92,11 +93,9 @@ namespace PeerConnectionClient.Media_Extension
         }
 
 
-        public IMediaSource CreateMediaStreamSource(MediaStreamTrack track, uint framerate, string id)
+        public IMediaSource CreateMediaSource(MediaStreamTrack track, string id)
         {
-            var useTrack = track.Track;
-
-            return useTrack?.CreateMediaSource();
+            return track?.CreateMediaSource();
         }
 
         public IAsyncOperation<bool> EnumerateAudioVideoCaptureDevices()

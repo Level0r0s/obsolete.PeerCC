@@ -29,7 +29,14 @@ using PeerConnectionClient.Signalling;
 using PeerConnectionClient.Utilities;
 using PeerConnectionClient.Media_Extension;
 using org.ortc;
-
+using org.ortc.adapter;
+using CaptureCapability = PeerConnectionClient.Media_Extension.CaptureCapability;
+using FrameCounterHelper = org.ortc.FrameCounterHelper;
+using Media = PeerConnectionClient.Media_Extension.Media;
+using MediaDevice = PeerConnectionClient.Media_Extension.MediaDevice;
+using MediaStreamEvent = PeerConnectionClient.Media_Extension.MediaStreamEvent;
+using ResolutionHelper = org.ortc.ResolutionHelper;
+using RTCPeerConnectionHealthStats = PeerConnectionClient.Media_Extension.RTCPeerConnectionHealthStats;
 #if !WINDOWS_UAP // Disable on Win10 for now.
 using HockeyApp;
 using Windows.Networking.Connectivity;
@@ -108,7 +115,7 @@ namespace PeerConnectionClient.ViewModels
           {
             Debug.WriteLine("Re-establishing peer video");
 
-            var source = Media.CreateMedia().CreateMediaSource(_peerVideoTrack, "PEER");
+            var source = Media.CreateMedia().CreateMediaStreamSource(_peerVideoTrack, "PEER");
             RunOnUiThread(() =>
             {
               PeerVideo.SetMediaStreamSource(source);
@@ -395,14 +402,14 @@ namespace PeerConnectionClient.ViewModels
             NewIceServer = new IceServer();
 
             // Prepare to list supported audio codecs
-            AudioCodecs = new ObservableCollection<CodecInfo>();
+            AudioCodecs = new ObservableCollection<RTCRtpCodecCapability>();
             var audioCodecList = WebRTC.GetAudioCodecs();
 
             // These are features added to existing codecs, they can't decode/encode real audio data so ignore them
             string[] incompatibleAudioCodecs = new string[] { "CN32000", "CN16000", "CN8000", "red8000", "telephone-event8000" };
 
             // Prepare to list supported video codecs
-            VideoCodecs = new ObservableCollection<CodecInfo>();
+            VideoCodecs = new ObservableCollection<RTCRtpCodecCapability>();
 
             // Order the video codecs so that the stable VP8 is in front.
             var videoCodecList = WebRTC.GetVideoCodecs().OrderBy(codec =>
@@ -421,7 +428,7 @@ namespace PeerConnectionClient.ViewModels
             {
                 foreach (var audioCodec in audioCodecList) 
                 {
-                    if (!incompatibleAudioCodecs.Contains(audioCodec.Name + audioCodec.Clockrate))
+                    if (!incompatibleAudioCodecs.Contains(audioCodec.Name + audioCodec.ClockRate))
                     {
                         AudioCodecs.Add(audioCodec);
                     }
@@ -434,7 +441,7 @@ namespace PeerConnectionClient.ViewModels
                         int id = (int)settings.Values["SelectedAudioCodecId"];
                         foreach (var audioCodec in AudioCodecs)
                         {
-                            if (audioCodec.Id == id)
+                            if (audioCodec.PreferredPayloadType == id)
                             {
                                 SelectedAudioCodec = audioCodec;
                                 break;
@@ -459,7 +466,7 @@ namespace PeerConnectionClient.ViewModels
                         int id = (int)settings.Values["SelectedVideoCodecId"];
                         foreach (var videoCodec in VideoCodecs)
                         {
-                            if (videoCodec.Id == id)
+                            if (videoCodec.PreferredPayloadType == id)
                             {
                                 SelectedVideoCodec = videoCodec;
                                 break;
@@ -1489,9 +1496,9 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         private async Task SavingLogging()
         {
-            StorageFolder logFolder = WebRTC.LogFolder;
+            StorageFolder logFolder = WebRTC.LogFolder();
 
-            String logFileName = WebRTC.LogFileName;
+            String logFileName = WebRTC.LogFileName();
 
             StorageFile logFile= await logFolder.GetFileAsync(logFileName);
 
@@ -1622,7 +1629,7 @@ namespace PeerConnectionClient.ViewModels
                 Conductor.Instance.AudioCodec = value;
                 OnPropertyChanged(() => SelectedAudioCodec);
                 var localSettings = ApplicationData.Current.LocalSettings;
-                localSettings.Values["SelectedAudioCodecId"] = Conductor.Instance.AudioCodec.Id;
+                localSettings.Values["SelectedAudioCodecId"] = Conductor.Instance.AudioCodec.PreferredPayloadType;
             }
         }
 
@@ -1759,7 +1766,7 @@ namespace PeerConnectionClient.ViewModels
                 Conductor.Instance.VideoCodec = value;
                 OnPropertyChanged(() => SelectedVideoCodec);
                 var localSettings = ApplicationData.Current.LocalSettings;
-                localSettings.Values["SelectedVideoCodecId"] = Conductor.Instance.VideoCodec.Id;
+                localSettings.Values["SelectedVideoCodecId"] = Conductor.Instance.VideoCodec.PreferredPayloadType;
             }
         }
 

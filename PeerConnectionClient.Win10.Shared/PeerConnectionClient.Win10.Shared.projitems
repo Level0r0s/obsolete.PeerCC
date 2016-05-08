@@ -22,11 +22,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)AutoLock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Media.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MediaDevice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WebRTC.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="$(MSBuildThisFileDirectory)Package.appxmanifest" />

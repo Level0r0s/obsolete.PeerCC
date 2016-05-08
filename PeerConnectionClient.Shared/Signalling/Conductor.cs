@@ -25,6 +25,7 @@ using org.ortc;
 using org.ortc.adapter;
 using RTCRtpCodecCapability = org.ortc.RTCRtpCodecCapability;
 using PeerConnectionClient.Media_Extension;
+using RTCIceCandidate = org.ortc.adapter.RTCIceCandidate;
 
 
 namespace PeerConnectionClient.Signalling
@@ -320,7 +321,7 @@ namespace PeerConnectionClient.Signalling
             var json = new JsonObject
             {
                 {kCandidateSdpMidName, JsonValue.CreateStringValue(evt.Candidate.SdpMid)},
-                {kCandidateSdpMlineIndexName, JsonValue.CreateNumberValue(evt.Candidate.SdpMLineIndex)},
+                {kCandidateSdpMlineIndexName, JsonValue.CreateNumberValue((double) evt.Candidate.SdpMLineIndex)},
                 {kCandidateSdpName, JsonValue.CreateStringValue(evt.Candidate.Candidate)}
             };
             Debug.WriteLine("Conductor: Sending ice candidate.\n" + json.Stringify());
@@ -545,8 +546,11 @@ namespace PeerConnectionClient.Signalling
                         return;
                     }
 
-                    var candidate = new RTCIceCandidate(sdp, sdpMid, (ushort)sdpMlineIndex);
-                    await _peerConnection.AddIceCandidate(candidate);
+                    var candidate = new RTCIceCandidate();//(sdp, sdpMid, (ushort)sdpMlineIndex);
+                    candidate.SdpMid = sdpMid;
+                    candidate.SdpMLineIndex = (ushort?) sdpMlineIndex;
+                    candidate.Candidate = sdp;
+                    _peerConnection.AddIceCandidate(candidate);
                     Debug.WriteLine("Conductor: Received candidate : " + message);
                 }
             }).Wait();
@@ -613,7 +617,7 @@ namespace PeerConnectionClient.Signalling
                 // Alter sdp to force usage of selected codecs
                 string newSdp = offer.Sdp;
                 SdpUtils.SelectCodecs(ref newSdp, AudioCodec, VideoCodec);
-                offer.Sdp = newSdp;
+                //offer.Sdp = newSdp;
 
                 await _peerConnection.SetLocalDescription(offer);
                 Debug.WriteLine("Conductor: Sending offer.");
@@ -760,14 +764,15 @@ namespace PeerConnectionClient.Signalling
                     url = "turn:";
                 }
                 url += iceServer.Host.Value + ":" + iceServer.Port.Value;
-                RTCIceServer server = new RTCIceServer { Url = url };
+                RTCIceServer server = new RTCIceServer();
+                server.Urls.Add(url);
                 if (iceServer.Credential != null)
                 {
                     server.Credential = iceServer.Credential;
                 }
                 if (iceServer.Username != null)
                 {
-                    server.Username = iceServer.Username;
+                    server.UserName = iceServer.Username;
                 }
                 _iceServers.Add(server);
             }
