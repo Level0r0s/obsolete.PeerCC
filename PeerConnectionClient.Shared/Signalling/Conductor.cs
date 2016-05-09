@@ -211,7 +211,7 @@ namespace PeerConnectionClient.Signalling
                 //IceTransportPolicy = RTCIceTransportPolicy.All,
                 GatherOptions = new RTCIceGatherOptions()
                 { 
-                    IceServers = _iceServers,
+                    IceServers = new List<RTCIceServer>(_iceServers),
                 }
             };
 
