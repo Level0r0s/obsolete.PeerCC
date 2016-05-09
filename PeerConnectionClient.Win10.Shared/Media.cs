@@ -105,7 +105,7 @@ namespace PeerConnectionClient.Media_Extension
                 var devices = await MediaDevices.EnumerateDevices();
 
                 var audioCaptureList = Helper.Filter(MediaDeviceKind.AudioInput, devices);
-                //var audioPlaybackList = Helper.Filter(MediaDeviceKind.AudioOutput, devices);
+                var audioPlaybackList = Helper.Filter(MediaDeviceKind.AudioOutput, devices);
                 var videoList = Helper.Filter(MediaDeviceKind.VideoInput, devices);
 
                 //_audioCaptureDevices = audioCaptureList;
@@ -115,11 +115,11 @@ namespace PeerConnectionClient.Media_Extension
                 {
                     @lock.WaitAsync().Wait();
                     AudioCaptureDevices = audioCaptureList;
-                    //_audioPlaybackDevices = audioPlaybackList;
+                    AudioPlaybackDevices = audioPlaybackList;
                     VideoDevices = videoList;
                 }
 
-                await Task.Run(() =>
+                /*await Task.Run(() =>
                 {
                     foreach (var info in audioCaptureList)
                     {
@@ -129,7 +129,7 @@ namespace PeerConnectionClient.Media_Extension
                     {
                         OnVideoCaptureDeviceFound?.Invoke(new MediaDevice(info.DeviceId, info.Label));
                     }
-                });
+                });*/
 
                 return devices.Count > 0;
             }).AsAsyncOperation();
@@ -142,7 +142,7 @@ namespace PeerConnectionClient.Media_Extension
             MediaDevices.OnAppSuspending();
         }
 
-        public void SelectAudioDevice(MediaDevice device)
+        public void SelectAudioCaptureDevice(MediaDevice device)
         {
             using (var @lock = new AutoLock(_lock))
             {

@@ -73,7 +73,7 @@ namespace org
                     return infos.Where(info => kind == info.Kind).ToList();
                 }
 
-                /*public static MediaDevice ToMediaDevice(MediaDeviceInfo device)
+                public static MediaDevice ToMediaDevice(MediaDeviceInfo device)
                 {
                     return new MediaDevice(device.DeviceId, device.Label);
                 }
@@ -81,7 +81,7 @@ namespace org
                 public static IList<MediaDevice> ToMediaDevices(IList<MediaDeviceInfo> devices)
                 {
                     return devices.Select(ToMediaDevice).ToList();
-                }*/
+                }
                 /*
                 public static CodecInfo ToDto(RTCRtpCodecCapability codec, int index)
                 {
@@ -92,14 +92,14 @@ namespace org
                 {
                     var caps = RTCRtpSender.GetCapabilities(kind);
                     var codecs = caps.Codecs;
-                    var results = new List<RTCRtpCodecCapability>();
-
+                    var results = new List<RTCRtpCodecCapability>(caps.Codecs);
+                    /*
                     int index = 0;
                     foreach (var codec in codecs)
                     {
                         ++index;
                         results.Add(ToDto(codec, index));
-                    }
+                    }*/
                     return results;
                 }
 

@@ -230,9 +230,9 @@ namespace PeerConnectionClient.Signalling
             }
 
             _peerConnection.OnIceCandidate += PeerConnection_OnIceCandidate;
-            _peerConnection.OnAddStream += PeerConnection_OnAddStream;
-            _peerConnection.OnRemoveStream += PeerConnection_OnRemoveStream;
-            _peerConnection.OnConnectionHealthStats += PeerConnection_OnConnectionHealthStats;
+            _peerConnection.OnTrack += PeerConnection_OnAddTrack;
+            //_peerConnection.OnRemoveStream += PeerConnection_OnRemoveStream;
+            //_peerConnection.OnConnectionHealthStats += PeerConnection_OnConnectionHealthStats;
 
             Debug.WriteLine("Conductor: Getting user media.");
             RTCMediaStreamConstraints mediaStreamConstraints = new RTCMediaStreamConstraints();
@@ -254,8 +254,16 @@ namespace PeerConnectionClient.Signalling
                 return false;
             }
 
+            if (_mediaStream == null)
+                return false;
+
             Debug.WriteLine("Conductor: Adding local media stream.");
-            _peerConnection.AddStream(_mediaStream);
+            IList<MediaStream> mediaStreamList = new List<MediaStream>();
+            mediaStreamList.Add(_mediaStream);
+            foreach (var mediaStreamTrack in _mediaStream.GetTracks())
+            {
+                _peerConnection.AddTrack(mediaStreamTrack, mediaStreamList);
+            }
             if (OnAddLocalStream != null)
             {
                 OnAddLocalStream(new MediaStreamEvent() { Stream = _mediaStream });
@@ -331,13 +339,10 @@ namespace PeerConnectionClient.Signalling
         /// <summary>
         /// Invoked when the remote peer added a media stream to the peer connection.
         /// </summary>
-        public event Action<MediaStreamEvent> OnAddRemoteStream;
-        private void PeerConnection_OnAddStream(MediaStreamEvent evt)
+        public event Action<RTCTrackEvent> OnAddRemoteTrack;
+        private void PeerConnection_OnAddTrack(RTCTrackEvent evt)
         {
-            if (OnAddRemoteStream != null)
-            {
-                OnAddRemoteStream(evt);
-            }
+            OnAddRemoteTrack?.Invoke(evt);
         }
 
         /// <summary>
@@ -515,19 +520,19 @@ namespace PeerConnectionClient.Signalling
                         return;
                     }
 
-                    RTCSdpType sdpType = RTCSdpType.SdpOffer;
+                    RTCSessionDescriptionSignalingType sdpType = RTCSessionDescriptionSignalingType.SdpOffer;
                     switch (type)
                     {
-                        case "offer": sdpType = RTCSdpType.SdpOffer; break;
-                        case "answer": sdpType = RTCSdpType.SdpAnswer; break;
-                        case "pranswer": sdpType = RTCSdpType.SdpPreanswer; break;
+                        case "offer": sdpType = RTCSessionDescriptionSignalingType.SdpOffer; break;
+                        case "answer": sdpType = RTCSessionDescriptionSignalingType.SdpAnswer; break;
+                        case "pranswer": sdpType = RTCSessionDescriptionSignalingType.SdpPreanswer; break;
                         default: Debug.Assert(false, type); break;
                     }
 
                     Debug.WriteLine("Conductor: Received session description: " + message);
                     await _peerConnection.SetRemoteDescription(new RTCSessionDescription(sdpType, sdp));
 
-                    if (sdpType == RTCSdpType.SdpOffer)
+                    if (sdpType == RTCSessionDescriptionSignalingType.SdpOffer)
                     {
                         var answer = await _peerConnection.CreateAnswer();
                         await _peerConnection.SetLocalDescription(answer);
@@ -651,7 +656,7 @@ namespace PeerConnectionClient.Signalling
         private void SendSdp(RTCSessionDescription description)
         {
             var json = new JsonObject();
-            json.Add(kSessionDescriptionTypeName, JsonValue.CreateStringValue(description.Type.GetValueOrDefault().ToString().ToLower()));
+            json.Add(kSessionDescriptionTypeName, JsonValue.CreateStringValue(description.Type.ToString().ToLower()));
             json.Add(kSessionDescriptionSdpName, JsonValue.CreateStringValue(description.Sdp));
             SendMessage(json);
         }
