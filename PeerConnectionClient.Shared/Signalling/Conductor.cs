@@ -25,6 +25,7 @@ using org.ortc;
 using org.ortc.adapter;
 using RTCRtpCodecCapability = org.ortc.RTCRtpCodecCapability;
 using PeerConnectionClient.Media_Extension;
+using PeerConnectionClient.ViewModels;
 using RTCIceCandidate = org.ortc.adapter.RTCIceCandidate;
 
 
@@ -38,7 +39,7 @@ namespace PeerConnectionClient.Signalling
         private static Object _instanceLock = new Object();
         private Object _mediaLock = new object();
         private static Conductor _instance;
-
+        private RTCSessionDescriptionSignalingType _signalingType;
         /// <summary>
         ///  The single instance of the Conductor class.
         /// </summary>
@@ -113,7 +114,10 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
-        MediaStream _mediaStream;
+        public ObservableCollection<Peer> Peers;
+        public Peer Peer;
+        MediaStream MediaStream { get; set; }
+        //private IList<MediaStreamTrack> Tracks { get; set; }
         List<RTCIceServer> _iceServers;
 
         private int _peerId = -1;
@@ -208,6 +212,7 @@ namespace PeerConnectionClient.Signalling
             var config = new RTCConfiguration()
             {
                 BundlePolicy = RTCBundlePolicy.Balanced,
+                SignalingType = _signalingType,//RTCSessionDescriptionSignalingType.Json,
                 //IceTransportPolicy = RTCIceTransportPolicy.All,
                 GatherOptions = new RTCIceGatherOptions()
                 { 
@@ -231,7 +236,7 @@ namespace PeerConnectionClient.Signalling
 
             _peerConnection.OnIceCandidate += PeerConnection_OnIceCandidate;
             _peerConnection.OnTrack += PeerConnection_OnAddTrack;
-            //_peerConnection.OnRemoveStream += PeerConnection_OnRemoveStream;
+            _peerConnection.OnTrackGone += PeerConnection_OnRemoveTrack;
             //_peerConnection.OnConnectionHealthStats += PeerConnection_OnConnectionHealthStats;
 
             Debug.WriteLine("Conductor: Getting user media.");
@@ -248,25 +253,32 @@ namespace PeerConnectionClient.Signalling
                 return false;
             }
 
-            _mediaStream = await _media.GetUserMedia(mediaStreamConstraints);
+            var tracks = await _media.GetUserMedia(mediaStreamConstraints);
+            if (tracks != null)
+            {
+                MediaStream = new MediaStream(tracks);
+                Debug.WriteLine("Conductor: Adding local media stream.");
+                IList<MediaStream> mediaStreamList = new List<MediaStream>();
+                mediaStreamList.Add(MediaStream);
+                foreach (var mediaStreamTrack in tracks)
+                {
+                    _peerConnection.AddTrack(mediaStreamTrack, mediaStreamList);
+                }
+            }
+
             if (cancelationToken.IsCancellationRequested)
             {
                 return false;
             }
 
-            if (_mediaStream == null)
-                return false;
-
-            Debug.WriteLine("Conductor: Adding local media stream.");
-            IList<MediaStream> mediaStreamList = new List<MediaStream>();
-            mediaStreamList.Add(_mediaStream);
-            foreach (var mediaStreamTrack in _mediaStream.GetTracks())
+            
+            /*foreach (var mediaStreamTrack in _mediaStream.GetTracks())
             {
                 _peerConnection.AddTrack(mediaStreamTrack, mediaStreamList);
-            }
+            }*/
             if (OnAddLocalStream != null)
             {
-                OnAddLocalStream(new MediaStreamEvent() { Stream = _mediaStream });
+                OnAddLocalStream(new MediaStreamEvent() { Stream = MediaStream });
             }
 
             if (cancelationToken.IsCancellationRequested)
@@ -286,15 +298,15 @@ namespace PeerConnectionClient.Signalling
                 if (_peerConnection != null)
                 {
                     _peerId = -1;
-                    if (_mediaStream != null)
+                    if (MediaStream != null)
                     {
-                        foreach (var track in _mediaStream.GetTracks())
+                        foreach (var track in MediaStream.GetTracks())
                         {
                             track.Stop();
-                            _mediaStream.RemoveTrack(track);
+                            MediaStream.RemoveTrack(track);
                         }
                     }
-                    _mediaStream = null;
+                    MediaStream = null;
 
                     if (OnPeerConnectionClosed != null)
                     {
@@ -348,13 +360,10 @@ namespace PeerConnectionClient.Signalling
         /// <summary>
         /// Invoked when the remote peer removed a media stream from the peer connection.
         /// </summary>
-        public event Action<MediaStreamEvent> OnRemoveRemoteStream;
-        private void PeerConnection_OnRemoveStream(MediaStreamEvent evt)
+        public event Action<RTCTrackEvent> OnRemoveTrack;
+        private void PeerConnection_OnRemoveTrack(RTCTrackEvent evt)
         {
-            if (OnRemoveRemoteStream != null)
-            {
-                OnRemoveRemoteStream(evt);
-            }
+            OnRemoveTrack?.Invoke(evt);
         }
 
         /// <summary>
@@ -451,7 +460,7 @@ namespace PeerConnectionClient.Signalling
             {
                 Debug.Assert(_peerId == peerId || _peerId == -1);
                 Debug.Assert(message.Length > 0);
-
+                
                 if (_peerId != peerId && _peerId != -1)
                 {
                     Debug.WriteLine("[Error] Conductor: Received a message from unknown peer while already in a conversation with a different peer.");
@@ -479,6 +488,10 @@ namespace PeerConnectionClient.Signalling
                         {
                             Debug.Assert(_peerId == -1);
                             _peerId = peerId;
+
+                            IEnumerable<Peer> enumerablePeer = Peers.Where(x => x.Id == peerId);
+                            Peer = enumerablePeer.First();
+                            _signalingType = Helper.SignalingTypeForClientName(Peer.Name, type=="offer");
 
                             connectToPeerCancelationTokenSource = new CancellationTokenSource();
                             connectToPeerTask = CreatePeerConnection(connectToPeerCancelationTokenSource.Token);
@@ -598,9 +611,9 @@ namespace PeerConnectionClient.Signalling
         /// Calls to connect to the selected peer.
         /// </summary>
         /// <param name="peerId">ID of the peer to connect to.</param>
-        public async void ConnectToPeer(int peerId)
+        public async void ConnectToPeer(Peer peer)
         {
-            Debug.Assert(peerId != -1);
+            Debug.Assert(peer != null);
             Debug.Assert(_peerId == -1);
 
             if (_peerConnection != null)
@@ -608,6 +621,7 @@ namespace PeerConnectionClient.Signalling
                 Debug.WriteLine("[Error] Conductor: We only support connecting to one peer at a time");
                 return;
             }
+            _signalingType = Helper.SignalingTypeForClientName(peer.Name, true);
             connectToPeerCancelationTokenSource = new System.Threading.CancellationTokenSource();
             connectToPeerTask = CreatePeerConnection(connectToPeerCancelationTokenSource.Token);
             bool connectResult = await connectToPeerTask;
@@ -616,7 +630,7 @@ namespace PeerConnectionClient.Signalling
 
             if (connectResult)
             {
-                _peerId = peerId;
+                _peerId = peer.Id;
                 var offer = await _peerConnection.CreateOffer();
 
                 // Alter sdp to force usage of selected codecs
@@ -646,7 +660,9 @@ namespace PeerConnectionClient.Signalling
         private string GetLocalPeerName()
         {
             var hostname = NetworkInformation.GetHostNames().FirstOrDefault(h => h.Type == HostNameType.DomainName);
-            return hostname != null ? hostname.CanonicalName : "<unknown host>";
+            string ret =  hostname != null ? hostname.CanonicalName : "<unknown host>";
+            ret = ret +"-dual";
+            return ret;
         }
 
         /// <summary>
@@ -686,9 +702,9 @@ namespace PeerConnectionClient.Signalling
         {
             lock (_mediaLock)
             {
-                if (_mediaStream != null)
+                if (MediaStream != null)
                 {
-                    foreach (MediaStreamTrack videoTrack in _mediaStream.GetVideoTracks())
+                    foreach (MediaStreamTrack videoTrack in MediaStream.GetVideoTracks())
                     {
                         videoTrack.Enabled = true;
                     }
@@ -704,9 +720,9 @@ namespace PeerConnectionClient.Signalling
         {
             lock (_mediaLock)
             {
-                if (_mediaStream != null)
+                if (MediaStream != null)
                 {
-                    foreach (MediaStreamTrack videoTrack in _mediaStream.GetVideoTracks())
+                    foreach (MediaStreamTrack videoTrack in MediaStream.GetVideoTracks())
                     {
                         videoTrack.Enabled = false;
                     }
@@ -722,10 +738,10 @@ namespace PeerConnectionClient.Signalling
         {
             lock (_mediaLock)
             {
-                if (_mediaStream != null)
+                if (MediaStream != null)
                 {
-                    var audioTracks = _mediaStream.GetAudioTracks();
-                    foreach (MediaStreamTrack audioTrack in _mediaStream.GetAudioTracks())
+                    var audioTracks = MediaStream.GetAudioTracks();
+                    foreach (MediaStreamTrack audioTrack in MediaStream.GetAudioTracks())
                     {
                         audioTrack.Enabled = false;
                     }
@@ -741,10 +757,10 @@ namespace PeerConnectionClient.Signalling
         {
             lock (_mediaLock)
             {
-                if (_mediaStream != null)
+                if (MediaStream != null)
                 {
-                    var audioTracks = _mediaStream.GetAudioTracks();
-                    foreach (MediaStreamTrack audioTrack in _mediaStream.GetAudioTracks())
+                    var audioTracks = MediaStream.GetAudioTracks();
+                    foreach (MediaStreamTrack audioTrack in MediaStream.GetAudioTracks())
                     {
                         audioTrack.Enabled = true;
                     }
@@ -769,7 +785,10 @@ namespace PeerConnectionClient.Signalling
                     url = "turn:";
                 }
                 url += iceServer.Host.Value + ":" + iceServer.Port.Value;
-                RTCIceServer server = new RTCIceServer();
+                RTCIceServer server = new RTCIceServer()
+                {
+                    Urls = new List<string>(),
+                };
                 server.Urls.Add(url);
                 if (iceServer.Credential != null)
                 {

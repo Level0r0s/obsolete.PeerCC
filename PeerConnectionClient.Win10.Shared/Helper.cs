@@ -282,18 +282,6 @@ namespace org
                     constraintSet.DeviceId.Parameters.Exact.Value = device.Id;
                     constraintSet.DeviceId.Value = new StringOrStringList();
                     constraintSet.DeviceId.Value.Value = device.Id;
-//#warning  TODO Removed hardcoded values
-//                    constraintSet.Height = new ConstrainLong();
-//                    constraintSet.Height.Value = 600;
-
-//                    constraintSet.Width = new ConstrainLong();
-//                    constraintSet.Width.Value = 800;
-
-//                    constraintSet.FrameRate = new ConstrainDouble();
-//                    constraintSet.FrameRate.Value = 30;
-
-//                    constraintSet.SampleRate = new ConstrainLong();
-//                    constraintSet.SampleRate.Value = 48000;
 
                     trackConstraints.Advanced.Add(constraintSet);
 
@@ -528,6 +516,26 @@ namespace org
                     return options;
                 }
 
+                public static RTCSessionDescriptionSignalingType SignalingTypeForClientName(string clientName, bool initiator)
+                {
+                    RTCSessionDescriptionSignalingType ret = RTCSessionDescriptionSignalingType.SdpOffer;
+
+                    string[] substring = clientName.Split('-');
+                    if (substring.Length == 2)
+                    {
+                        switch (substring[1])
+                        {
+                            case "dual":
+                                ret = RTCSessionDescriptionSignalingType.Json; 
+                                break;
+
+                            default:
+                                ret = initiator ? RTCSessionDescriptionSignalingType.SdpOffer : RTCSessionDescriptionSignalingType.SdpAnswer;
+                                break;
+                        }
+                    }
+                    return ret;
+                }
             }
         }
     }

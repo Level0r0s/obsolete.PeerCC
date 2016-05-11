@@ -58,7 +58,7 @@ namespace PeerConnectionClient.Media_Extension
             return Task.Run(() => CreateMedia()).AsAsyncOperation();
         }
 
-        public IAsyncOperation<MediaStream> GetUserMedia(RTCMediaStreamConstraints mediaStreamConstraints)
+        /*public IAsyncOperation<MediaStream> GetUserMedia(RTCMediaStreamConstraints mediaStreamConstraints)
         {
             Task<MediaStream> t = Task.Run(() =>
             {
@@ -78,21 +78,37 @@ namespace PeerConnectionClient.Media_Extension
                 }
 
                 Task<IList<MediaStreamTrack>> task = MediaDevices.GetUserMedia(constraints).AsTask();
-                return task.ContinueWith(temp =>
+                return task.ContinueWith(temp => new MediaStream(temp.Result));
+            });
+
+            return t.AsAsyncOperation();
+        }*/
+
+        public IAsyncOperation<IList<MediaStreamTrack>> GetUserMedia(RTCMediaStreamConstraints mediaStreamConstraints)
+        {
+            Task<IList<MediaStreamTrack>> t = Task.Run(() =>
+            {
+                var constraints = Helper.MakeConstraints(mediaStreamConstraints.audioEnabled, null,
+                    MediaDeviceKind.AudioInput, _audioCaptureDevice);
+                constraints = Helper.MakeConstraints(mediaStreamConstraints.videoEnabled, constraints,
+                    MediaDeviceKind.VideoInput, _videoDevice);
+                if (constraints.Video != null && constraints.Video.Advanced.Count > 0)
                 {
-                    /*var audioTracks = Helper.InsertAudioIfValid(mediaStreamConstraints.audioEnabled, null,
-                        temp.Result, _audioCaptureDevice);
-                    var videoTracks = Helper.InsertVideoIfValid(mediaStreamConstraints.videoEnabled, null,
-                        temp.Result, _videoDevice);
-                    return new MediaStream(audioTracks, videoTracks);*/
-                    return new MediaStream(temp.Result);
-                });
+                    MediaTrackConstraintSet constraintSet = constraints.Video.Advanced.First();
+                    constraintSet.Width = new ConstrainLong();
+                    constraintSet.Width.Value = _preferredFrameWidth;
+                    constraintSet.Height = new ConstrainLong();
+                    constraintSet.Height.Value = _preferredFrameHeight;
+                    constraintSet.FrameRate = new ConstrainDouble();
+                    constraintSet.FrameRate.Value = _preferredFPS;
+                }
+
+                Task<IList<MediaStreamTrack>> task = MediaDevices.GetUserMedia(constraints).AsTask();
+                return task.Result;
             });
 
             return t.AsAsyncOperation();
         }
-
-
         public IMediaSource CreateMediaSource(MediaStreamTrack track, string id)
         {
             return track?.CreateMediaSource();

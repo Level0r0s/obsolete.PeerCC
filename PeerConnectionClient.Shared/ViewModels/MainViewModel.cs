@@ -10,6 +10,7 @@
 //*********************************************************
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -188,54 +189,61 @@ namespace PeerConnectionClient.ViewModels
                 savedAudioPlayoutDeviceId = (string)settings.Values["SelectedAudioPlayoutDeviceId"];
             }
 
-            var contentAsync = MediaDevices.EnumerateDevices();
-            contentAsync.AsTask().Wait();
-            var devices = contentAsync.GetResults();
-            foreach (MediaDeviceInfo devInfo in devices)
+            MediaDevices.EnumerateDevices().AsTask().ContinueWith((devices) =>
             {
-                MediaDevice mediaDevice = Helper.ToMediaDevice(devInfo);
-                switch (devInfo.Kind)
+                Task.Delay(5000).Wait();
+                foreach (MediaDeviceInfo devInfo in devices.Result)
                 {
-                    case MediaDeviceKind.AudioInput:
-                        if (savedAudioRecordingDeviceId != null && savedAudioRecordingDeviceId == devInfo.DeviceId)
+                    MediaDevice mediaDevice = Helper.ToMediaDevice(devInfo);
+                    RunOnUiThread(() =>
+                    {
+                        switch (devInfo.Kind)
                         {
-                            SelectedMicrophone = mediaDevice;
-                        }
-                        Microphones.Add(mediaDevice);
-                        break;
-                    case MediaDeviceKind.AudioOutput:
-                        if (savedAudioPlayoutDeviceId != null && savedAudioPlayoutDeviceId == devInfo.DeviceId)
-                        {
-                            SelectedAudioPlayoutDevice = mediaDevice;
-                        }
+                            case MediaDeviceKind.AudioInput:
+                                if (savedAudioRecordingDeviceId != null && savedAudioRecordingDeviceId == devInfo.DeviceId)
+                                {
+                                    SelectedMicrophone = mediaDevice;
+                                }
+                                Microphones.Add(mediaDevice);
+                                break;
+                            case MediaDeviceKind.AudioOutput:
+                                if (savedAudioPlayoutDeviceId != null && savedAudioPlayoutDeviceId == devInfo.DeviceId)
+                                {
+                                    SelectedAudioPlayoutDevice = mediaDevice;
+                                }
 
-                        AudioPlayoutDevices.Add(mediaDevice);
-                        break;
-                    case MediaDeviceKind.VideoInput:
-                        
-                        if (savedVideoRecordingDeviceId != null && savedVideoRecordingDeviceId == devInfo.DeviceId)
-                        {
-                            SelectedCamera = mediaDevice;
+                                AudioPlayoutDevices.Add(mediaDevice);
+                                break;
+                            case MediaDeviceKind.VideoInput:
+
+                                if (savedVideoRecordingDeviceId != null && savedVideoRecordingDeviceId == devInfo.DeviceId)
+                                {
+                                    SelectedCamera = mediaDevice;
+                                }
+                                Cameras.Add(mediaDevice);
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
                         }
-                        Cameras.Add(mediaDevice);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    });
                 }
-            }
 
-            if (SelectedCamera == null && Cameras.Count > 0)
-            {
-                SelectedCamera = Cameras.First();
-            }
-            if (SelectedMicrophone == null && Microphones.Count > 0)
-            {
-                SelectedMicrophone = Microphones.First();
-            }
-            if (SelectedAudioPlayoutDevice == null && AudioPlayoutDevices.Count > 0)
-            {
-                SelectedAudioPlayoutDevice = AudioPlayoutDevices.First();
-            }
+                if (SelectedCamera == null && Cameras.Count > 0)
+                {
+                    SelectedCamera = Cameras.First();
+                }
+                if (SelectedMicrophone == null && Microphones.Count > 0)
+                {
+                    SelectedMicrophone = Microphones.First();
+                }
+                if (SelectedAudioPlayoutDevice == null && AudioPlayoutDevices.Count > 0)
+                {
+                    SelectedAudioPlayoutDevice = AudioPlayoutDevices.First();
+                }
+            });
+            //contentAsync.AsTask().Wait();
+            //var devices = contentAsync.GetResults();
+           
             /*foreach (MediaDevice videoCaptureDevice in Conductor.Instance.Media.GetVideoCaptureDevices())
             {
                 if (savedVideoRecordingDeviceId != null && savedVideoRecordingDeviceId == videoCaptureDevice.Id)
@@ -333,7 +341,10 @@ namespace PeerConnectionClient.ViewModels
                 RunOnUiThread(() =>
                 {
                     if (Peers == null)
+                    {
                         Peers = new ObservableCollection<Peer>();
+                        Conductor.Instance.Peers = Peers;
+                    }
                     Peers.Add(new Peer {Id = peerId, Name = peerName});
                 });
             };
@@ -393,7 +404,7 @@ namespace PeerConnectionClient.ViewModels
 
             // Event handlers for managing the media streams 
             Conductor.Instance.OnAddRemoteTrack += Conductor_OnAddRemoteTrack;
-            Conductor.Instance.OnRemoveRemoteStream += Conductor_OnRemoveRemoteStream;
+            Conductor.Instance.OnRemoveTrack += Conductor_OnRemoveTrack;
             Conductor.Instance.OnAddLocalStream += Conductor_OnAddLocalStream;
 
             Conductor.Instance.OnConnectionHealthStats += Conductor_OnPeerConnectionHealthStats;
@@ -503,7 +514,7 @@ namespace PeerConnectionClient.ViewModels
                 {
                     if (settings.Values["SelectedAudioCodecId"] != null)
                     {
-                        int id = (int) settings.Values["SelectedAudioCodecId"];
+                        int id = Convert.ToInt32(settings.Values["SelectedAudioCodecId"]);
                         foreach (var audioCodec in AudioCodecs)
                         {
                             if (audioCodec.PreferredPayloadType == id)
@@ -528,7 +539,7 @@ namespace PeerConnectionClient.ViewModels
                 {
                     if (settings.Values["SelectedVideoCodecId"] != null)
                     {
-                        int id = (int) settings.Values["SelectedVideoCodecId"];
+                        int id = Convert.ToInt32(settings.Values["SelectedVideoCodecId"]);
                         foreach (var videoCodec in VideoCodecs)
                         {
                             if (videoCodec.PreferredPayloadType == id)
@@ -558,13 +569,13 @@ namespace PeerConnectionClient.ViewModels
         /// Handle media devices change event triggered by WebRTC.
         /// </summary>
         /// <param name="mediaType">The type of devices changed</param>
-        private void OnMediaDevicesChanged()
+        private async void OnMediaDevicesChanged()
         {
-            var contentAsync = MediaDevices.EnumerateDevices();
-            contentAsync.AsTask().Wait();
-            var devices = contentAsync.GetResults();
+            IList<MediaDeviceInfo> devices = await MediaDevices.EnumerateDevices();
+            //contentAsync.AsTask().Wait();
+            //var devices = contentAsync.GetResults();
 
-            Collection <MediaDevice> audioInputDevices = new Collection<MediaDevice>();
+            Collection<MediaDevice> audioInputDevices = new Collection<MediaDevice>();
             Collection<MediaDevice> audioOutputDevices = new Collection<MediaDevice>();
             Collection<MediaDevice> videoInputDevices = new Collection<MediaDevice>();
             foreach (MediaDeviceInfo devInfo in devices)
@@ -593,21 +604,21 @@ namespace PeerConnectionClient.ViewModels
             RefreshAudioPlayoutDevices(audioOutputDevices);
 
         }
-       /* private void OnMediaDevicesChanged(MediaDeviceType mediaType)
-        {
-            switch (mediaType)
-            {
-                case MediaDeviceType.MediaDeviceType_VideoCapture:
-                    RefreshVideoCaptureDevices();
-                    break;
-                case MediaDeviceType.MediaDeviceType_AudioCapture:
-                    RefreshAudioCaptureDevices();
-                    break;
-                case MediaDeviceType.MediaDeviceType_AudioPlayout:
-                    RefreshAudioPlayoutDevices();
-                    break;
-            }
-        }*/
+        /* private void OnMediaDevicesChanged(MediaDeviceType mediaType)
+         {
+             switch (mediaType)
+             {
+                 case MediaDeviceType.MediaDeviceType_VideoCapture:
+                     RefreshVideoCaptureDevices();
+                     break;
+                 case MediaDeviceType.MediaDeviceType_AudioCapture:
+                     RefreshAudioCaptureDevices();
+                     break;
+                 case MediaDeviceType.MediaDeviceType_AudioPlayout:
+                     RefreshAudioPlayoutDevices();
+                     break;
+             }
+         }*/
 
         /// <summary>
         /// Refresh video capture devices list.
@@ -725,7 +736,7 @@ namespace PeerConnectionClient.ViewModels
         /// Remove remote stream event handler.
         /// </summary>
         /// <param name="evt">Details about Media stream event.</param>
-        private void Conductor_OnRemoveRemoteStream(MediaStreamEvent evt)
+        private void Conductor_OnRemoveTrack(RTCTrackEvent evt)
         {
             RunOnUiThread(() => { PeerVideo.SetMediaStreamSource(null); });
         }
@@ -828,7 +839,7 @@ namespace PeerConnectionClient.ViewModels
         /// <summary>
         /// A class represents a peer.
         /// </summary>
-        public class Peer
+        /*public class Peer
         {
             public int Id { get; set; }
             public string Name { get; set; }
@@ -837,7 +848,7 @@ namespace PeerConnectionClient.ViewModels
             {
                 return Id + ": " + Name;
             }
-        }
+        }*/
 
         private ObservableCollection<Peer> _peers;
 
@@ -1966,7 +1977,7 @@ namespace PeerConnectionClient.ViewModels
         /// <param name="obj"></param>
         private void ConnectToPeerCommandExecute(object obj)
         {
-            new Task(() => { Conductor.Instance.ConnectToPeer(SelectedPeer.Id); }).Start();
+            new Task(() => { Conductor.Instance.ConnectToPeer(SelectedPeer); }).Start();
         }
 
         /// <summary>
