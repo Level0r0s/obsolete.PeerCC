@@ -84,9 +84,9 @@ namespace PeerConnectionClient.Media_Extension
             return t.AsAsyncOperation();
         }*/
 
-        public IAsyncOperation<IList<MediaStreamTrack>> GetUserMedia(RTCMediaStreamConstraints mediaStreamConstraints)
+        public Task<IList<MediaStreamTrack>> GetUserMedia(RTCMediaStreamConstraints mediaStreamConstraints)
         {
-            Task<IList<MediaStreamTrack>> t = Task.Run(() =>
+            return Task.Run(() =>
             {
                 var constraints = Helper.MakeConstraints(mediaStreamConstraints.audioEnabled, null,
                     MediaDeviceKind.AudioInput, _audioCaptureDevice);
@@ -106,8 +106,6 @@ namespace PeerConnectionClient.Media_Extension
                 Task<IList<MediaStreamTrack>> task = MediaDevices.GetUserMedia(constraints).AsTask();
                 return task.Result;
             });
-
-            return t.AsAsyncOperation();
         }
         public IMediaSource CreateMediaSource(MediaStreamTrack track, string id)
         {
