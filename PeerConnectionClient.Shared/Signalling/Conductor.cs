@@ -564,10 +564,7 @@ namespace PeerConnectionClient.Signalling
                         return;
                     }
 
-                    var candidate = new RTCIceCandidate();//(sdp, sdpMid, (ushort)sdpMlineIndex);
-                    candidate.SdpMid = sdpMid;
-                    candidate.SdpMLineIndex = (ushort?) sdpMlineIndex;
-                    candidate.Candidate = sdp;
+                    var candidate = String.IsNullOrEmpty(sdpMid) ? RTCIceCandidate.FromSdpStringWithMLineIndex(sdp, (ushort)sdpMlineIndex) : RTCIceCandidate.FromSdpStringWithMid(sdp, sdpMid);
                     _peerConnection.AddIceCandidate(candidate);
                     Debug.WriteLine("Conductor: Received candidate : " + message);
                 }

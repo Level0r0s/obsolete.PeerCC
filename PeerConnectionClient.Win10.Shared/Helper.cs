@@ -361,6 +361,7 @@ namespace org
                 }
                 */
 
+                    /*
                 public static RTCIceCandidate ToWrapperIceCandidate(ortc.RTCIceCandidate iceCandidate,
                     int sdpComponentId)
                 {
@@ -391,7 +392,7 @@ namespace org
 
                     string sdpMid = "audio";
                     UInt16 sdpMLineIndex = 0;
-                    var ret = new RTCIceCandidate()
+                    var ret = new RTCIceCandidate();
                     {
                         SdpMid = sdpMid,
                         SdpMLineIndex = sdpMLineIndex,
@@ -400,7 +401,9 @@ namespace org
 
                     return ret;
                 }
+                */
 
+                    /*
                 public static ortc.RTCIceCandidate IceCandidateFromSdp(string sdp)
                 {
                     ortc.RTCIceCandidate ice = null;//new org.ortc.RTCIceCandidate();
@@ -438,6 +441,7 @@ namespace org
                     }
                     return ice;
                 }
+                */
 
                 public static MediaStreamConstraints ToApiConstraints(RTCMediaStreamConstraints mediaStreamConstraints)
                 {
