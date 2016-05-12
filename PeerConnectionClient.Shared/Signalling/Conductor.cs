@@ -186,8 +186,6 @@ namespace PeerConnectionClient.Signalling
         {
           if (VideoCaptureProfile != null)
           {
-
-
                 _media.SetPreferredVideoCaptureFormat(
                     (int)VideoCaptureProfile.Width, (int)VideoCaptureProfile.Height, (int)VideoCaptureProfile.FrameRate);
 /*#else
@@ -256,13 +254,38 @@ namespace PeerConnectionClient.Signalling
             var tracks = await _media.GetUserMedia(mediaStreamConstraints);
             if (tracks != null)
             {
+                RTCRtpCapabilities audioCapabilities = RTCRtpSender.GetCapabilities("audio");
+                RTCRtpCapabilities videoCapabilities = RTCRtpSender.GetCapabilities("video");
+                /*RTCRtpParameters audioParameters = RTCSessionDescription.ConvertCapabilitiesToParameters(audioCapabilities);
+                var itemsToRemove = audioParameters.Codecs.Where(x => x.PayloadType == AudioCodec.PreferredPayloadType).ToList();
+                if (itemsToRemove.Count > 0)
+                {
+                    RTCRtpCodecParameters codecParameters = itemsToRemove.First();
+                    if (codecParameters!= null && audioParameters.Codecs.IndexOf(codecParameters) > 0)
+                    {
+                        audioParameters.Codecs.Remove(codecParameters);
+                        audioParameters.Codecs.Insert(0, codecParameters);
+                    }
+                }*/
                 MediaStream = new MediaStream(tracks);
                 Debug.WriteLine("Conductor: Adding local media stream.");
                 IList<MediaStream> mediaStreamList = new List<MediaStream>();
                 mediaStreamList.Add(MediaStream);
                 foreach (var mediaStreamTrack in tracks)
                 {
-                    _peerConnection.AddTrack(mediaStreamTrack, mediaStreamList);
+                    RTCMediaStreamTrackConfiguration configuration = null;
+                    if (mediaStreamTrack.Kind == MediaStreamTrackKind.Audio)
+                    {
+                        configuration =
+                            await Helper.GetTrackConfigurationForCapabilities(audioCapabilities, AudioCodec);
+                    }
+                    else if (mediaStreamTrack.Kind == MediaStreamTrackKind.Video)
+                    {
+                        configuration =
+                            await Helper.GetTrackConfigurationForCapabilities(videoCapabilities, VideoCodec);
+                    }
+                    if (configuration != null)
+                        _peerConnection.AddTrack(mediaStreamTrack, mediaStreamList, configuration);
                 }
             }
 
