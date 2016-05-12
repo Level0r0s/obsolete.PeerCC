@@ -525,6 +525,7 @@ namespace org
                     {
                         switch (substring[1])
                         {
+                            case "json":
                             case "dual":
                                 ret = RTCSessionDescriptionSignalingType.Json; 
                                 break;
@@ -535,6 +536,47 @@ namespace org
                         }
                     }
                     return ret;
+                }
+
+               public static Task<RTCMediaStreamTrackConfiguration> GetTrackConfigurationForCapabilities(RTCRtpCapabilities capabilities, RTCRtpCodecCapability codecCapability)
+                {
+                    RTCMediaStreamTrackConfiguration ret;
+
+                    return (Task<RTCMediaStreamTrackConfiguration>) Task.Run(() =>
+                    {
+                        RTCRtpParameters parameters = RTCSessionDescription.ConvertCapabilitiesToParameters(capabilities);
+                        var itemsToRemove = parameters.Codecs.Where(x => x.PayloadType == codecCapability.PreferredPayloadType).ToList();
+                        if (itemsToRemove.Count > 0)
+                        {
+                            RTCRtpCodecParameters codecParameters = itemsToRemove.First();
+                            if (codecParameters != null && parameters.Codecs.IndexOf(codecParameters) > 0)
+                            {
+                                parameters.Codecs.Remove(codecParameters);
+                                parameters.Codecs.Insert(0, codecParameters);
+                            }
+                        }
+
+                        RTCMediaStreamTrackConfiguration configuration = new RTCMediaStreamTrackConfiguration()
+                        {
+                            Parameters = new RTCRtpParameters()
+                            {
+                                Codecs = new List<RTCRtpCodecParameters>(parameters.Codecs),
+                                DegradationPreference = parameters.DegradationPreference,
+                                Encodings = new List<RTCRtpEncodingParameters>(parameters.Encodings),
+                                HeaderExtensions =
+                                    new List<RTCRtpHeaderExtensionParameters>(parameters.HeaderExtensions),
+                                MuxId = parameters.MuxId,
+                                Rtcp = new RTCRtcpParameters()
+                                {
+                                    Cname = parameters.Rtcp.Cname,
+                                    Mux = parameters.Rtcp.Mux,
+                                    ReducedSize = parameters.Rtcp.ReducedSize,
+                                    Ssrc = parameters.Rtcp.Ssrc
+                                }
+                            }
+                        };
+                        return configuration;
+                    });
                 }
             }
         }
