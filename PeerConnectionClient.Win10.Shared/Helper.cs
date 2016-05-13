@@ -546,9 +546,17 @@ namespace org
                 {
                     RTCMediaStreamTrackConfiguration ret;
 
+                    if (codecCapability==null)
+                        throw new ArgumentNullException(nameof(codecCapability));
+
                     return (Task<RTCMediaStreamTrackConfiguration>) Task.Run(() =>
                     {
                         RTCRtpParameters parameters = RTCSessionDescription.ConvertCapabilitiesToParameters(capabilities);
+
+                        if (parameters == null)
+                            throw new NullReferenceException("Unexpected null return from RTCSessionDescription.ConvertCapabilitiesToParameters.");
+
+                        //Move prefered codec to be first in the list
                         var itemsToRemove = parameters.Codecs.Where(x => x.PayloadType == codecCapability.PreferredPayloadType).ToList();
                         if (itemsToRemove.Count > 0)
                         {
@@ -566,9 +574,9 @@ namespace org
                             {
                                 Codecs = new List<RTCRtpCodecParameters>(parameters.Codecs),
                                 DegradationPreference = parameters.DegradationPreference,
-                                Encodings = new List<RTCRtpEncodingParameters>(parameters.Encodings),
-                                HeaderExtensions =
-                                    new List<RTCRtpHeaderExtensionParameters>(parameters.HeaderExtensions),
+                                Encodings = parameters.Encodings != null ? new List<RTCRtpEncodingParameters>(parameters.Encodings) : null,
+                                HeaderExtensions = parameters.HeaderExtensions != null ?
+                                    new List<RTCRtpHeaderExtensionParameters>(parameters.HeaderExtensions) : null,
                                 MuxId = parameters.MuxId,
                                 Rtcp = new RTCRtcpParameters()
                                 {
