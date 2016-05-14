@@ -520,9 +520,9 @@ namespace org
                     return options;
                 }
 
-                public static RTCSessionDescriptionSignalingType SignalingTypeForClientName(string clientName, bool initiator)
+                public static RTCPeerConnectionSignalingMode SignalingModeForClientName(string clientName)
                 {
-                    RTCSessionDescriptionSignalingType ret = RTCSessionDescriptionSignalingType.SdpOffer;
+                    RTCPeerConnectionSignalingMode ret = RTCPeerConnectionSignalingMode.Sdp;
 
                     string[] substring = clientName.Split('-');
                     if (substring.Length == 2)
@@ -531,11 +531,11 @@ namespace org
                         {
                             case "json":
                             case "dual":
-                                ret = RTCSessionDescriptionSignalingType.Json; 
+                                ret = RTCPeerConnectionSignalingMode.Json; 
                                 break;
 
                             default:
-                                ret = initiator ? RTCSessionDescriptionSignalingType.SdpOffer : RTCSessionDescriptionSignalingType.SdpAnswer;
+                                ret = RTCPeerConnectionSignalingMode.Sdp;
                                 break;
                         }
                     }

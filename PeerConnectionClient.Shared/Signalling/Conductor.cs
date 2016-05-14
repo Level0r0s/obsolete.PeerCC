@@ -39,7 +39,7 @@ namespace PeerConnectionClient.Signalling
         private static Object _instanceLock = new Object();
         private Object _mediaLock = new object();
         private static Conductor _instance;
-        private RTCSessionDescriptionSignalingType _signalingType;
+        private RTCPeerConnectionSignalingMode _signalingMode;
         /// <summary>
         ///  The single instance of the Conductor class.
         /// </summary>
@@ -210,7 +210,7 @@ namespace PeerConnectionClient.Signalling
             var config = new RTCConfiguration()
             {
                 BundlePolicy = RTCBundlePolicy.Balanced,
-                SignalingType = _signalingType,//RTCSessionDescriptionSignalingType.Json,
+                SignalingMode = _signalingMode,//RTCSessionDescriptionSignalingType.Json,
                 //IceTransportPolicy = RTCIceTransportPolicy.All,
                 GatherOptions = new RTCIceGatherOptions()
                 { 
@@ -514,7 +514,7 @@ namespace PeerConnectionClient.Signalling
 
                             IEnumerable<Peer> enumerablePeer = Peers.Where(x => x.Id == peerId);
                             Peer = enumerablePeer.First();
-                            _signalingType = Helper.SignalingTypeForClientName(Peer.Name, type=="offer");
+                            _signalingMode = Helper.SignalingModeForClientName(Peer.Name);
 
                             connectToPeerCancelationTokenSource = new CancellationTokenSource();
                             connectToPeerTask = CreatePeerConnection(connectToPeerCancelationTokenSource.Token);
@@ -641,7 +641,7 @@ namespace PeerConnectionClient.Signalling
                 Debug.WriteLine("[Error] Conductor: We only support connecting to one peer at a time");
                 return;
             }
-            _signalingType = Helper.SignalingTypeForClientName(peer.Name, true);
+            _signalingMode = Helper.SignalingModeForClientName(peer.Name);
             connectToPeerCancelationTokenSource = new System.Threading.CancellationTokenSource();
             connectToPeerTask = CreatePeerConnection(connectToPeerCancelationTokenSource.Token);
             bool connectResult = await connectToPeerTask;
