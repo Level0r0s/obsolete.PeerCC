@@ -542,50 +542,53 @@ namespace org
                     return ret;
                 }
 
-               public static Task<RTCMediaStreamTrackConfiguration> GetTrackConfigurationForCapabilities(RTCRtpCapabilities capabilities, RTCRtpCodecCapability codecCapability)
+               public static Task<RTCMediaStreamTrackConfiguration> GetTrackConfigurationForCapabilities(RTCRtpCapabilities sourceCapabilities, RTCRtpCodecCapability preferredCodec)
                 {
                     RTCMediaStreamTrackConfiguration ret;
 
-                    if (codecCapability==null)
-                        throw new ArgumentNullException(nameof(codecCapability));
+                    if (preferredCodec == null)
+                        throw new ArgumentNullException(nameof(preferredCodec));
 
                     return (Task<RTCMediaStreamTrackConfiguration>) Task.Run(() =>
                     {
-                        RTCRtpParameters parameters = RTCSessionDescription.ConvertCapabilitiesToParameters(capabilities);
+                        RTCRtpCapabilities capabilities = sourceCapabilities.Clone();
+                        RTCRtpParameters parameters = RTCSessionDescription.ConvertCapabilitiesToParameters(sourceCapabilities);
 
                         if (parameters == null)
                             throw new NullReferenceException("Unexpected null return from RTCSessionDescription.ConvertCapabilitiesToParameters.");
 
-                        //Move prefered codec to be first in the list
-                        var itemsToRemove = parameters.Codecs.Where(x => x.PayloadType == codecCapability.PreferredPayloadType).ToList();
-                        if (itemsToRemove.Count > 0)
+                        // scoope: move prefered codec to be first in the list
                         {
-                            RTCRtpCodecParameters codecParameters = itemsToRemove.First();
-                            if (codecParameters != null && parameters.Codecs.IndexOf(codecParameters) > 0)
+                            var itemsToRemove = capabilities.Codecs.Where(x => x.PreferredPayloadType == preferredCodec.PreferredPayloadType).ToList();
+                            if (itemsToRemove.Count > 0)
                             {
-                                parameters.Codecs.Remove(codecParameters);
-                                parameters.Codecs.Insert(0, codecParameters);
+                                RTCRtpCodecCapability codecCapability = itemsToRemove.First();
+                                if (codecCapability != null && capabilities.Codecs.IndexOf(codecCapability) > 0)
+                                {
+                                    capabilities.Codecs.Remove(codecCapability);
+                                    capabilities.Codecs.Insert(0, codecCapability);
+                                }
+                            }
+                        }
+
+                        // scoope: move prefered codec to be first in the list
+                        {
+                            var itemsToRemove = parameters.Codecs.Where(x => x.PayloadType == preferredCodec.PreferredPayloadType).ToList();
+                            if (itemsToRemove.Count > 0)
+                            {
+                                RTCRtpCodecParameters codecParameters = itemsToRemove.First();
+                                if (codecParameters != null && parameters.Codecs.IndexOf(codecParameters) > 0)
+                                {
+                                    parameters.Codecs.Remove(codecParameters);
+                                    parameters.Codecs.Insert(0, codecParameters);
+                                }
                             }
                         }
 
                         RTCMediaStreamTrackConfiguration configuration = new RTCMediaStreamTrackConfiguration()
                         {
-                            Parameters = new RTCRtpParameters()
-                            {
-                                Codecs = new List<RTCRtpCodecParameters>(parameters.Codecs),
-                                DegradationPreference = parameters.DegradationPreference,
-                                Encodings = parameters.Encodings != null ? new List<RTCRtpEncodingParameters>(parameters.Encodings) : null,
-                                HeaderExtensions = parameters.HeaderExtensions != null ?
-                                    new List<RTCRtpHeaderExtensionParameters>(parameters.HeaderExtensions) : null,
-                                MuxId = parameters.MuxId,
-                                Rtcp = new RTCRtcpParameters()
-                                {
-                                    Cname = parameters.Rtcp.Cname,
-                                    Mux = parameters.Rtcp.Mux,
-                                    ReducedSize = parameters.Rtcp.ReducedSize,
-                                    Ssrc = parameters.Rtcp.Ssrc
-                                }
-                            }
+                            Capabilities = capabilities,
+                            Parameters = parameters
                         };
                         return configuration;
                     });
