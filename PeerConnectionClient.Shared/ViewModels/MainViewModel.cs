@@ -210,7 +210,6 @@ namespace PeerConnectionClient.ViewModels
                                 {
                                     SelectedAudioPlayoutDevice = mediaDevice;
                                 }
-
                                 AudioPlayoutDevices.Add(mediaDevice);
                                 break;
                             case MediaDeviceKind.VideoInput:
@@ -510,7 +509,6 @@ namespace PeerConnectionClient.ViewModels
         /// <summary>
         /// Handle media devices change event triggered by WebRTC.
         /// </summary>
-        /// <param name="mediaType">The type of devices changed</param>
         private async void OnMediaDevicesChanged()
         {
             IList<MediaDeviceInfo> devices = await MediaDevices.EnumerateDevices();
@@ -546,21 +544,7 @@ namespace PeerConnectionClient.ViewModels
             RefreshAudioPlayoutDevices(audioOutputDevices);
 
         }
-        /* private void OnMediaDevicesChanged(MediaDeviceType mediaType)
-         {
-             switch (mediaType)
-             {
-                 case MediaDeviceType.MediaDeviceType_VideoCapture:
-                     RefreshVideoCaptureDevices();
-                     break;
-                 case MediaDeviceType.MediaDeviceType_AudioCapture:
-                     RefreshAudioCaptureDevices();
-                     break;
-                 case MediaDeviceType.MediaDeviceType_AudioPlayout:
-                     RefreshAudioPlayoutDevices();
-                     break;
-             }
-         }*/
+       
 
         /// <summary>
         /// Refresh video capture devices list.
@@ -640,13 +624,13 @@ namespace PeerConnectionClient.ViewModels
             //var audioPlayoutDevices = Conductor.Instance.Media.GetAudioPlayoutDevices();
             RunOnUiThread(() =>
             {
-                var SelectedPlayoutDeviceId = SelectedAudioPlayoutDevice != null ? SelectedAudioPlayoutDevice.Id : null;
+                var selectedPlayoutDeviceId = SelectedAudioPlayoutDevice?.Id;
                 SelectedAudioPlayoutDevice = null;
                 AudioPlayoutDevices.Clear();
                 foreach (MediaDevice audioPlayoutDevice in audioPlayoutDevices)
                 {
                     AudioPlayoutDevices.Add(audioPlayoutDevice);
-                    if (audioPlayoutDevice.Id == SelectedPlayoutDeviceId)
+                    if (audioPlayoutDevice.Id == selectedPlayoutDeviceId)
                     {
                         SelectedAudioPlayoutDevice = audioPlayoutDevice;
                     }
@@ -1375,6 +1359,7 @@ namespace PeerConnectionClient.ViewModels
 
         /// <summary>
         /// The list of available audio playout devices.
+        /// </summary>
         public ObservableCollection<MediaDevice> AudioPlayoutDevices
         {
             get { return _audioPlayoutDevices; }
@@ -1395,7 +1380,6 @@ namespace PeerConnectionClient.ViewModels
                 {
                     var localSettings = ApplicationData.Current.LocalSettings;
                     localSettings.Values["SelectedAudioPlayoutDeviceId"] = _selectedAudioPlayoutDevice.Id;
-                    Conductor.Instance.Media.SelectAudioPlayoutDevice(_selectedAudioPlayoutDevice);
                 }
             }
         }
@@ -1620,10 +1604,10 @@ namespace PeerConnectionClient.ViewModels
 
         private ObservableCollection<String> _allCapRes;
 
+        /// <summary>
+        /// The list of all capture resolutions.
+        /// </summary>
         public ObservableCollection<String> AllCapRes
-            /// <summary>
-            /// The list of all capture resolutions.
-            /// </summary>
         {
             get
             {
@@ -1638,10 +1622,10 @@ namespace PeerConnectionClient.ViewModels
 
         private String _selectedCapResItem;
 
+        /// <summary>
+        /// The selected capture resolution.
+        /// </summary>
         public String SelectedCapResItem
-            /// <summary>
-            /// The selected capture resolution.
-            /// </summary>
         {
             get { return _selectedCapResItem; }
             set
@@ -1693,10 +1677,10 @@ namespace PeerConnectionClient.ViewModels
 
         private ObservableCollection<CaptureCapability> _allCapFPS;
 
+        /// <summary>
+        /// The list of all capture frame rates.
+        /// </summary>
         public ObservableCollection<CaptureCapability> AllCapFPS
-            /// <summary>
-            /// The list of all capture frame rates.
-            /// </summary>
         {
             get
             {
@@ -1711,10 +1695,10 @@ namespace PeerConnectionClient.ViewModels
 
         private CaptureCapability _selectedCapFPSItem;
 
+        /// <summary>
+        /// The selected capture frame rate.
+        /// </summary>
         public CaptureCapability SelectedCapFPSItem
-            /// <summary>
-            /// The selected capture frame rate.
-            /// </summary>
         {
             get { return _selectedCapFPSItem; }
             set
@@ -1725,7 +1709,7 @@ namespace PeerConnectionClient.ViewModels
                     Conductor.Instance.updatePreferredFrameFormat();
 
                     var localSettings = ApplicationData.Current.LocalSettings;
-                    localSettings.Values["SelectedCapFPSItemFrameRate"] = (value != null) ? value.FrameRate : 0;
+                    localSettings.Values["SelectedCapFPSItemFrameRate"] = value?.FrameRate ?? 0;
                 }
             }
         }
