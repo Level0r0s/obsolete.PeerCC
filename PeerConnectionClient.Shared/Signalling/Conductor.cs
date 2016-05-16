@@ -552,7 +552,7 @@ namespace PeerConnectionClient.Signalling
                     {
                         case "offer": sdpType = RTCSessionDescriptionSignalingType.SdpOffer; break;
                         case "answer": sdpType = RTCSessionDescriptionSignalingType.SdpAnswer; break;
-                        case "pranswer": sdpType = RTCSessionDescriptionSignalingType.SdpPreanswer; break;
+                        case "pranswer": sdpType = RTCSessionDescriptionSignalingType.SdpPranswer; break;
                         default: Debug.Assert(false, type); break;
                     }
 
