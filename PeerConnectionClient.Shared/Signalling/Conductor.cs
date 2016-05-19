@@ -635,13 +635,8 @@ namespace PeerConnectionClient.Signalling
                 {
                     var offer = await _peerConnection.CreateOffer();
 
-                    // Alter sdp to force usage of selected codecs
-                    string newSdp = offer.Sdp;
-                    SdpUtils.SelectCodecs(ref newSdp, AudioCodec, VideoCodec);
-                    //offer.Sdp = newSdp;
-
                     await _peerConnection.SetLocalDescription(offer);
-                    Debug.WriteLine("Conductor: Sending offer.");
+                    Debug.WriteLine("Conductor: Sending offer: " + offer.FormattedDescription);
                     SendSdp(offer);
                 }
             }
