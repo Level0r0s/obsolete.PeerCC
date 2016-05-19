@@ -669,6 +669,13 @@ namespace PeerConnectionClient.Signalling
         /// <param name="description">RTC session description.</param>
         private void SendSdp(RTCSessionDescription description)
         {
+            var type = description.Type.ToString().ToLower();
+            var prefix = type.Substring(0, "sdp".Length);
+            if (prefix == "sdp")
+            {
+                type = type.Substring("sdp".Length);
+            }
+
             var json = new JsonObject
             {
                 {kSessionDescriptionTypeName, JsonValue.CreateStringValue(description.Type.ToString().ToLower())},
