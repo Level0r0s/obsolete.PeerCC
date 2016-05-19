@@ -678,7 +678,7 @@ namespace PeerConnectionClient.Signalling
 
             var json = new JsonObject
             {
-                {kSessionDescriptionTypeName, JsonValue.CreateStringValue(description.Type.ToString().ToLower())},
+                {kSessionDescriptionTypeName, JsonValue.CreateStringValue(type)},
                 {kSessionDescriptionSdpName, JsonValue.CreateStringValue(description.Sdp)}
             };
             SendMessage(json);
