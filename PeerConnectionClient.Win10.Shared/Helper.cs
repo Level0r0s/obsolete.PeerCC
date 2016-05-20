@@ -96,8 +96,11 @@ namespace org
                     {
                         switch (substring.Last())
                         {
-                            case "json":
                             case "dual":
+                                ret = RTCPeerConnectionSignalingMode.Json;
+                                break;
+
+                            case "json":
                                 ret = RTCPeerConnectionSignalingMode.Json; 
                                 break;
 
