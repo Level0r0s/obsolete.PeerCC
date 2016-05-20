@@ -339,17 +339,15 @@ namespace PeerConnectionClient.Signalling
         private void PeerConnection_OnIceCandidate(RTCPeerConnectionIceEvent evt)
         {
             double index = (null != evt.Candidate.SdpMLineIndex ? (double) evt.Candidate.SdpMLineIndex : -1);
-            if (evt.Candidate?.SdpMLineIndex != null)
+
+            var json = new JsonObject
             {
-                var json = new JsonObject
-                {
-                    {kCandidateSdpMidName, JsonValue.CreateStringValue(evt.Candidate.SdpMid)},
-                    {kCandidateSdpMlineIndexName, JsonValue.CreateNumberValue((double) evt.Candidate.SdpMLineIndex)},
-                    {kCandidateSdpName, JsonValue.CreateStringValue(evt.Candidate.Candidate)}
-                };
-                Debug.WriteLine("Conductor: Sending ice candidate.\n" + json.Stringify());
-                SendMessage(json);
-            }
+                {kCandidateSdpMidName, JsonValue.CreateStringValue(evt.Candidate.SdpMid)},
+                {kCandidateSdpMlineIndexName, JsonValue.CreateNumberValue((double) evt.Candidate.SdpMLineIndex)},
+                {kCandidateSdpName, JsonValue.CreateStringValue(evt.Candidate.Candidate)}
+            };
+            Debug.WriteLine("Conductor: Sending ice candidate.\n" + json.Stringify());
+            SendMessage(json);
         }
 
         /// <summary>
