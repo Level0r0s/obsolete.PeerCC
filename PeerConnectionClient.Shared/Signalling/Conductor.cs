@@ -340,11 +340,17 @@ namespace PeerConnectionClient.Signalling
         {
             double index = (null != evt.Candidate.SdpMLineIndex ? (double) evt.Candidate.SdpMLineIndex : -1);
 
+            String message;
+            if (RTCPeerConnectionSignalingMode.Json == _signalingMode)
+                message = evt.Candidate.ToJsonString();
+            else
+                message = evt.Candidate.Candidate;
+
             var json = new JsonObject
             {
                 {kCandidateSdpMidName, JsonValue.CreateStringValue(evt.Candidate.SdpMid)},
                 {kCandidateSdpMlineIndexName, JsonValue.CreateNumberValue(index)},
-                {kCandidateSdpName, JsonValue.CreateStringValue(evt.Candidate.Candidate)}
+                {kCandidateSdpName, JsonValue.CreateStringValue(message)}
             };
             Debug.WriteLine("Conductor: Sending ice candidate.\n" + json.Stringify());
             SendMessage(json);
@@ -567,7 +573,11 @@ namespace PeerConnectionClient.Signalling
                         return;
                     }
 
-                    var candidate = String.IsNullOrEmpty(sdpMid) ? RTCIceCandidate.FromSdpStringWithMLineIndex(sdp, (ushort)sdpMlineIndex) : RTCIceCandidate.FromSdpStringWithMid(sdp, sdpMid);
+                    RTCIceCandidate candidate = null;
+                    if (RTCPeerConnectionSignalingMode.Json ==_signalingMode)
+                        candidate = RTCIceCandidate.FromJsonString(sdp);
+                    else
+                        candidate = String.IsNullOrEmpty(sdpMid) ? RTCIceCandidate.FromSdpStringWithMLineIndex(sdp, (ushort)sdpMlineIndex) : RTCIceCandidate.FromSdpStringWithMid(sdp, sdpMid);
                     _peerConnection?.AddIceCandidate(candidate);
                     Debug.WriteLine("Conductor: Received candidate : " + message);
                 }
