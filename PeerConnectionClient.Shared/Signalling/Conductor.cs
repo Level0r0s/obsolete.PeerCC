@@ -338,6 +338,7 @@ namespace PeerConnectionClient.Signalling
         /// <param name="evt">Details about RTC Peer Connection Ice event.</param>
         private void PeerConnection_OnIceCandidate(RTCPeerConnectionIceEvent evt)
         {
+            double index = (null != evt.Candidate.SdpMLineIndex ? (double) evt.Candidate.SdpMLineIndex : -1);
             if (evt.Candidate?.SdpMLineIndex != null)
             {
                 var json = new JsonObject
@@ -552,6 +553,7 @@ namespace PeerConnectionClient.Signalling
                             var answer = await _peerConnection.CreateAnswer();
                             await _peerConnection.SetLocalDescription(answer);
                             // Send answer
+                            Debug.WriteLine("Conductor: Sending answer: " + answer.FormattedDescription);
                             SendSdp(answer);
                         }
                     }
@@ -561,7 +563,7 @@ namespace PeerConnectionClient.Signalling
                     var sdpMid = jMessage.ContainsKey(kCandidateSdpMidName) ? jMessage.GetNamedString(kCandidateSdpMidName) : null;
                     var sdpMlineIndex = jMessage.ContainsKey(kCandidateSdpMlineIndexName) ? jMessage.GetNamedNumber(kCandidateSdpMlineIndexName) : -1;
                     var sdp = jMessage.ContainsKey(kCandidateSdpName) ? jMessage.GetNamedString(kCandidateSdpName) : null;
-                    if (String.IsNullOrEmpty(sdpMid) || sdpMlineIndex == -1 || String.IsNullOrEmpty(sdp))
+                    if ((String.IsNullOrEmpty(sdpMid) && (sdpMlineIndex == -1)) || String.IsNullOrEmpty(sdp))
                     {
                         Debug.WriteLine("[Error] Conductor: Can't parse received message.\n" + message);
                         return;
@@ -679,7 +681,7 @@ namespace PeerConnectionClient.Signalling
             var json = new JsonObject
             {
                 {kSessionDescriptionTypeName, JsonValue.CreateStringValue(type)},
-                {kSessionDescriptionSdpName, JsonValue.CreateStringValue(description.Sdp)}
+                {kSessionDescriptionSdpName, JsonValue.CreateStringValue(description.FormattedDescription)}
             };
             SendMessage(json);
         }
