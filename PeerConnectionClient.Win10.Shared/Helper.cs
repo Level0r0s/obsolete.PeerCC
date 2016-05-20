@@ -89,12 +89,12 @@ namespace org
                 
                 public static RTCPeerConnectionSignalingMode SignalingModeForClientName(string clientName)
                 {
-                    RTCPeerConnectionSignalingMode ret = RTCPeerConnectionSignalingMode.Sdp;
+                    RTCPeerConnectionSignalingMode ret = RTCPeerConnectionSignalingMode.Json;
 
                     string[] substring = clientName.Split('-');
-                    if (substring.Length == 2)
+                    if (substring.Length >= 2)
                     {
-                        switch (substring[1])
+                        switch (substring.Last())
                         {
                             case "json":
                             case "dual":
