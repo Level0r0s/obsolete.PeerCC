@@ -635,13 +635,8 @@ namespace PeerConnectionClient.Signalling
                 {
                     var offer = await _peerConnection.CreateOffer();
 
-                    // Alter sdp to force usage of selected codecs
-                    string newSdp = offer.Sdp;
-                    SdpUtils.SelectCodecs(ref newSdp, AudioCodec, VideoCodec);
-                    //offer.Sdp = newSdp;
-
                     await _peerConnection.SetLocalDescription(offer);
-                    Debug.WriteLine("Conductor: Sending offer.");
+                    Debug.WriteLine("Conductor: Sending offer: " + offer.FormattedDescription);
                     SendSdp(offer);
                 }
             }
@@ -674,9 +669,16 @@ namespace PeerConnectionClient.Signalling
         /// <param name="description">RTC session description.</param>
         private void SendSdp(RTCSessionDescription description)
         {
+            var type = description.Type.ToString().ToLower();
+            var prefix = type.Substring(0, "sdp".Length);
+            if (prefix == "sdp")
+            {
+                type = type.Substring("sdp".Length);
+            }
+
             var json = new JsonObject
             {
-                {kSessionDescriptionTypeName, JsonValue.CreateStringValue(description.Type.ToString().ToLower())},
+                {kSessionDescriptionTypeName, JsonValue.CreateStringValue(type)},
                 {kSessionDescriptionSdpName, JsonValue.CreateStringValue(description.Sdp)}
             };
             SendMessage(json);
