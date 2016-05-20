@@ -10,7 +10,7 @@ using org.ortc.adapter;
 using PeerConnectionClient.Media_Extension;
 
 namespace PeerConnectionClient.Utilities
-{
+{ 
     class Helper
     {
         public static MediaDevice ToMediaDevice(MediaDeviceInfo device)
@@ -86,15 +86,18 @@ namespace PeerConnectionClient.Utilities
                 
         public static RTCPeerConnectionSignalingMode SignalingModeForClientName(string clientName)
         {
-            RTCPeerConnectionSignalingMode ret = RTCPeerConnectionSignalingMode.Sdp;
+            RTCPeerConnectionSignalingMode ret = RTCPeerConnectionSignalingMode.Json;
 
             string[] substring = clientName.Split('-');
-            if (substring.Length == 2)
+            if (substring.Length >= 2)
             {
-                switch (substring[1])
+                switch (substring.Last())
                 {
-                    case "json":
                     case "dual":
+                        ret = RTCPeerConnectionSignalingMode.Json;
+                        break;
+
+                    case "json":
                         ret = RTCPeerConnectionSignalingMode.Json; 
                         break;
 
@@ -156,5 +159,4 @@ namespace PeerConnectionClient.Utilities
             });
         }
     }
-
 }
