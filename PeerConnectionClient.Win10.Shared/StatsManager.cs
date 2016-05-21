@@ -22,21 +22,7 @@ using org.ortc;
 using org.ortc.adapter;
 using RtcPeerConnection = org.ortc.adapter.RTCPeerConnection;
 
-#if USE_WEBRTC_API
-using RtcPeerConnection = webrtc_winrt_api.RTCPeerConnection;
-using RtcStatsReport = webrtc_winrt_api.RTCStatsReport;
-using RtcStatsType = webrtc_winrt_api.RTCStatsType;
-using RtcStatsValueName = webrtc_winrt_api.RTCStatsValueName;
-using RtcStatsReportsReadyEvent = webrtc_winrt_api.RTCStatsReportsReadyEvent;
-#elif USE_ORTC_API
-using RtcPeerConnection = ChatterBox.Client.Voip.Rtc.RTCPeerConnection;
-using RtcStatsReport = ChatterBox.Client.Voip.Rtc.RTCStatsReport;
-using RtcStatsType = ChatterBox.Client.Voip.Rtc.RTCStatsType;
-using RtcStatsValueName = ChatterBox.Client.Voip.Rtc.RTCStatsValueName;
-using RtcStatsReportsReadyEvent = ChatterBox.Client.Voip.Rtc.RTCStatsReportsReadyEvent;
-#endif //USE_WEBRTC_API
-
-namespace ChatterBox.Client.Universal.Background
+namespace PeerConnectionClient.Utilities
 {
     internal sealed class RtcStatsReport
     {
@@ -179,7 +165,15 @@ namespace ChatterBox.Client.Universal.Background
     }
     internal sealed class StatsManager
     {
-        public StatsManager()
+        private static volatile StatsManager _instance;
+        private static readonly object SyncRoot = new object();
+        RtcPeerConnection _peerConnection;
+        TelemetryClient _telemetry;
+        Timer _metricsTimer;
+        Timer _networkTimer;
+        AudioVideoMetricsCollector _metricsCollector;
+
+        private StatsManager()
         {
             _telemetry = new TelemetryClient();
             _telemetry.Context.Session.Id = Guid.NewGuid().ToString();
@@ -189,11 +183,20 @@ namespace ChatterBox.Client.Universal.Background
             _telemetry.Flush();
         }
 
-        RtcPeerConnection _peerConnection;
-        TelemetryClient _telemetry;
-        Timer _metricsTimer;
-        Timer _networkTimer;
-        AudioVideoMetricsCollector _metricsCollector;
+        public static StatsManager Instance
+        {
+            get
+            {
+                if (_instance != null) return _instance;
+                lock (SyncRoot)
+                {
+                    if (_instance == null) _instance = new StatsManager();
+                }
+
+                return _instance;
+            }
+        }
+       
         public void Initialize(RtcPeerConnection pc)
         {
             if (pc != null)
@@ -609,6 +612,51 @@ namespace ChatterBox.Client.Universal.Background
                     _networkTimer.Dispose();
                 }
             }
+        }
+
+        public void TrackCallStarted()
+        {
+            /*if (!AppInsightsEnabled)
+            {
+                return;
+            }*/
+            //_callStartDateTime = DateTimeOffset.Now;
+            var currentConnection = NetworkInformation.GetInternetConnectionProfile();
+            string connType;
+            switch (currentConnection.NetworkAdapter.IanaInterfaceType)
+            {
+                case 6:
+                    connType = "Cable";
+                    break;
+                case 71:
+                    connType = "WiFi";
+                    break;
+                case 243:
+                    connType = "Mobile";
+                    break;
+                default:
+                    connType = "Unknown";
+                    break;
+            }
+            var properties = new Dictionary<string, string> { { "Connection Type", connType } };
+            StatsManager.Instance.TrackEvent("CallStarted", properties);
+            // start call watch to count duration for tracking as request
+            StatsManager.Instance.StartCallWatch();
+        }
+
+        public void TrackCallEnded()
+        {
+            /*if (!_hub.IsAppInsightsEnabled)
+            {
+                return;
+            }*/
+            // log call duration as CallEnded event property
+            string duration = "";//DateTimeOffset.Now.Subtract(_callStartDateTime).Duration().ToString(@"hh\:mm\:ss");
+            var properties = new Dictionary<string, string> { { "Call Duration", duration } };
+            StatsManager.Instance.TrackEvent("CallEnded", properties);
+
+            // stop call watch, so the duration will be calculated and tracked as request
+            StatsManager.Instance.StopCallWatch();
         }
     }
 

@@ -168,6 +168,21 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
+        bool _appInsightsEnabled;
+
+
+        public bool AppInsightsEnabled
+        {
+            get
+            {
+                return _appInsightsEnabled;
+            }
+            set
+            {
+                _appInsightsEnabled = value;
+                StatsManager.Instance.DisableTelemetry(!_appInsightsEnabled);
+            }
+        }
         CancellationTokenSource connectToPeerCancelationTokenSource;
         Task<bool> connectToPeerTask;
 
@@ -206,7 +221,7 @@ namespace PeerConnectionClient.Signalling
             {
                 return false;
             }
-            
+
             var config = new RTCConfiguration()
             {
                 BundlePolicy = RTCPeerConnectionSignalingMode.Json == _signalingMode ? RTCBundlePolicy.MaxBundle : RTCBundlePolicy.Balanced,
@@ -225,6 +240,15 @@ namespace PeerConnectionClient.Signalling
             if (cancelationToken.IsCancellationRequested)
             {
                 return false;
+            }
+
+            if (_peerConnection == null)
+                throw new NullReferenceException("Peer connection is not created.");
+
+            if (AppInsightsEnabled)
+            {
+                StatsManager.Instance.Initialize(_peerConnection);
+                StatsManager.Instance.IsStatsCollectionEnabled = true;
             }
 
             OnPeerConnectionCreated?.Invoke();
@@ -322,6 +346,8 @@ namespace PeerConnectionClient.Signalling
                     OnPeerConnectionClosed?.Invoke();
 
                     _peerConnection.Close(); // Slow, so do this after UI updated and camera turned off
+                    if (AppInsightsEnabled)
+                        StatsManager.Instance.TrackCallEnded();
                     _peerConnection = null;
 
                     OnReadyToConnect?.Invoke();
@@ -567,6 +593,8 @@ namespace PeerConnectionClient.Signalling
                             // Send answer
                             Debug.WriteLine("Conductor: Sending answer: " + answer.FormattedDescription);
                             SendSdp(answer);
+                            if (AppInsightsEnabled)
+                                StatsManager.Instance.TrackCallStarted();
                         }
                     }
                 }
@@ -660,6 +688,8 @@ namespace PeerConnectionClient.Signalling
                     await _peerConnection.SetLocalDescription(offer);
                     Debug.WriteLine("Conductor: Sending offer: " + offer.FormattedDescription);
                     SendSdp(offer);
+                    if (AppInsightsEnabled)
+                        StatsManager.Instance.TrackCallStarted();
                 }
             }
         }
@@ -722,6 +752,8 @@ namespace PeerConnectionClient.Signalling
         private async Task SendHangupMessage()
         {
             await _signaller.SendToPeer(_peerId, "BYE");
+            if (AppInsightsEnabled)
+                StatsManager.Instance.TrackCallEnded();
         }
 
         /// <summary>

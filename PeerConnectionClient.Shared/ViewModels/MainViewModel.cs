@@ -2373,5 +2373,35 @@ namespace PeerConnectionClient.ViewModels
             WebRTC.CpuUsage = CPUData.GetCPUUsage();
             WebRTC.MemoryUsage = MEMData.GetMEMUsage();
         }
+
+        private bool _appInsightsEnabled;
+
+        /// <summary>
+        /// Enable tracing toggle button.
+        /// Stop tracing and send logs/Start tracing if the tracing is disabled/enabled.
+        /// </summary>
+        public bool AppInsightsEnabled
+        {
+            get { return _appInsightsEnabled; }
+            set
+            {
+                if (!SetProperty(ref _appInsightsEnabled, value))
+                {
+                    return;
+                }
+
+                if (_appInsightsEnabled)
+                {
+                    //WebRTC.StartTracing();
+                }
+                else
+                {
+                    Conductor.Instance.AppInsightsEnabled = _appInsightsEnabled;
+                    // WebRTC.StopTracing();
+                    //   WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
+                }
+                
+            }
+        }
     }
 }
