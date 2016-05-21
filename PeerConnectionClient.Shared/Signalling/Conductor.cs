@@ -489,7 +489,7 @@ namespace PeerConnectionClient.Signalling
                         // about to get initiated. Otherwise ignore the
                         // messages from peers which could be a result
                         // of old (but not yet fully closed) connections.
-                        if (type == "offer" || type == "answer")
+                        if (type == "offer" || type == "answer" || type == "json")
                         {
                             Debug.Assert(_peerId == -1);
                             _peerId = peerId;
