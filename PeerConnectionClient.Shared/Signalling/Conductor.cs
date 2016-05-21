@@ -209,7 +209,7 @@ namespace PeerConnectionClient.Signalling
             
             var config = new RTCConfiguration()
             {
-                BundlePolicy = RTCBundlePolicy.Balanced,
+                BundlePolicy = RTCPeerConnectionSignalingMode.Json == _signalingMode ? RTCBundlePolicy.MaxBundle : RTCBundlePolicy.Balanced,
                 SignalingMode = _signalingMode,//RTCSessionDescriptionSignalingType.Json,
                 //IceTransportPolicy = RTCIceTransportPolicy.All,
                 GatherOptions = new RTCIceGatherOptions()
