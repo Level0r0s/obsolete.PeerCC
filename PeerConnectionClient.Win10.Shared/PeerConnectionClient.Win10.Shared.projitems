@@ -30,6 +30,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Media.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MediaDevice.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Peer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StatsManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebRTC.cs" />
   </ItemGroup>
   <ItemGroup>
