@@ -340,18 +340,25 @@ namespace PeerConnectionClient.Signalling
         {
             double index = (null != evt.Candidate.SdpMLineIndex ? (double) evt.Candidate.SdpMLineIndex : -1);
 
+            JsonObject json;
+
             String message;
             if (RTCPeerConnectionSignalingMode.Json == _signalingMode)
-                message = evt.Candidate.ToJsonString();
-            else
-                message = evt.Candidate.Candidate;
-
-            var json = new JsonObject
             {
-                {kCandidateSdpMidName, JsonValue.CreateStringValue(evt.Candidate.SdpMid)},
-                {kCandidateSdpMlineIndexName, JsonValue.CreateNumberValue(index)},
-                {kCandidateSdpName, JsonValue.CreateStringValue(message)}
-            };
+                message = evt.Candidate.ToJsonString();
+                json = JsonObject.Parse(message);
+            }
+            else
+            {
+                message = evt.Candidate.Candidate;
+                json = new JsonObject
+                {
+                    {kCandidateSdpMidName, JsonValue.CreateStringValue(evt.Candidate.SdpMid)},
+                    {kCandidateSdpMlineIndexName, JsonValue.CreateNumberValue(index)},
+                    {kCandidateSdpName, JsonValue.CreateStringValue(message)}
+                };
+            }
+
             Debug.WriteLine("Conductor: Sending ice candidate.\n" + json.Stringify());
             SendMessage(json);
         }
@@ -565,20 +572,24 @@ namespace PeerConnectionClient.Signalling
                 }
                 else
                 {
-                    var sdpMid = jMessage.ContainsKey(kCandidateSdpMidName) ? jMessage.GetNamedString(kCandidateSdpMidName) : null;
-                    var sdpMlineIndex = jMessage.ContainsKey(kCandidateSdpMlineIndexName) ? jMessage.GetNamedNumber(kCandidateSdpMlineIndexName) : -1;
-                    var sdp = jMessage.ContainsKey(kCandidateSdpName) ? jMessage.GetNamedString(kCandidateSdpName) : null;
-                    if ((String.IsNullOrEmpty(sdpMid) && (sdpMlineIndex == -1)) || String.IsNullOrEmpty(sdp))
+                    RTCIceCandidate candidate = null;
+                    if (RTCPeerConnectionSignalingMode.Json != _signalingMode)
                     {
-                        Debug.WriteLine("[Error] Conductor: Can't parse received message.\n" + message);
-                        return;
+                        var sdpMid = jMessage.ContainsKey(kCandidateSdpMidName) ? jMessage.GetNamedString(kCandidateSdpMidName) : null;
+                        var sdpMlineIndex = jMessage.ContainsKey(kCandidateSdpMlineIndexName) ? jMessage.GetNamedNumber(kCandidateSdpMlineIndexName) : -1;
+                        var sdp = jMessage.ContainsKey(kCandidateSdpName) ? jMessage.GetNamedString(kCandidateSdpName) : null;
+                        if ((String.IsNullOrEmpty(sdpMid) && (sdpMlineIndex == -1)) || String.IsNullOrEmpty(sdp))
+                        {
+                            Debug.WriteLine("[Error] Conductor: Can't parse received message.\n" + message);
+                            return;
+                        }
+                        candidate = String.IsNullOrEmpty(sdpMid) ? RTCIceCandidate.FromSdpStringWithMLineIndex(sdp, (ushort)sdpMlineIndex) : RTCIceCandidate.FromSdpStringWithMid(sdp, sdpMid);
+                    }
+                    else
+                    {
+                        candidate = RTCIceCandidate.FromJsonString(message);
                     }
 
-                    RTCIceCandidate candidate = null;
-                    if (RTCPeerConnectionSignalingMode.Json ==_signalingMode)
-                        candidate = RTCIceCandidate.FromJsonString(sdp);
-                    else
-                        candidate = String.IsNullOrEmpty(sdpMid) ? RTCIceCandidate.FromSdpStringWithMLineIndex(sdp, (ushort)sdpMlineIndex) : RTCIceCandidate.FromSdpStringWithMid(sdp, sdpMid);
                     _peerConnection?.AddIceCandidate(candidate);
                     Debug.WriteLine("Conductor: Received candidate : " + message);
                 }
