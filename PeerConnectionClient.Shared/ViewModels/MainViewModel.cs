@@ -2278,7 +2278,7 @@ namespace PeerConnectionClient.ViewModels
         private void HandleNtpTimeSync(long ntpTime)
         {
             Debug.WriteLine(String.Format("New NTP time: {0}", ntpTime));
-            WebRTC.SynNTPTime(ntpTime);
+            Ortc.NtpServerTime = ntpTime;
             NtpSyncInProgress = false;
         }
 

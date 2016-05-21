@@ -115,11 +115,6 @@ namespace org
 
                 }
 
-                public static void SynNTPTime(long currentNtpTime)
-                {
-
-                }
-
                 public static void UpdateCPUUsage(double cpuUsage)
                 {
 
