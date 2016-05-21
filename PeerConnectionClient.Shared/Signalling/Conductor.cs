@@ -209,7 +209,7 @@ namespace PeerConnectionClient.Signalling
             
             var config = new RTCConfiguration()
             {
-                BundlePolicy = RTCBundlePolicy.Balanced,
+                BundlePolicy = RTCPeerConnectionSignalingMode.Json == _signalingMode ? RTCBundlePolicy.MaxBundle : RTCBundlePolicy.Balanced,
                 SignalingMode = _signalingMode,//RTCSessionDescriptionSignalingType.Json,
                 //IceTransportPolicy = RTCIceTransportPolicy.All,
                 GatherOptions = new RTCIceGatherOptions()
@@ -338,17 +338,29 @@ namespace PeerConnectionClient.Signalling
         /// <param name="evt">Details about RTC Peer Connection Ice event.</param>
         private void PeerConnection_OnIceCandidate(RTCPeerConnectionIceEvent evt)
         {
-            if (evt.Candidate?.SdpMLineIndex != null)
+            double index = (null != evt.Candidate.SdpMLineIndex ? (double) evt.Candidate.SdpMLineIndex : -1);
+
+            JsonObject json;
+
+            String message;
+            if (RTCPeerConnectionSignalingMode.Json == _signalingMode)
             {
-                var json = new JsonObject
+                message = evt.Candidate.ToJsonString();
+                json = JsonObject.Parse(message);
+            }
+            else
+            {
+                message = evt.Candidate.Candidate;
+                json = new JsonObject
                 {
                     {kCandidateSdpMidName, JsonValue.CreateStringValue(evt.Candidate.SdpMid)},
-                    {kCandidateSdpMlineIndexName, JsonValue.CreateNumberValue((double) evt.Candidate.SdpMLineIndex)},
-                    {kCandidateSdpName, JsonValue.CreateStringValue(evt.Candidate.Candidate)}
+                    {kCandidateSdpMlineIndexName, JsonValue.CreateNumberValue(index)},
+                    {kCandidateSdpName, JsonValue.CreateStringValue(message)}
                 };
-                Debug.WriteLine("Conductor: Sending ice candidate.\n" + json.Stringify());
-                SendMessage(json);
             }
+
+            Debug.WriteLine("Conductor: Sending ice candidate.\n" + json.Stringify());
+            SendMessage(json);
         }
 
         /// <summary>
@@ -484,7 +496,7 @@ namespace PeerConnectionClient.Signalling
                         // about to get initiated. Otherwise ignore the
                         // messages from peers which could be a result
                         // of old (but not yet fully closed) connections.
-                        if (type == "offer" || type == "answer")
+                        if (type == "offer" || type == "answer" || type == "json")
                         {
                             Debug.Assert(_peerId == -1);
                             _peerId = peerId;
@@ -536,6 +548,7 @@ namespace PeerConnectionClient.Signalling
                     RTCSessionDescriptionSignalingType sdpType = RTCSessionDescriptionSignalingType.SdpOffer;
                     switch (type)
                     {
+                        case "json": sdpType = RTCSessionDescriptionSignalingType.Json; break;
                         case "offer": sdpType = RTCSessionDescriptionSignalingType.SdpOffer; break;
                         case "answer": sdpType = RTCSessionDescriptionSignalingType.SdpAnswer; break;
                         case "pranswer": sdpType = RTCSessionDescriptionSignalingType.SdpPranswer; break;
@@ -552,22 +565,31 @@ namespace PeerConnectionClient.Signalling
                             var answer = await _peerConnection.CreateAnswer();
                             await _peerConnection.SetLocalDescription(answer);
                             // Send answer
+                            Debug.WriteLine("Conductor: Sending answer: " + answer.FormattedDescription);
                             SendSdp(answer);
                         }
                     }
                 }
                 else
                 {
-                    var sdpMid = jMessage.ContainsKey(kCandidateSdpMidName) ? jMessage.GetNamedString(kCandidateSdpMidName) : null;
-                    var sdpMlineIndex = jMessage.ContainsKey(kCandidateSdpMlineIndexName) ? jMessage.GetNamedNumber(kCandidateSdpMlineIndexName) : -1;
-                    var sdp = jMessage.ContainsKey(kCandidateSdpName) ? jMessage.GetNamedString(kCandidateSdpName) : null;
-                    if (String.IsNullOrEmpty(sdpMid) || sdpMlineIndex == -1 || String.IsNullOrEmpty(sdp))
+                    RTCIceCandidate candidate = null;
+                    if (RTCPeerConnectionSignalingMode.Json != _signalingMode)
                     {
-                        Debug.WriteLine("[Error] Conductor: Can't parse received message.\n" + message);
-                        return;
+                        var sdpMid = jMessage.ContainsKey(kCandidateSdpMidName) ? jMessage.GetNamedString(kCandidateSdpMidName) : null;
+                        var sdpMlineIndex = jMessage.ContainsKey(kCandidateSdpMlineIndexName) ? jMessage.GetNamedNumber(kCandidateSdpMlineIndexName) : -1;
+                        var sdp = jMessage.ContainsKey(kCandidateSdpName) ? jMessage.GetNamedString(kCandidateSdpName) : null;
+                        if ((String.IsNullOrEmpty(sdpMid) && (sdpMlineIndex == -1)) || String.IsNullOrEmpty(sdp))
+                        {
+                            Debug.WriteLine("[Error] Conductor: Can't parse received message.\n" + message);
+                            return;
+                        }
+                        candidate = String.IsNullOrEmpty(sdpMid) ? RTCIceCandidate.FromSdpStringWithMLineIndex(sdp, (ushort)sdpMlineIndex) : RTCIceCandidate.FromSdpStringWithMid(sdp, sdpMid);
+                    }
+                    else
+                    {
+                        candidate = RTCIceCandidate.FromJsonString(message);
                     }
 
-                    var candidate = String.IsNullOrEmpty(sdpMid) ? RTCIceCandidate.FromSdpStringWithMLineIndex(sdp, (ushort)sdpMlineIndex) : RTCIceCandidate.FromSdpStringWithMid(sdp, sdpMid);
                     _peerConnection?.AddIceCandidate(candidate);
                     Debug.WriteLine("Conductor: Received candidate : " + message);
                 }
@@ -679,7 +701,7 @@ namespace PeerConnectionClient.Signalling
             var json = new JsonObject
             {
                 {kSessionDescriptionTypeName, JsonValue.CreateStringValue(type)},
-                {kSessionDescriptionSdpName, JsonValue.CreateStringValue(description.Sdp)}
+                {kSessionDescriptionSdpName, JsonValue.CreateStringValue(description.FormattedDescription)}
             };
             SendMessage(json);
         }
