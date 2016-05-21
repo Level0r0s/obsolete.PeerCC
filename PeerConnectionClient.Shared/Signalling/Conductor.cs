@@ -541,6 +541,7 @@ namespace PeerConnectionClient.Signalling
                     RTCSessionDescriptionSignalingType sdpType = RTCSessionDescriptionSignalingType.SdpOffer;
                     switch (type)
                     {
+                        case "json": sdpType = RTCSessionDescriptionSignalingType.Json; break;
                         case "offer": sdpType = RTCSessionDescriptionSignalingType.SdpOffer; break;
                         case "answer": sdpType = RTCSessionDescriptionSignalingType.SdpAnswer; break;
                         case "pranswer": sdpType = RTCSessionDescriptionSignalingType.SdpPranswer; break;
