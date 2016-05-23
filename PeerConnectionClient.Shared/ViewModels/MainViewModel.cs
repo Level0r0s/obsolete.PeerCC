@@ -649,7 +649,7 @@ namespace PeerConnectionClient.ViewModels
         private void Conductor_OnAddRemoteTrack(RTCTrackEvent evt)
         {
             _peerVideoTrack = evt.Track;
-            if (evt.Track != null)
+            if (evt.Track != null && evt.Track.Kind == MediaStreamTrackKind.Video)
             {
                 var source = Media.CreateMedia().CreateMediaSource(_peerVideoTrack, "PEER");
                 RunOnUiThread(() => { PeerVideo.SetMediaStreamSource(source); });
