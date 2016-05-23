@@ -181,7 +181,7 @@ namespace PeerConnectionClient.Signalling
             set
             {
                 _appInsightsEnabled = value;
-                StatsManager.Instance.DisableTelemetry(!_appInsightsEnabled);
+                //StatsManager.Instance.DisableTelemetry(!_appInsightsEnabled);
             }
         }
         CancellationTokenSource connectToPeerCancelationTokenSource;
@@ -429,7 +429,7 @@ namespace PeerConnectionClient.Signalling
         {
             _signaller = new Signaller();
             _media = Media.CreateMedia();
-
+            AppInsightsEnabled = true;
             Signaller.OnDisconnected += Signaller_OnDisconnected;
             Signaller.OnMessageFromPeer += Signaller_OnMessageFromPeer;
             Signaller.OnPeerConnected += Signaller_OnPeerConnected;

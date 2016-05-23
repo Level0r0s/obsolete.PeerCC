@@ -31,6 +31,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)MediaDevice.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ORTCStatsManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Peer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PlotlyManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StatsManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebRTC.cs" />
   </ItemGroup>
