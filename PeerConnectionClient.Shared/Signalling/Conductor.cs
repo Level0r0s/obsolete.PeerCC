@@ -26,6 +26,7 @@ using org.ortc.adapter;
 using RTCRtpCodecCapability = org.ortc.RTCRtpCodecCapability;
 using PeerConnectionClient.Media_Extension;
 using PeerConnectionClient.ViewModels;
+using PeerConnectionClient.Win10.Shared;
 using RTCIceCandidate = org.ortc.adapter.RTCIceCandidate;
 
 
@@ -247,8 +248,9 @@ namespace PeerConnectionClient.Signalling
 
             if (AppInsightsEnabled)
             {
-                StatsManager.Instance.Initialize(_peerConnection);
-                StatsManager.Instance.IsStatsCollectionEnabled = true;
+                ORTCStatsManager.Instance.Initialize(_peerConnection);
+                //StatsManager.Instance.Initialize(_peerConnection);
+                //StatsManager.Instance.IsStatsCollectionEnabled = true;
             }
 
             OnPeerConnectionCreated?.Invoke();
@@ -347,7 +349,10 @@ namespace PeerConnectionClient.Signalling
 
                     _peerConnection.Close(); // Slow, so do this after UI updated and camera turned off
                     if (AppInsightsEnabled)
-                        StatsManager.Instance.TrackCallEnded();
+                    {
+                        ORTCStatsManager.Instance.CallEnded();
+                    }
+                        //StatsManager.Instance.TrackCallEnded();
                     _peerConnection = null;
 
                     OnReadyToConnect?.Invoke();
@@ -600,7 +605,8 @@ namespace PeerConnectionClient.Signalling
                             Debug.WriteLine("Conductor: Sending answer: " + answer.FormattedDescription);
                             SendSdp(answer);
                             if (AppInsightsEnabled)
-                                StatsManager.Instance.TrackCallStarted();
+                                ORTCStatsManager.Instance.StartCallWatch();
+                                //StatsManager.Instance.TrackCallStarted();
                         }
                     }
                 }
@@ -695,7 +701,8 @@ namespace PeerConnectionClient.Signalling
                     Debug.WriteLine("Conductor: Sending offer: " + offer.FormattedDescription);
                     SendSdp(offer);
                     if (AppInsightsEnabled)
-                        StatsManager.Instance.TrackCallStarted();
+                        ORTCStatsManager.Instance.StartCallWatch();
+                    //StatsManager.Instance.TrackCallStarted();
                 }
             }
         }
@@ -759,7 +766,10 @@ namespace PeerConnectionClient.Signalling
         {
             await _signaller.SendToPeer(_peerId, "BYE");
             if (AppInsightsEnabled)
-                StatsManager.Instance.TrackCallEnded();
+            {
+                ORTCStatsManager.Instance.CallEnded();
+            }
+                //StatsManager.Instance.TrackCallEnded();
         }
 
         /// <summary>

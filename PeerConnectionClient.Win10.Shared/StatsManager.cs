@@ -167,12 +167,14 @@ namespace PeerConnectionClient.Utilities
     {
         private static volatile StatsManager _instance;
         private static readonly object SyncRoot = new object();
+         
         RtcPeerConnection _peerConnection;
         TelemetryClient _telemetry;
         Timer _metricsTimer;
         Timer _networkTimer;
         AudioVideoMetricsCollector _metricsCollector;
 
+        private RTCStatsProvider statsProvider { get; set; }
         private StatsManager()
         {
             _telemetry = new TelemetryClient();
@@ -202,6 +204,9 @@ namespace PeerConnectionClient.Utilities
             if (pc != null)
             {
                 _peerConnection = pc;
+                RTCStatsProviderOptions options = new RTCStatsProviderOptions(new List<RTCStatsType>{ RTCStatsType.IceGatherer, RTCStatsType.Codec, RTCStatsType .DtlsTransport});
+                  
+                statsProvider = new RTCStatsProvider(pc,options);
 #warning StatsManager: Check what should do with OnRTCStatsReportsReady
                 //_peerConnection.OnRTCStatsReportsReady += PeerConnection_OnRTCStatsReportsReady;
             }

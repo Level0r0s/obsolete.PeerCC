@@ -226,18 +226,21 @@ namespace PeerConnectionClient.ViewModels
                     });
                 }
 
-                if (SelectedCamera == null && Cameras.Count > 0)
+                RunOnUiThread(() =>
                 {
-                    SelectedCamera = Cameras.First();
-                }
-                if (SelectedMicrophone == null && Microphones.Count > 0)
-                {
-                    SelectedMicrophone = Microphones.First();
-                }
-                if (SelectedAudioPlayoutDevice == null && AudioPlayoutDevices.Count > 0)
-                {
-                    SelectedAudioPlayoutDevice = AudioPlayoutDevices.First();
-                }
+                    if (SelectedCamera == null && Cameras.Count > 0)
+                    {
+                        SelectedCamera = Cameras.First();
+                    }
+                    if (SelectedMicrophone == null && Microphones.Count > 0)
+                    {
+                        SelectedMicrophone = Microphones.First();
+                    }
+                    if (SelectedAudioPlayoutDevice == null && AudioPlayoutDevices.Count > 0)
+                    {
+                        SelectedAudioPlayoutDevice = AudioPlayoutDevices.First();
+                    }
+                });
             });
             MediaDevices.Singleton.OnDeviceChange += OnMediaDevicesChanged;
             //Conductor.Instance.Media.OnMediaDevicesChanged += OnMediaDevicesChanged;
