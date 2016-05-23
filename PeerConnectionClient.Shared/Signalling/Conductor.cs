@@ -488,6 +488,8 @@ namespace PeerConnectionClient.Signalling
 
                 string type = jMessage.ContainsKey(kSessionDescriptionTypeName) ? jMessage.GetNamedString(kSessionDescriptionTypeName) : null;
 
+                bool created = false;
+
                 if (_peerConnection == null)
                 {
                     if (!String.IsNullOrEmpty(type))
@@ -500,6 +502,8 @@ namespace PeerConnectionClient.Signalling
                         {
                             Debug.Assert(_peerId == -1);
                             _peerId = peerId;
+
+                            created = true;
 
                             IEnumerable<Peer> enumerablePeer = Peers.Where(x => x.Id == peerId);
                             Peer = enumerablePeer.First();
@@ -560,7 +564,9 @@ namespace PeerConnectionClient.Signalling
                     {
                         await _peerConnection.SetRemoteDescription(new RTCSessionDescription(sdpType, sdp));
 
-                        if (sdpType == RTCSessionDescriptionSignalingType.SdpOffer)
+                        if ((sdpType == RTCSessionDescriptionSignalingType.SdpOffer) ||
+                            ((created) &&
+                             (sdpType == RTCSessionDescriptionSignalingType.Json)))
                         {
                             var answer = await _peerConnection.CreateAnswer();
                             await _peerConnection.SetLocalDescription(answer);
