@@ -545,10 +545,15 @@ namespace PeerConnectionClient.Signalling
 
                     string formatted = null;
 
-                    if (jMessage.ContainsKey(kSessionDescriptionSdpName))
+                    if (jMessage.ContainsKey(kSessionDescriptionJsonName))
+                    {
+                        var containerObject = new JsonObject { { kSessionDescriptionJsonName, jMessage.GetNamedObject(kSessionDescriptionJsonName) } };
+                        formatted = containerObject.Stringify();
+                    }
+                    else if (jMessage.ContainsKey(kSessionDescriptionSdpName))
+                    {
                         formatted = jMessage.GetNamedString(kSessionDescriptionSdpName);
-                    else if (jMessage.ContainsKey(kSessionDescriptionJsonName))
-                        formatted = jMessage.GetNamedObject(kSessionDescriptionJsonName).ToString();
+                    }
 
                     if (String.IsNullOrEmpty(formatted))
                     {
