@@ -548,7 +548,7 @@ namespace PeerConnectionClient.Signalling
                     if (jMessage.ContainsKey(kSessionDescriptionSdpName))
                         formatted = jMessage.GetNamedString(kSessionDescriptionSdpName);
                     else if (jMessage.ContainsKey(kSessionDescriptionJsonName))
-                        formatted = jMessage.GetNamedObject(kSessionDescriptionSdpName).ToString();
+                        formatted = jMessage.GetNamedObject(kSessionDescriptionJsonName).ToString();
 
                     if (String.IsNullOrEmpty(formatted))
                     {
