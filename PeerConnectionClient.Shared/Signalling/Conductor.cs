@@ -26,6 +26,7 @@ using org.ortc.adapter;
 using RTCRtpCodecCapability = org.ortc.RTCRtpCodecCapability;
 using PeerConnectionClient.Media_Extension;
 using PeerConnectionClient.ViewModels;
+using PeerConnectionClient.Win10.Shared;
 using RTCIceCandidate = org.ortc.adapter.RTCIceCandidate;
 
 
@@ -169,6 +170,21 @@ namespace PeerConnectionClient.Signalling
             }
         }
 
+        bool _appInsightsEnabled;
+
+
+        public bool AppInsightsEnabled
+        {
+            get
+            {
+                return _appInsightsEnabled;
+            }
+            set
+            {
+                _appInsightsEnabled = value;
+                //StatsManager.Instance.DisableTelemetry(!_appInsightsEnabled);
+            }
+        }
         CancellationTokenSource connectToPeerCancelationTokenSource;
         Task<bool> connectToPeerTask;
 
@@ -207,7 +223,7 @@ namespace PeerConnectionClient.Signalling
             {
                 return false;
             }
-            
+
             var config = new RTCConfiguration()
             {
                 BundlePolicy = RTCPeerConnectionSignalingMode.Json == _signalingMode ? RTCBundlePolicy.MaxBundle : RTCBundlePolicy.Balanced,
@@ -226,6 +242,16 @@ namespace PeerConnectionClient.Signalling
             if (cancelationToken.IsCancellationRequested)
             {
                 return false;
+            }
+
+            if (_peerConnection == null)
+                throw new NullReferenceException("Peer connection is not created.");
+
+            if (AppInsightsEnabled)
+            {
+                ORTCStatsManager.Instance.Initialize(_peerConnection);
+                //StatsManager.Instance.Initialize(_peerConnection);
+                //StatsManager.Instance.IsStatsCollectionEnabled = true;
             }
 
             OnPeerConnectionCreated?.Invoke();
@@ -323,6 +349,11 @@ namespace PeerConnectionClient.Signalling
                     OnPeerConnectionClosed?.Invoke();
 
                     _peerConnection.Close(); // Slow, so do this after UI updated and camera turned off
+                    if (AppInsightsEnabled)
+                    {
+                        ORTCStatsManager.Instance.CallEnded();
+                    }
+                        //StatsManager.Instance.TrackCallEnded();
                     _peerConnection = null;
 
                     OnReadyToConnect?.Invoke();
@@ -399,7 +430,7 @@ namespace PeerConnectionClient.Signalling
         {
             _signaller = new Signaller();
             _media = Media.CreateMedia();
-
+            AppInsightsEnabled = true;
             Signaller.OnDisconnected += Signaller_OnDisconnected;
             Signaller.OnMessageFromPeer += Signaller_OnMessageFromPeer;
             Signaller.OnPeerConnected += Signaller_OnPeerConnected;
@@ -585,6 +616,9 @@ namespace PeerConnectionClient.Signalling
                             // Send answer
                             Debug.WriteLine("Conductor: Sending answer: " + answer.FormattedDescription);
                             SendSdp(answer);
+                            if (AppInsightsEnabled)
+                                ORTCStatsManager.Instance.StartCallWatch();
+                                //StatsManager.Instance.TrackCallStarted();
                         }
                     }
                 }
@@ -678,6 +712,9 @@ namespace PeerConnectionClient.Signalling
                     await _peerConnection.SetLocalDescription(offer);
                     Debug.WriteLine("Conductor: Sending offer: " + offer.FormattedDescription);
                     SendSdp(offer);
+                    if (AppInsightsEnabled)
+                        ORTCStatsManager.Instance.StartCallWatch();
+                    //StatsManager.Instance.TrackCallStarted();
                 }
             }
         }
@@ -755,6 +792,11 @@ namespace PeerConnectionClient.Signalling
         private async Task SendHangupMessage()
         {
             await _signaller.SendToPeer(_peerId, "BYE");
+            if (AppInsightsEnabled)
+            {
+                ORTCStatsManager.Instance.CallEnded();
+            }
+                //StatsManager.Instance.TrackCallEnded();
         }
 
         /// <summary>
