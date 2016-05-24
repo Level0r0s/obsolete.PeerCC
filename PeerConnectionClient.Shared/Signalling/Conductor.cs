@@ -99,6 +99,7 @@ namespace PeerConnectionClient.Signalling
         private static readonly string kCandidateSdpName = "candidate";
         private static readonly string kSessionDescriptionTypeName = "type";
         private static readonly string kSessionDescriptionSdpName = "sdp";
+        private static readonly string kSessionDescriptionJsonName = "session";
 
         RTCPeerConnection _peerConnection;
         Media _media;
@@ -542,31 +543,37 @@ namespace PeerConnectionClient.Signalling
                         Debug.Assert(false);
                     }
 
-                    string sdp = jMessage.ContainsKey(kSessionDescriptionSdpName) ? jMessage.GetNamedString(kSessionDescriptionSdpName) : null;
-                    if (String.IsNullOrEmpty(sdp))
+                    string formatted = null;
+
+                    if (jMessage.ContainsKey(kSessionDescriptionSdpName))
+                        formatted = jMessage.GetNamedString(kSessionDescriptionSdpName);
+                    else if (jMessage.ContainsKey(kSessionDescriptionJsonName))
+                        formatted = jMessage.GetNamedObject(kSessionDescriptionSdpName).ToString();
+
+                    if (String.IsNullOrEmpty(formatted))
                     {
                         Debug.WriteLine("[Error] Conductor: Can't parse received session description message.");
                         return;
                     }
 
-                    RTCSessionDescriptionSignalingType sdpType = RTCSessionDescriptionSignalingType.SdpOffer;
+                    RTCSessionDescriptionSignalingType messageType = RTCSessionDescriptionSignalingType.SdpOffer;
                     switch (type)
                     {
-                        case "json": sdpType = RTCSessionDescriptionSignalingType.Json; break;
-                        case "offer": sdpType = RTCSessionDescriptionSignalingType.SdpOffer; break;
-                        case "answer": sdpType = RTCSessionDescriptionSignalingType.SdpAnswer; break;
-                        case "pranswer": sdpType = RTCSessionDescriptionSignalingType.SdpPranswer; break;
+                        case "json": messageType = RTCSessionDescriptionSignalingType.Json; break;
+                        case "offer": messageType = RTCSessionDescriptionSignalingType.SdpOffer; break;
+                        case "answer": messageType = RTCSessionDescriptionSignalingType.SdpAnswer; break;
+                        case "pranswer": messageType = RTCSessionDescriptionSignalingType.SdpPranswer; break;
                         default: Debug.Assert(false, type); break;
                     }
 
                     Debug.WriteLine("Conductor: Received session description: " + message);
                     if (_peerConnection != null)
                     {
-                        await _peerConnection.SetRemoteDescription(new RTCSessionDescription(sdpType, sdp));
+                        await _peerConnection.SetRemoteDescription(new RTCSessionDescription(messageType, formatted));
 
-                        if ((sdpType == RTCSessionDescriptionSignalingType.SdpOffer) ||
+                        if ((messageType == RTCSessionDescriptionSignalingType.SdpOffer) ||
                             ((created) &&
-                             (sdpType == RTCSessionDescriptionSignalingType.Json)))
+                             (messageType == RTCSessionDescriptionSignalingType.Json)))
                         {
                             var answer = await _peerConnection.CreateAnswer();
                             await _peerConnection.SetLocalDescription(answer);
@@ -698,17 +705,32 @@ namespace PeerConnectionClient.Signalling
         private void SendSdp(RTCSessionDescription description)
         {
             var type = description.Type.ToString().ToLower();
-            var prefix = type.Substring(0, "sdp".Length);
-            if (prefix == "sdp")
-            {
-                type = type.Substring("sdp".Length);
-            }
 
-            var json = new JsonObject
+            JsonObject json = null;
+            if (description.Type == RTCSessionDescriptionSignalingType.Json)
             {
-                {kSessionDescriptionTypeName, JsonValue.CreateStringValue(type)},
-                {kSessionDescriptionSdpName, JsonValue.CreateStringValue(description.FormattedDescription)}
-            };
+                var jsonDescription = JsonObject.Parse(description.FormattedDescription);
+                var sessionValue = jsonDescription.GetNamedObject(kSessionDescriptionJsonName);
+                json = new JsonObject
+                {
+                    {kSessionDescriptionTypeName, JsonValue.CreateStringValue(type)},
+                    {kSessionDescriptionJsonName,  sessionValue}
+                };
+            }
+            else
+            {
+                var prefix = type.Substring(0, "sdp".Length);
+                if (prefix == "sdp")
+                {
+                    type = type.Substring("sdp".Length);
+                }
+
+                json = new JsonObject
+                {
+                    {kSessionDescriptionTypeName, JsonValue.CreateStringValue(type)},
+                    {kSessionDescriptionSdpName, JsonValue.CreateStringValue(description.FormattedDescription)}
+                };
+            }
             SendMessage(json);
         }
 
