@@ -37,10 +37,11 @@ namespace PeerConnectionClient.Signalling
     /// </summary>
     internal class Conductor
     {
-        private static Object _instanceLock = new Object();
-        private Object _mediaLock = new object();
+        private static readonly object InstanceLock = new object();
+        private readonly object _mediaLock = new object();
         private static Conductor _instance;
         private RTCPeerConnectionSignalingMode _signalingMode;
+
         /// <summary>
         ///  The single instance of the Conductor class.
         /// </summary>
@@ -50,7 +51,7 @@ namespace PeerConnectionClient.Signalling
             {
                 if (_instance == null)
                 {
-                    lock (_instanceLock)
+                    lock (InstanceLock)
                     {
                         if (_instance == null)
                         {
@@ -86,13 +87,6 @@ namespace PeerConnectionClient.Signalling
         /// </summary>
         public RTCRtpCodecCapability AudioCodec { get; set; }
         public CaptureCapability VideoCaptureProfile;
-        /// <summary>
-        /// Video frames per second property.
-        /// </summary>
-
-        /// <summary>
-        /// Video resolution property.
-        /// </summary>
 
         // SDP negotiation attributes
         private static readonly string kCandidateSdpMidName = "sdpMid";
@@ -182,7 +176,7 @@ namespace PeerConnectionClient.Signalling
             set
             {
                 _appInsightsEnabled = value;
-                //StatsManager.Instance.DisableTelemetry(!_appInsightsEnabled);
+                OrtcStatsManager.Instance.IsStatsCollectionEnabled = value;
             }
         }
         CancellationTokenSource connectToPeerCancelationTokenSource;
@@ -249,7 +243,7 @@ namespace PeerConnectionClient.Signalling
 
             if (AppInsightsEnabled)
             {
-                ORTCStatsManager.Instance.Initialize(_peerConnection);
+                OrtcStatsManager.Instance.Initialize(_peerConnection);
                 //StatsManager.Instance.Initialize(_peerConnection);
                 //StatsManager.Instance.IsStatsCollectionEnabled = true;
             }
@@ -349,9 +343,10 @@ namespace PeerConnectionClient.Signalling
                     OnPeerConnectionClosed?.Invoke();
 
                     _peerConnection.Close(); // Slow, so do this after UI updated and camera turned off
+                    
                     if (AppInsightsEnabled)
                     {
-                        ORTCStatsManager.Instance.CallEnded();
+                        //OrtcStatsManager.Instance.CallEnded();
                     }
                         //StatsManager.Instance.TrackCallEnded();
                     _peerConnection = null;
@@ -430,7 +425,7 @@ namespace PeerConnectionClient.Signalling
         {
             _signaller = new Signaller();
             _media = Media.CreateMedia();
-            AppInsightsEnabled = true;
+            AppInsightsEnabled = false;
             Signaller.OnDisconnected += Signaller_OnDisconnected;
             Signaller.OnMessageFromPeer += Signaller_OnMessageFromPeer;
             Signaller.OnPeerConnected += Signaller_OnPeerConnected;
@@ -617,7 +612,7 @@ namespace PeerConnectionClient.Signalling
                             Debug.WriteLine("Conductor: Sending answer: " + answer.FormattedDescription);
                             SendSdp(answer);
                             if (AppInsightsEnabled)
-                                ORTCStatsManager.Instance.StartCallWatch();
+                                OrtcStatsManager.Instance.StartCallWatch();
                                 //StatsManager.Instance.TrackCallStarted();
                         }
                     }
@@ -713,7 +708,7 @@ namespace PeerConnectionClient.Signalling
                     Debug.WriteLine("Conductor: Sending offer: " + offer.FormattedDescription);
                     SendSdp(offer);
                     if (AppInsightsEnabled)
-                        ORTCStatsManager.Instance.StartCallWatch();
+                        OrtcStatsManager.Instance.StartCallWatch();
                     //StatsManager.Instance.TrackCallStarted();
                 }
             }
@@ -794,7 +789,7 @@ namespace PeerConnectionClient.Signalling
             await _signaller.SendToPeer(_peerId, "BYE");
             if (AppInsightsEnabled)
             {
-                ORTCStatsManager.Instance.CallEnded();
+                OrtcStatsManager.Instance.CallEnded();
             }
                 //StatsManager.Instance.TrackCallEnded();
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 
@@ -30,8 +31,12 @@ namespace PeerConnectionClient.Win10.Shared
             }
         }
 
-        public async void SendData(List<object> dict)
+        //public async void SendData(List<object> dict)
+        public async void SendData(IList<object> data, IList<object> timestamps, string name)
         {
+            var dataStr = "[" + String.Join(",", data.ToArray()) + "]";
+            var timestampsStr = "[" + String.Join(",", timestamps.ToArray()) + "]";
+            var argsStr = "\"[" + dataStr + "," + timestampsStr + "]\"";
             using (var client = new HttpClient())
             {
                 var values = new Dictionary<string, string>
@@ -40,8 +45,8 @@ namespace PeerConnectionClient.Win10.Shared
                    { "key", key },
                    {"origin", "plot" },
                     {"platform","lisp"},
-                    { "args","[[0, 1, 2], [3, 1, 6]]"},
-                    {"kwargs","{\"filename\": \"plot from api\",\"fileopt\": \"overwrite\",\"style\": {\"type\": \"bar\"}, \"traces\": [0,3,5],\"layout\": {\"title\": \"experimental data\"},\"world_readable\": true}"},
+                    { "args",argsStr},
+                    {"kwargs","{\"filename\": \"" + name + "\",\"fileopt\": \"new\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"experimental data\"},\"world_readable\": true}"},
                 };
                 /*var values = new Dictionary<string, string>
                 {
