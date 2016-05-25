@@ -667,10 +667,6 @@ namespace PeerConnectionClient.ViewModels
         /// <param name="evt">Details about Media stream event.</param>
         private void Conductor_OnRemoveTrack(RTCTrackEvent evt)
         {
-            if (evt.Track != null && evt.Track.Kind == MediaStreamTrackKind.Video)
-            {
-                RunOnUiThread(() => { PeerVideo.SetMediaStreamSource(null); });
-            }
         }
 
         /// <summary>
