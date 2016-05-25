@@ -14,37 +14,31 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace org
+namespace PeerConnectionClient.Utilities
 {
-    namespace ortc
+    internal class AutoLock : IDisposable
     {
-        namespace adapter
+        private readonly SemaphoreSlim _sem;
+        private bool _isLocked;
+
+        public AutoLock(SemaphoreSlim sem)
         {
-            internal class AutoLock : IDisposable
+            _sem = sem;
+        }
+
+        public Task WaitAsync()
+        {
+            if (_isLocked) return Task.Run(() => { });
+            _isLocked = true;
+            var result = _sem.WaitAsync();
+            return result;
+        }
+
+        public void Dispose()
+        {
+            if (_isLocked)
             {
-                private readonly SemaphoreSlim _sem;
-                private bool _isLocked;
-
-                public AutoLock(SemaphoreSlim sem)
-                {
-                    _sem = sem;
-                }
-
-                public Task WaitAsync()
-                {
-                    if (_isLocked) return Task.Run(() => { });
-                    _isLocked = true;
-                    var result = _sem.WaitAsync();
-                    return result;
-                }
-
-                public void Dispose()
-                {
-                    if (_isLocked)
-                    {
-                        _sem.Release();
-                    }
-                }
+                _sem.Release();
             }
         }
     }

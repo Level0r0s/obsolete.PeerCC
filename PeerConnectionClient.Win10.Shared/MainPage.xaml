@@ -688,6 +688,14 @@
                           HorizontalContentAlignment="Left"
                           RelativePanel.Below="EtwStatsToggleSwitch"
                           Margin="5"/>
+                    <ToggleSwitch 
+                          Name="AppInsightsToggleSwitch"
+                          Header="AppInsight Logging"
+                          IsOn="{Binding AppInsightsEnabled, Mode=TwoWay}"
+                          HorizontalAlignment="Left"
+                          HorizontalContentAlignment="Left"
+                          RelativePanel.Below="ConnectionHealtStatsToggleSwitch"
+                          Margin="5"/>
                 </RelativePanel>
             </RelativePanel>
             <TextBlock

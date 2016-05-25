@@ -226,18 +226,21 @@ namespace PeerConnectionClient.ViewModels
                     });
                 }
 
-                if (SelectedCamera == null && Cameras.Count > 0)
+                RunOnUiThread(() =>
                 {
-                    SelectedCamera = Cameras.First();
-                }
-                if (SelectedMicrophone == null && Microphones.Count > 0)
-                {
-                    SelectedMicrophone = Microphones.First();
-                }
-                if (SelectedAudioPlayoutDevice == null && AudioPlayoutDevices.Count > 0)
-                {
-                    SelectedAudioPlayoutDevice = AudioPlayoutDevices.First();
-                }
+                    if (SelectedCamera == null && Cameras.Count > 0)
+                    {
+                        SelectedCamera = Cameras.First();
+                    }
+                    if (SelectedMicrophone == null && Microphones.Count > 0)
+                    {
+                        SelectedMicrophone = Microphones.First();
+                    }
+                    if (SelectedAudioPlayoutDevice == null && AudioPlayoutDevices.Count > 0)
+                    {
+                        SelectedAudioPlayoutDevice = AudioPlayoutDevices.First();
+                    }
+                });
             });
             MediaDevices.Singleton.OnDeviceChange += OnMediaDevicesChanged;
             //Conductor.Instance.Media.OnMediaDevicesChanged += OnMediaDevicesChanged;
@@ -2375,6 +2378,36 @@ namespace PeerConnectionClient.ViewModels
         {
             WebRTC.CpuUsage = CPUData.GetCPUUsage();
             WebRTC.MemoryUsage = MEMData.GetMEMUsage();
+        }
+
+        private bool _appInsightsEnabled;
+
+        /// <summary>
+        /// Enable tracing toggle button.
+        /// Stop tracing and send logs/Start tracing if the tracing is disabled/enabled.
+        /// </summary>
+        public bool AppInsightsEnabled
+        {
+            get { return _appInsightsEnabled; }
+            set
+            {
+                if (!SetProperty(ref _appInsightsEnabled, value))
+                {
+                    return;
+                }
+
+                if (_appInsightsEnabled)
+                {
+                    //WebRTC.StartTracing();
+                }
+                else
+                {
+                    Conductor.Instance.AppInsightsEnabled = _appInsightsEnabled;
+                    // WebRTC.StopTracing();
+                    //   WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
+                }
+                
+            }
         }
     }
 }
