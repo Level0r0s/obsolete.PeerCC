@@ -160,7 +160,7 @@ namespace PeerConnectionClient.Win10.Shared
                 string graphTitle = GetTitle(key);
                 string color = GetColor(key);
 
-                string formated = "{\"x\" " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}";
+                string formated = "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}";
                 datasets.Add(formated);
             }
             string ret = "[" + String.Join(",", datasets.ToArray()) + "]";

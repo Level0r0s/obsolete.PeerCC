@@ -191,7 +191,7 @@ namespace PeerConnectionClient.Win10.Shared
         /// </summary>
         private void PrepareForStats()
         {
-            _currentId = /*Conductor.Instance.Peer.Name +*/ "/" + Helper.ProductName() + "/" + Helper.DeviceName() + "/" + Helper.OsVersion() + "/" + Conductor.Instance.AudioCodec.Name + "_" + Conductor.Instance.VideoCodec.Name + "/" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + "/dataset/Plot1";
+            _currentId = /*Conductor.Instance.Peer.Name + "/" +*/ Helper.ProductName() + "/" + Helper.DeviceName() + "/" + Helper.OsVersion() + "/" + Conductor.Instance.AudioCodec.Name + "_" + Conductor.Instance.VideoCodec.Name + "/" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + "/dataset/Plot1";
 
             StatsData statsData = new StatsData();
             //All call stats will be stored in this dict, so it can be safely uploaded to server, while other call can be in progress
@@ -328,6 +328,11 @@ namespace PeerConnectionClient.Win10.Shared
                 TrackStatsData ret = null;
                 if (trackId != null && TrackStatsDictionary.ContainsKey(trackId))
                     ret = TrackStatsDictionary[trackId];
+                else
+                {
+                    ret = new TrackStatsData();
+                    TrackStatsDictionary.Add(trackId,ret);
+                }
                 return ret;
             }
         }
