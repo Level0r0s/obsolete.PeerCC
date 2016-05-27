@@ -2392,13 +2392,15 @@ namespace PeerConnectionClient.ViewModels
                     return;
                 }
 
+                Conductor.Instance.AppInsightsEnabled = _appInsightsEnabled;
+
                 if (_appInsightsEnabled)
                 {
                     //WebRTC.StartTracing();
                 }
                 else
                 {
-                    Conductor.Instance.AppInsightsEnabled = _appInsightsEnabled;
+                    //Conductor.Instance.AppInsightsEnabled = _appInsightsEnabled;
                     // WebRTC.StopTracing();
                     //   WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
                 }

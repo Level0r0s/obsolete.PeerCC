@@ -122,7 +122,7 @@ namespace PeerConnectionClient.Win10.Shared
         StatsValueNameCurrentEndToEndDelayMs = 103
     }
 
-    public class CallMatrics
+    /*public class CallMatrics
     {
         public IDictionary<RTCStatsValueName, IDictionary<string, CallMatricsData>> Data { get; set; }
 
@@ -143,7 +143,7 @@ namespace PeerConnectionClient.Win10.Shared
             DataList = new List<object>();
             Timestamps = new List<object>();
         }
-    }
+    }*/
     class OrtcStatsManager
     {
         private static volatile OrtcStatsManager _instance;
@@ -153,20 +153,23 @@ namespace PeerConnectionClient.Win10.Shared
         private string _currentId;
         private bool _isStatsCollectionEnabled;
         private Timer _callMetricsTimer;
-
+        private const int scheduleTimeInSeconds = 2;
+        private int CallDuration { get; set; }
         private RTCStatsProvider StatsProviderPeerConnection { get; set; }
         private RTCStatsProvider StatsProviderPeerConnectionCall { get; set; }
         private IList<RTCStatsReport> callMetricsStatsReportList { get; set; }
         //private Dictionary<string,IDictionary<RTCStatsValueName,IList<object>>> callsMetricsDictionary {get; set;}
-        private Dictionary<string, CallMatrics> callsMetricsDictionary { get; set; }
+        //private Dictionary<string, CallMatrics> callsMetricsDictionary { get; set; }
+        private Dictionary<string, StatsData> callsStatsDictionary { get; set; }
         private Dictionary<string, IList<RTCStatsReport>> callsStatsReportDictionary { get; set; }
         // /tester/peercc/device/codec/<notes-if-present>/<YYYMMDD-HHMM>/dataset 
         private OrtcStatsManager()
         {
             //this.callMetricsStatsReportList = new List<RTCStatsReport>();
             //callsMetricsDictionary = new Dictionary<string, IDictionary<RTCStatsValueName, IList<object>>>();
-            callsMetricsDictionary = new Dictionary<string, CallMatrics>();
+            //callsMetricsDictionary = new Dictionary<string, CallMatrics>();
             callsStatsReportDictionary = new Dictionary<string, IList<RTCStatsReport>>();
+            callsStatsDictionary = new Dictionary<string, StatsData>();
         }
 
         public static OrtcStatsManager Instance
@@ -189,35 +192,12 @@ namespace PeerConnectionClient.Win10.Shared
         private void PrepareForStats()
         {
             _currentId = /*Conductor.Instance.Peer.Name +*/ "/" + Helper.ProductName() + "/" + Helper.DeviceName() + "/" + Helper.OsVersion() + "/" + Conductor.Instance.AudioCodec.Name + "_" + Conductor.Instance.VideoCodec.Name + "/" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + "/dataset/Plot1";
-            //Dictionary<RTCStatsValueName,IList<object>> callMatrics = new Dictionary<RTCStatsValueName, IList<object>>();
-            CallMatrics callMatrics = new CallMatrics();
+
+            StatsData statsData = new StatsData();
             //All call stats will be stored in this dict, so it can be safely uploaded to server, while other call can be in progress
-            callsMetricsDictionary.Add(_currentId,callMatrics);
+            callsStatsDictionary.Add(_currentId,statsData);
+            
 
-            callMatrics.Data.Add(RTCStatsValueName.StatsValueNameBytesSent, new Dictionary<string, CallMatricsData>());
-            callMatrics.Data.Add(RTCStatsValueName.StatsValueNameBytesReceived, new Dictionary<string, CallMatricsData>());
-            callMatrics.Data.Add(RTCStatsValueName.StatsValueNamePacketsLost, new Dictionary<string, CallMatricsData>());
-            callMatrics.Data.Add(RTCStatsValueName.StatsValueNamePacketsSent, new Dictionary<string, CallMatricsData>());
-            callMatrics.Data.Add(RTCStatsValueName.StatsValueNamePacketsReceived, new Dictionary<string, CallMatricsData>());
-            callMatrics.Data.Add(RTCStatsValueName.StatsValueNameFrameHeightSent, new Dictionary<string, CallMatricsData>());
-            callMatrics.Data.Add(RTCStatsValueName.StatsValueNameFrameWidthSent, new Dictionary<string, CallMatricsData>());
-            callMatrics.Data.Add(RTCStatsValueName.StatsValueNameFrameHeightReceived, new Dictionary<string, CallMatricsData>());
-            callMatrics.Data.Add(RTCStatsValueName.StatsValueNameFrameWidthReceived, new Dictionary<string, CallMatricsData>());
-            callMatrics.Data.Add(RTCStatsValueName.StatsValueNameFrameRateSent, new Dictionary<string, CallMatricsData>());
-            callMatrics.Data.Add(RTCStatsValueName.StatsValueNameFrameRateReceived, new Dictionary<string, CallMatricsData>());
-
-            /*callMatrics.Add(RTCStatsValueName.StatsValueNameBytesSent, new List<object>());
-            callMatrics.Add(RTCStatsValueName.StatsValueNameBytesReceived, new List<object>());
-            callMatrics.Add(RTCStatsValueName.StatsValueNamePacketsLost, new List<object>());
-            callMatrics.Add(RTCStatsValueName.StatsValueNamePacketsSent, new List<object>());
-            callMatrics.Add(RTCStatsValueName.StatsValueNamePacketsReceived, new List<object>());
-            callMatrics.Add(RTCStatsValueName.StatsValueNameFrameHeightSent, new List<object>());
-            callMatrics.Add(RTCStatsValueName.StatsValueNameFrameWidthSent, new List<object>());
-            callMatrics.Add(RTCStatsValueName.StatsValueNameFrameHeightReceived, new List<object>());
-            callMatrics.Add(RTCStatsValueName.StatsValueNameFrameWidthReceived, new List<object>());
-            callMatrics.Add(RTCStatsValueName.StatsValueNameFrameRateSent, new List<object>());
-            callMatrics.Add(RTCStatsValueName.StatsValueNameFrameRateReceived, new List<object>());
-            */
             callMetricsStatsReportList = new List<RTCStatsReport>();
         }
         public void Initialize(RtcPeerConnection pc)
@@ -275,6 +255,8 @@ namespace PeerConnectionClient.Win10.Shared
             }
         }
 
+        
+
         public void StartCallWatch()
         {
             if (_peerConnection != null)
@@ -287,10 +269,10 @@ namespace PeerConnectionClient.Win10.Shared
                         RTCStatsType.Track
                     });
                 StatsProviderPeerConnectionCall = new RTCStatsProvider(_peerConnection, options);
-
+                CallDuration = 0;
                 AutoResetEvent autoEvent = new AutoResetEvent(false);
-                TimerCallback tcb = CollectCallMetrics;
-                _callMetricsTimer = new Timer(tcb, autoEvent, 0, 2000);
+                TimerCallback tcb = CollectCallMetrics3;
+                _callMetricsTimer = new Timer(tcb, autoEvent, 0, scheduleTimeInSeconds*1000);
             }
             else
             {
@@ -301,147 +283,13 @@ namespace PeerConnectionClient.Win10.Shared
         public async void CallEnded()
         {
             StopCallWatch();
-            if (callMetricsStatsReportList != null && callMetricsStatsReportList.Count > 0)
+            
+            if (callsStatsDictionary != null && callsStatsDictionary.ContainsKey(_currentId))
             {
-                //callsStatsReportDictionary.Add(_currentId,callMetricsStatsReportList);
-                //await ProcessStats();
-                IDictionary<string, CallMatricsData> dataDict =
-                    callsMetricsDictionary[_currentId].Data[RTCStatsValueName.StatsValueNameBytesReceived];
-                CallMatricsData dataList = dataDict["bruka"];
-
-                PlotlyManager.Instance.SendData(dataList.DataList, dataList.Timestamps,_currentId);
-
-                /*PlotlyManager.Instance.SendData(callsMetricsDictionary[_currentId].Data[RTCStatsValueName.StatsValueNameBytesReceived].First().Value.DataList, callsMetricsDictionary[_currentId].Data[RTCStatsValueName.StatsValueNameBytesReceived].First().Value.Timestamps);*/
+                await PlotlyManager.Instance.SendData(callsStatsDictionary[_currentId], _currentId);
             }
         }
-
-
-        public void ProcessStatsReport(RTCStatsReport report)
-        {
-            List<object> xList = new List<object>();
-            List<object> yList = new List<object>();
-            //IList<object>> dict = callsMetricsDictionary[_currentId];
-            CallMatrics callMatrics = callsMetricsDictionary[_currentId];
-            foreach (var statId in report.StatsIds)
-            {
-                RTCStats stats = report.GetStats(statId);
-                switch (stats.StatsType)
-                {
-                    case RTCStatsType.InboundRtp:
-                        RTCInboundRtpStreamStats inboundRtpStreamStats = stats.ToInboundRtp();
-                        if (inboundRtpStreamStats!=null)
-                        {
-                            CallMatricsData dataBytesReceived = GetMetricData(statId, callMatrics, RTCStatsValueName.StatsValueNameBytesReceived);
-                            dataBytesReceived.DataList.Add(inboundRtpStreamStats.BytesReceived);
-                            dataBytesReceived.Timestamps.Add(stats.Timestamp);
-
-                            CallMatricsData dataPacketsLost = GetMetricData(statId, callMatrics, RTCStatsValueName.StatsValueNamePacketsLost);
-                            dataPacketsLost.DataList.Add(inboundRtpStreamStats.PacketsLost);
-                            dataPacketsLost.Timestamps.Add(stats.Timestamp);
-
-                            CallMatricsData dataPacketsReceived = GetMetricData(statId, callMatrics, RTCStatsValueName.StatsValueNamePacketsReceived);
-                            dataPacketsReceived.DataList.Add(inboundRtpStreamStats.PacketsReceived);
-                            dataPacketsReceived.Timestamps.Add(stats.Timestamp);
-                            /* dict[StatsValueNameBytesReceived].Add(inboundRtpStreamStats.BytesReceived);
-                            dict[RTCStatsValueName.StatsValueNamePacketsReceived].Add(inboundRtpStreamStats.PacketsReceived);
-                            dict[RTCStatsValueName.StatsValueNamePacketsLost].Add(inboundRtpStreamStats.PacketsLost);*/
-                        }
-                        break;
-                    case RTCStatsType.OutboundRtp:
-                        RTCOutboundRtpStreamStats outboundRtpStreamStats = stats.ToOutboundRtp();
-                        if (outboundRtpStreamStats != null)
-                        {
-                            CallMatricsData dataBytesSent = GetMetricData(statId, callMatrics, RTCStatsValueName.StatsValueNameBytesSent);
-                            dataBytesSent.DataList.Add(outboundRtpStreamStats.BytesSent);
-                            dataBytesSent.Timestamps.Add(stats.Timestamp);
-
-                            CallMatricsData dataPacketsSent = GetMetricData(statId, callMatrics, RTCStatsValueName.StatsValueNamePacketsSent);
-                            dataPacketsSent.DataList.Add(outboundRtpStreamStats.PacketsSent);
-                            dataPacketsSent.Timestamps.Add(stats.Timestamp);
-                        }
-                        break;
-                    case RTCStatsType.Track:
-                        RTCMediaStreamTrackStats mediaStreamTrackStats = stats.ToTrack();
-                        if (mediaStreamTrackStats != null)
-                        {
-                            CallMatricsData dataFrameRateSent = GetMetricData(statId, callMatrics, RTCStatsValueName.StatsValueNameFrameRateSent);
-                            dataFrameRateSent.DataList.Add(mediaStreamTrackStats.FramesSent);
-                            dataFrameRateSent.Timestamps.Add(stats.Timestamp);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        private static CallMatricsData GetMetricData(string statId1, CallMatrics callMatrics, RTCStatsValueName statsValueName)
-        {
-            CallMatricsData data;
-            IDictionary<string, CallMatricsData> dict = callMatrics.Data[statsValueName];
-            string statId = "bruka";
-            if (!dict.TryGetValue(statId, out data))
-            {
-                data = new CallMatricsData { Id = statId };
-                callMatrics.Data[statsValueName].Add(statId, data);
-            }
-            /*else
-            //CallMatricsData data = callMatrics.Data[statsValueName][statId];
-            //if (data == null)
-            {
-                data = new CallMatricsData {Id = statId};
-                callMatrics.Data[statsValueName].Add(statId, data);
-            }*/
-            return data;
-        }
-
-        public IAsyncAction ProcessStats()
-        {
-            return Task.Run(() =>
-            {
-                foreach (RTCStatsReport statsReport in callsStatsReportDictionary[_currentId])
-                {
-                    ProcessStatsReport(statsReport);
-                    /*foreach (var statId in statsReport.StatsIds)
-                    {
-                        RTCStats stats = statsReport.GetStats(statId);
-                        switch (stats.StatsType)
-                        {
-                            case RTCStatsType.InboundRtp:
-                                RTCInboundRtpStreamStats inboundRtpStreamStats = stats.ToInboundRtp();
-                                if (inboundRtpStreamStats != null)
-                                {
-                                    Debug.WriteLine("to");
-                                }
-                                break;
-                            case RTCStatsType.OutboundRtp:
-                                RTCOutboundRtpStreamStats outboundRtpStreamStats = stats.ToOutboundRtp();
-                                if (outboundRtpStreamStats != null)
-                                {
-                                    Debug.WriteLine("to");
-                                }
-                                break;
-                            case RTCStatsType.Track:
-                                RTCMediaStreamTrackStats mediaStreamTrackStats = stats.ToTrack();
-                                if (mediaStreamTrackStats != null)
-                                {
-                                    Debug.WriteLine("to");
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    }*/
-                }
-                PlotlyManager.Instance.SendData(callsMetricsDictionary[_currentId].Data[RTCStatsValueName.StatsValueNameBytesSent].First().Value.DataList, callsMetricsDictionary[_currentId].Data[RTCStatsValueName.StatsValueNameBytesSent].First().Value.Timestamps,_currentId);
-                /*RTCStatsReport report = await StatsProviderPeerConnection.GetStats();
-                if (report != null)
-                {
-                    ProcessStatsReport(report);
-                        }*/
-
-            }).AsAsyncAction();
-        }
+        
         public static int counter = 0;
         public static bool send = true;
         public void StopCallWatch()
@@ -451,110 +299,158 @@ namespace PeerConnectionClient.Win10.Shared
                 _callMetricsTimer.Dispose();
             }
         }
-        private async void CollectCallMetrics(object state)
-        {
-            if (counter > 20)
-            {
-                if (send)
-                {
-                    send = false;
-                    counter++;
-                    IDictionary<string, CallMatricsData> dataDict =
-                        callsMetricsDictionary[_currentId].Data[RTCStatsValueName.StatsValueNameBytesReceived];
-                    CallMatricsData dataList = dataDict["bruka"];
 
-                    PlotlyManager.Instance.SendData(dataList.DataList, dataList.Timestamps, _currentId);
-                }
-                return;
-            }
+        /*private async void CollectCallMetrics2(object state)
+        {
             RTCStatsReport report = await StatsProviderPeerConnectionCall.GetStats();
             CallMatrics callMatrics = callsMetricsDictionary[_currentId];
+
             if (report != null)
             {
                 callMetricsStatsReportList.Add(report);
-                
+            }
+        }*/
+
+        private StatsData currentStatsData;
+        internal class StatsData
+        {
+            public IList<int> Timestamps { get; } 
+            public Dictionary<string,TrackStatsData> TrackStatsDictionary { get; }
+
+            public StatsData()
+            {
+                Timestamps = new List<int>();
+                TrackStatsDictionary = new Dictionary<string, TrackStatsData>();
+            }
+
+            public TrackStatsData GetTrackStatsData(string trackId)
+            {
+                TrackStatsData ret = null;
+                if (trackId != null && TrackStatsDictionary.ContainsKey(trackId))
+                    ret = TrackStatsDictionary[trackId];
+                return ret;
+            }
+        }
+        internal class TrackStatsData
+        {
+            public string MediaTrackId { get; set; }
+            public Dictionary<RTCStatsValueName,IList<object>> Data{ get; }
+
+            public TrackStatsData()
+            {
+                Data = new Dictionary<RTCStatsValueName, IList<object>>();
+            }
+
+            public void AddData(RTCStatsValueName valueName, object value)
+            {
+                IList<object> list;
+                if (value != null && Data.ContainsKey(valueName))
+                {
+                    list = Data[valueName];
+                }
+                else
+                {
+                    list = new List<object>();
+                    Data.Add(valueName,list);
+                }
+                list.Add(value);
+            }
+        }
+
+        private StatsData activeStatsData;
+
+        private void ParseStats(RTCStats stats, StatsData statsData)
+        {
+            switch (stats.StatsType)
+            {
+                case RTCStatsType.InboundRtp:
+                    //Debug.WriteLine("RTCStatsType.InboundRtp:" + statId);
+                    RTCInboundRtpStreamStats inboundRtpStreamStats = stats.ToInboundRtp();
+                    if (inboundRtpStreamStats != null)
+                    {
+                        TrackStatsData tsd =
+                            statsData.GetTrackStatsData(inboundRtpStreamStats.RtpStreamStats.MediaTrackId);
+
+                        if (tsd != null)
+                        {
+                            tsd.AddData(RTCStatsValueName.StatsValueNameBytesReceived,
+                                inboundRtpStreamStats.BytesReceived);
+
+                            tsd.AddData(RTCStatsValueName.StatsValueNamePacketsReceived,
+                                inboundRtpStreamStats.PacketsReceived);
+
+                            tsd.AddData(RTCStatsValueName.StatsValueNamePacketsLost, inboundRtpStreamStats.PacketsLost);
+
+                            tsd.AddData(RTCStatsValueName.StatsValueNameCurrentEndToEndDelayMs,
+                                inboundRtpStreamStats.EndToEndDelay);
+                        }
+                    }
+                    break;
+                case RTCStatsType.OutboundRtp:
+                    RTCOutboundRtpStreamStats outboundRtpStreamStats = stats.ToOutboundRtp();
+                    if (outboundRtpStreamStats != null)
+                    {
+                        TrackStatsData tsd =
+                            statsData.GetTrackStatsData(outboundRtpStreamStats.RtpStreamStats.MediaTrackId);
+
+                        if (tsd != null)
+                        {
+                            tsd.AddData(RTCStatsValueName.StatsValueNameBytesSent, outboundRtpStreamStats.BytesSent);
+
+                            tsd.AddData(RTCStatsValueName.StatsValueNamePacketsSent, outboundRtpStreamStats.PacketsSent);
+                        }
+                    }
+                    break;
+                case RTCStatsType.Track:
+                    RTCMediaStreamTrackStats mediaStreamTrackStats = stats.ToTrack();
+                    if (mediaStreamTrackStats != null)
+                    {
+                        TrackStatsData tsd =
+                            statsData.GetTrackStatsData(mediaStreamTrackStats.TrackId);
+
+                        if (tsd != null)
+                        {
+                            if (mediaStreamTrackStats.RemoteSource)
+                            {
+                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameRateReceived,
+                                    mediaStreamTrackStats.FramesPerSecond);
+                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameWidthReceived,
+                                    mediaStreamTrackStats.FrameWidth);
+                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameHeightReceived,
+                                    mediaStreamTrackStats.FrameHeight);
+                            }
+                            else
+                            {
+                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameRateSent,
+                                    mediaStreamTrackStats.FramesPerSecond);
+                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameWidthSent,
+                                    mediaStreamTrackStats.FrameWidth);
+                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameHeightSent,
+                                    mediaStreamTrackStats.FrameHeight);
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private async void CollectCallMetrics3(object state)
+        {
+            CallDuration += scheduleTimeInSeconds;
+            StatsData statsData = callsStatsDictionary[_currentId];
+            statsData.Timestamps.Add(CallDuration);
+            RTCStatsReport report = await StatsProviderPeerConnectionCall.GetStats();
+            if (report != null)
+            {
                 foreach (var statId in report.StatsIds)
                 {
                     RTCStats stats = report.GetStats(statId);
-                    switch (stats.StatsType)
-                    {
-                        case RTCStatsType.InboundRtp:
-                            Debug.WriteLine("RTCStatsType.InboundRtp:"+statId);
-                            RTCInboundRtpStreamStats inboundRtpStreamStats = stats.ToInboundRtp();
-                            if (inboundRtpStreamStats != null)
-                            {
-                                counter++;
-                                CallMatricsData dataBytesReceived = GetMetricData(statId, callMatrics, RTCStatsValueName.StatsValueNameBytesReceived);
-                                dataBytesReceived.DataList.Add(inboundRtpStreamStats.BytesReceived);
-                                dataBytesReceived.Timestamps.Add(counter);
-
-                                CallMatricsData dataPacketsLost = GetMetricData(statId, callMatrics, RTCStatsValueName.StatsValueNamePacketsLost);
-                                dataPacketsLost.DataList.Add(inboundRtpStreamStats.PacketsLost);
-                                dataPacketsLost.Timestamps.Add(counter);
-
-                                CallMatricsData dataPacketsReceived = GetMetricData(statId, callMatrics, RTCStatsValueName.StatsValueNamePacketsReceived);
-                                dataPacketsReceived.DataList.Add(inboundRtpStreamStats.PacketsReceived);
-                                dataPacketsReceived.Timestamps.Add(counter);
-                                
-                            }
-                            break;
-                        case RTCStatsType.OutboundRtp:
-                            RTCOutboundRtpStreamStats outboundRtpStreamStats = stats.ToOutboundRtp();
-                            if (outboundRtpStreamStats != null)
-                            {
-                                CallMatricsData dataBytesSent = GetMetricData(statId, callMatrics, RTCStatsValueName.StatsValueNameBytesSent);
-                                dataBytesSent.DataList.Add(outboundRtpStreamStats.BytesSent);
-                                dataBytesSent.Timestamps.Add(counter);
-
-                                CallMatricsData dataPacketsSent = GetMetricData(statId, callMatrics, RTCStatsValueName.StatsValueNamePacketsSent);
-                                dataPacketsSent.DataList.Add(outboundRtpStreamStats.PacketsSent);
-                                dataPacketsSent.Timestamps.Add(counter);
-                            }
-                            break;
-                        case RTCStatsType.Track:
-                            RTCMediaStreamTrackStats mediaStreamTrackStats = stats.ToTrack();
-                            if (mediaStreamTrackStats != null)
-                            {
-                                CallMatricsData dataFrameRateSent = GetMetricData(statId, callMatrics, RTCStatsValueName.StatsValueNameFrameRateSent);
-                                dataFrameRateSent.DataList.Add(mediaStreamTrackStats.FramesSent);
-                                dataFrameRateSent.Timestamps.Add(counter);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                    
-                /*RTCStats stats = report.GetStats(statId);
-                    switch (stats.StatsType)
-                        {
-                            case RTCStatsType.InboundRtp:
-                                RTCInboundRtpStreamStats inboundRtpStreamStats = stats.ToInboundRtp();
-                                if (inboundRtpStreamStats != null)
-                                {
-                                    Debug.WriteLine("to");
-                                }
-                                break;
-                            case RTCStatsType.OutboundRtp:
-                                RTCOutboundRtpStreamStats outboundRtpStreamStats = stats.ToOutboundRtp();
-                                if (outboundRtpStreamStats != null)
-                                {
-                                    Debug.WriteLine("to");
-                                }
-                                break;
-                            case RTCStatsType.Track:
-                                RTCMediaStreamTrackStats mediaStreamTrackStats = stats.ToTrack();
-                                if (mediaStreamTrackStats != null)
-                                {
-                                    Debug.WriteLine("to");
-                                }
-                                break;
-                            default:
-                                break;
-                }*/
+                    ParseStats(stats, statsData);
                 }
-
             }
-           
         }
+
     }
 }
