@@ -191,7 +191,7 @@ namespace PeerConnectionClient.Win10.Shared
         /// </summary>
         private void PrepareForStats()
         {
-            _currentId = /*Conductor.Instance.Peer.Name + "/" +*/ Helper.ProductName() + "/" + Helper.DeviceName() + "/" + Helper.OsVersion() + "/" + Conductor.Instance.AudioCodec.Name + "_" + Conductor.Instance.VideoCodec.Name + "/" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + "/dataset/Plot1";
+            _currentId = /*Conductor.Instance.Peer.Name + "/" +*/ Helper.ProductName() + "/" + Helper.DeviceName() + "/" + Helper.OsVersion() + "/" + Conductor.Instance.AudioCodec.Name + "_" + Conductor.Instance.VideoCodec.Name + "/" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + "/dataset";
 
             StatsData statsData = new StatsData();
             //All call stats will be stored in this dict, so it can be safely uploaded to server, while other call can be in progress
@@ -339,26 +339,63 @@ namespace PeerConnectionClient.Win10.Shared
         internal class TrackStatsData
         {
             public string MediaTrackId { get; set; }
-            public Dictionary<RTCStatsValueName,IList<object>> Data{ get; }
+            public Dictionary<RTCStatsValueName,IList<double>> Data{ get; }
+            public Dictionary<RTCStatsValueName, double> LastValues { get; }
 
             public TrackStatsData()
             {
-                Data = new Dictionary<RTCStatsValueName, IList<object>>();
+                Data = new Dictionary<RTCStatsValueName, IList<double>>();
+                LastValues = new Dictionary<RTCStatsValueName, double>();
             }
 
-            public void AddData(RTCStatsValueName valueName, object value)
+            public void AddData(RTCStatsValueName valueName, double value)
             {
-                IList<object> list;
+                IList<double> list;
                 if (value != null && Data.ContainsKey(valueName))
                 {
                     list = Data[valueName];
                 }
                 else
                 {
-                    list = new List<object>();
+                    list = new List<double>();
                     Data.Add(valueName,list);
                 }
                 list.Add(value);
+            }
+
+            public void AddAverage(RTCStatsValueName valueName, double value)
+            {
+                try
+                {
+                    IList<double> list;
+                    double lastValue = 0;
+                    if (Data.ContainsKey(valueName))
+                    {
+                        list = (IList<double>)Data[valueName];
+                        
+                    }
+                    else
+                    {
+                        list = new List<double>();
+                        Data.Add(valueName, list);
+                    }
+
+                    if (LastValues.ContainsKey(valueName))
+                        lastValue =  LastValues[valueName];
+                    else
+                        LastValues.Add(valueName, lastValue);
+
+                    int totalLength = list.Count;
+                    double lastAverage = totalLength > 0 ? list.Last() : 0;
+                    double valueToAdd = (lastAverage * totalLength + (value - lastValue)) / (totalLength + 1);
+                    LastValues[valueName]=value;
+                    list.Add(valueToAdd);
+                }
+                catch (Exception e)
+                {
+                    Debug.Write(e);
+                }
+                
             }
         }
 
@@ -378,13 +415,13 @@ namespace PeerConnectionClient.Win10.Shared
 
                         if (tsd != null)
                         {
-                            tsd.AddData(RTCStatsValueName.StatsValueNameBytesReceived,
+                            tsd.AddAverage(RTCStatsValueName.StatsValueNameBytesReceived,
                                 inboundRtpStreamStats.BytesReceived);
 
-                            tsd.AddData(RTCStatsValueName.StatsValueNamePacketsReceived,
+                            tsd.AddAverage(RTCStatsValueName.StatsValueNamePacketsReceived,
                                 inboundRtpStreamStats.PacketsReceived);
 
-                            tsd.AddData(RTCStatsValueName.StatsValueNamePacketsLost, inboundRtpStreamStats.PacketsLost);
+                            tsd.AddAverage(RTCStatsValueName.StatsValueNamePacketsLost, inboundRtpStreamStats.PacketsLost);
 
                             tsd.AddData(RTCStatsValueName.StatsValueNameCurrentEndToEndDelayMs,
                                 inboundRtpStreamStats.EndToEndDelay);
@@ -400,9 +437,9 @@ namespace PeerConnectionClient.Win10.Shared
 
                         if (tsd != null)
                         {
-                            tsd.AddData(RTCStatsValueName.StatsValueNameBytesSent, outboundRtpStreamStats.BytesSent);
+                            tsd.AddAverage(RTCStatsValueName.StatsValueNameBytesSent, outboundRtpStreamStats.BytesSent);
 
-                            tsd.AddData(RTCStatsValueName.StatsValueNamePacketsSent, outboundRtpStreamStats.PacketsSent);
+                            tsd.AddAverage(RTCStatsValueName.StatsValueNamePacketsSent, outboundRtpStreamStats.PacketsSent);
                         }
                     }
                     break;
@@ -419,18 +456,18 @@ namespace PeerConnectionClient.Win10.Shared
                             {
                                 tsd.AddData(RTCStatsValueName.StatsValueNameFrameRateReceived,
                                     mediaStreamTrackStats.FramesPerSecond);
-                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameWidthReceived,
+                                tsd.AddAverage(RTCStatsValueName.StatsValueNameFrameWidthReceived,
                                     mediaStreamTrackStats.FrameWidth);
-                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameHeightReceived,
+                                tsd.AddAverage(RTCStatsValueName.StatsValueNameFrameHeightReceived,
                                     mediaStreamTrackStats.FrameHeight);
                             }
                             else
                             {
                                 tsd.AddData(RTCStatsValueName.StatsValueNameFrameRateSent,
                                     mediaStreamTrackStats.FramesPerSecond);
-                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameWidthSent,
+                                tsd.AddAverage(RTCStatsValueName.StatsValueNameFrameWidthSent,
                                     mediaStreamTrackStats.FrameWidth);
-                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameHeightSent,
+                                tsd.AddAverage(RTCStatsValueName.StatsValueNameFrameHeightSent,
                                     mediaStreamTrackStats.FrameHeight);
                             }
                         }

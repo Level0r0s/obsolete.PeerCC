@@ -149,40 +149,128 @@ namespace PeerConnectionClient.Win10.Shared
             return "purple";
         }
         //{\"x\": [0, 1, 2], \"y\": [3, 11, 16],\"line\": {\"color\":\"purple\"},\"name\":\"Frame Rates\"}
-        private string FormatDataForSending(OrtcStatsManager.TrackStatsData trackStatsData, string formatedTimestamps)
+        private async Task FormatDataForSending(OrtcStatsManager.TrackStatsData trackStatsData, string formatedTimestamps, string id, string trackId)
         {
             List<string> datasets= new List<string>();
             //foreach (var values in trackStatsData.Data.Values)
-            foreach (var key in trackStatsData.Data.Keys)
+            foreach (var valueNames in trackStatsData.Data.Keys)
             {
-                var values = trackStatsData.Data[key];
+                var values = trackStatsData.Data[valueNames];
                 var valuesStr = "[" + String.Join(",", values.ToArray()) + "]";
-                string graphTitle = GetTitle(key);
-                string color = GetColor(key);
+                string graphTitle = GetTitle(valueNames);
+                string color = GetColor(valueNames);
 
-                string formated = "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}";
-                datasets.Add(formated);
+                string formated = "[" + "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}" + "]";
+                await SendToPlotly(formated, id, graphTitle);
+                //datasets.Add(formated);
             }
-            string ret = "[" + String.Join(",", datasets.ToArray()) + "]";
-            return ret;
+            //string ret = "[" + String.Join(",", datasets.ToArray()) + "]";
+            //return ret;
+        }
+
+        private string FormatDataForSending(OrtcStatsManager.TrackStatsData trackStatsData, string formatedTimestamps, RTCStatsValueName valueNames)
+        {
+            var values = trackStatsData.Data[valueNames];
+            var valuesStr = "[" + String.Join(",", values.ToArray()) + "]";
+            string graphTitle = GetTitle(valueNames);
+            string color = GetColor(valueNames);
+
+            string formated = "[" + "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}" + "]";
+
+            return formated;
+        }
+
+        private Dictionary<string, string> FormatDataForSending2(OrtcStatsManager.TrackStatsData trackStatsData, string formatedTimestamps, RTCStatsValueName valueNames)
+        {
+            var values = trackStatsData.Data[valueNames];
+            var valuesStr = "[" + String.Join(",", values.ToArray()) + "]";
+            string graphTitle = GetTitle(valueNames);
+            string color = GetColor(valueNames);
+
+            string formated = "[" + "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}" + "]";
+
+            Dictionary<string,string> dictionary = new Dictionary<string, string>
+            {
+                 { "args",formated },
+                 { "title",graphTitle },
+            };
+
+            return dictionary;
+        }
+
+        public async Task SendSummary(List<Dictionary<string, string>> datasets, string path, string trackId)
+        {
+            //string ret = datasets.Aggregate("[", (current, dict) => current.Length==1?current:(current+",") + dict["args"]);
+
+            string ret = "[";
+            foreach (var dataset in datasets)
+                ret = (ret.Length == 1 ? ret : (ret + ",")) + dataset["args"];
+            ret += "]";
+            string title = "Summary for the track " + trackId;
+            await SendToPlotly(ret, path, trackId,title);
         }
         public async Task SendData(OrtcStatsManager.StatsData statsData, string id)
         {
             if (statsData == null)
                 return;
-            var timestampsStr = "[" + String.Join(",", statsData.Timestamps.ToArray()) + "]";
 
-            foreach (var key in statsData.TrackStatsDictionary.Keys)
+            var timestampsStr = "[" + String.Join(",", statsData.Timestamps.ToArray()) + "]";
+            //List<string> datasets = new List<string>();
+            //List<Dictionary<string, string>> datasets = new List<Dictionary<string, string>>();
+
+            foreach (var trackId in statsData.TrackStatsDictionary.Keys)
             {
-                OrtcStatsManager.TrackStatsData trackStatsData = statsData.TrackStatsDictionary[key];
-                string dataToSend = FormatDataForSending(trackStatsData, timestampsStr);
-                await SentToPlotly(dataToSend,id,key);
+                List<Dictionary<string, string>> datasets = new List<Dictionary<string, string>>();
+                OrtcStatsManager.TrackStatsData trackStatsData = statsData.TrackStatsDictionary[trackId];
+                foreach (var valueNames in trackStatsData.Data.Keys)
+                {
+                    //string formattedString = FormatDataForSending(trackStatsData, timestampsStr, valueNames);
+                    Dictionary<string, string> dictionary = FormatDataForSending2(trackStatsData, timestampsStr, valueNames);
+                    dictionary.Add("trackId",trackId);
+                    datasets.Add(dictionary);
+                    //datasets.Add(formattedString);
+                }
+                foreach (Dictionary<string, string> dict in datasets)
+                {
+                    await SendToPlotly(dict, id);
+                }
+
+                await SendSummary(datasets, id, trackId);
             }
+
+            
         }
 
-        public async Task SentToPlotly(string args, string name, string title)
+        public async Task SendToPlotly(Dictionary<string, string> dictionary, string path)
         {
-            string filename = name + "\\" + title;
+            string filename = path + "/" + dictionary["trackId"] + "/" + dictionary["title"];
+            using (var client = new HttpClient())
+            {
+                var values = new Dictionary<string, string>
+                {
+                   { "un", username },
+                   { "key", key },
+                   {"origin", "plot" },
+                    {"platform","lisp"},
+                    { "args",dictionary["args"]},
+                    {"kwargs","{\"filename\": \"" + filename + "\",\"fileopt\": \"append\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"" + dictionary["trackId"] + "_" + dictionary["title"] + "\"},\"world_readable\": true}"},
+                };
+
+                var content = new FormUrlEncodedContent(values);
+
+                var response = await client.PostAsync(restAPIUrl, content);
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                if (responseString != null && responseString.Length > 0)
+                {
+                    Debug.Write(responseString);
+                }
+            }
+        }
+        public async Task SendToPlotly(string args, string path, string trackId, string title=null)
+        {
+            string filename = path + "/" + trackId;
+            string plotTitle = title == null ? trackId : title;
             using (var client = new HttpClient())
             {
                 var values = new Dictionary<string, string>
@@ -192,7 +280,7 @@ namespace PeerConnectionClient.Win10.Shared
                    {"origin", "plot" },
                     {"platform","lisp"},
                     { "args",args},
-                    {"kwargs","{\"filename\": \"" + filename + "\",\"fileopt\": \"new\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"" + title + "\"},\"world_readable\": true}"},
+                    {"kwargs","{\"filename\": \"" + filename + "\",\"fileopt\": \"append\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"" + plotTitle + "\"},\"world_readable\": true}"},
                 };
 
                 var content = new FormUrlEncodedContent(values);
