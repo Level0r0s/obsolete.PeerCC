@@ -92,22 +92,19 @@ namespace PeerConnectionClient.Utilities
             RTCPeerConnectionSignalingMode ret = RTCPeerConnectionSignalingMode.Json;
 
             string[] substring = clientName.Split('-');
-            if (substring.Length >= 2)
+            switch (substring.Last())
             {
-                switch (substring.Last())
-                {
-                    case "dual":
-                        ret = RTCPeerConnectionSignalingMode.Json;
-                        break;
+                case "dual":
+                    ret = RTCPeerConnectionSignalingMode.Json;
+                    break;
 
-                    case "json":
-                        ret = RTCPeerConnectionSignalingMode.Json; 
-                        break;
+                case "json":
+                    ret = RTCPeerConnectionSignalingMode.Json; 
+                    break;
 
-                    default:
-                        ret = RTCPeerConnectionSignalingMode.Sdp;
-                        break;
-                }
+                default:
+                    ret = RTCPeerConnectionSignalingMode.Sdp;
+                    break;
             }
             return ret;
         }
