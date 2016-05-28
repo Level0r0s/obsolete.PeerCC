@@ -220,7 +220,7 @@ namespace PeerConnectionClient.Signalling
 
             var config = new RTCConfiguration()
             {
-                BundlePolicy = RTCPeerConnectionSignalingMode.Json == _signalingMode ? RTCBundlePolicy.MaxBundle : RTCBundlePolicy.Balanced,
+                BundlePolicy = RTCPeerConnectionSignalingMode.Json == _signalingMode ? RTCBundlePolicy.MaxBundle : RTCBundlePolicy.MaxBundle,
                 SignalingMode = _signalingMode,//RTCSessionDescriptionSignalingType.Json,
                 //IceTransportPolicy = RTCIceTransportPolicy.All,
                 GatherOptions = new RTCIceGatherOptions()
@@ -597,7 +597,7 @@ namespace PeerConnectionClient.Signalling
                         default: Debug.Assert(false, type); break;
                     }
 
-                    Debug.WriteLine("Conductor: Received session description: " + message);
+                    Debug.WriteLine("Conductor: Received session description: " + messageType.ToString() + "\n" + formatted);
                     if (_peerConnection != null)
                     {
                         await _peerConnection.SetRemoteDescription(new RTCSessionDescription(messageType, formatted));
