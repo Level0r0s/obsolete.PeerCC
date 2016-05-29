@@ -117,11 +117,7 @@ namespace PeerConnectionClient.Utilities
             return Task.Run(() =>
             {
                 RTCRtpCapabilities capabilities = sourceCapabilities.Clone();
-                RTCRtpParameters parameters = RTCSessionDescription.ConvertCapabilitiesToParameters(sourceCapabilities);
-
-                if (parameters == null)
-                    throw new NullReferenceException("Unexpected null return from RTCSessionDescription.ConvertCapabilitiesToParameters.");
-
+              
                 // scoope: move prefered codec to be first in the list
                 {
                     var itemsToRemove = capabilities.Codecs.Where(x => x.PreferredPayloadType == preferredCodec.PreferredPayloadType).ToList();
@@ -136,24 +132,9 @@ namespace PeerConnectionClient.Utilities
                     }
                 }
 
-                // scoope: move prefered codec to be first in the list
-                {
-                    var itemsToRemove = parameters.Codecs.Where(x => x.PayloadType == preferredCodec.PreferredPayloadType).ToList();
-                    if (itemsToRemove.Count > 0)
-                    {
-                        RTCRtpCodecParameters codecParameters = itemsToRemove.First();
-                        if (codecParameters != null && parameters.Codecs.IndexOf(codecParameters) > 0)
-                        {
-                            parameters.Codecs.Remove(codecParameters);
-                            parameters.Codecs.Insert(0, codecParameters);
-                        }
-                    }
-                }
-
                 RTCMediaStreamTrackConfiguration configuration = new RTCMediaStreamTrackConfiguration()
                 {
-                    Capabilities = capabilities,
-                    Parameters = parameters
+                    Capabilities = capabilities
                 };
                 return configuration;
             });
