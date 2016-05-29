@@ -253,6 +253,7 @@ namespace PeerConnectionClient.Signalling
             _peerConnection.OnIceCandidate += PeerConnection_OnIceCandidate;
             _peerConnection.OnTrack += PeerConnection_OnAddTrack;
             _peerConnection.OnTrackGone += PeerConnection_OnRemoveTrack;
+            _peerConnection.OnIceConnectionStateChange += () => { Debug.WriteLine("Conductor: Ice connection state change, state=" + _peerConnection.IceConnectionState.ToString()); };
             //_peerConnection.OnConnectionHealthStats += PeerConnection_OnConnectionHealthStats;
 
             Debug.WriteLine("Conductor: Getting user media.");
