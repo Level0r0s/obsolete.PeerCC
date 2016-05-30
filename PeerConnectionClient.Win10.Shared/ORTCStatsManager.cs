@@ -211,12 +211,19 @@ namespace PeerConnectionClient.Win10.Shared
         private void PrepareStatsForCall(string callId, bool isCaller)
         {
             _currentId = callId;
-        
-            StatsData statsData = new StatsData();
-            statsData.IsCaller = isCaller;
-            statsData.StarTime = DateTime.Now;
-            //All call stats will be stored in this dict, so it can be safely uploaded to server, while other call can be in progress
-            callsStatsDictionary.Add(_currentId, statsData);
+
+            try
+            {
+                StatsData statsData = new StatsData();
+                statsData.IsCaller = isCaller;
+                statsData.StarTime = DateTime.Now;
+                //All call stats will be stored in this dict, so it can be safely uploaded to server, while other call can be in progress
+                callsStatsDictionary.Add(_currentId, statsData);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+            }
 
             callMetricsStatsReportList = new List<RTCStatsReport>();
         }
@@ -494,6 +501,8 @@ namespace PeerConnectionClient.Win10.Shared
                                     mediaStreamTrackStats.FrameWidth);
                                 tsd.AddData(RTCStatsValueName.StatsValueNameFrameHeightReceived,
                                     mediaStreamTrackStats.FrameHeight);
+                                FramesPerSecondChanged?.Invoke("PEER", mediaStreamTrackStats.FramesPerSecond.ToString("0.#"));
+                                ResolutionChanged?.Invoke("PEER", mediaStreamTrackStats.FrameWidth, mediaStreamTrackStats.FrameHeight);
                             }
                             else
                             {
@@ -503,6 +512,8 @@ namespace PeerConnectionClient.Win10.Shared
                                     mediaStreamTrackStats.FrameWidth);
                                 tsd.AddData(RTCStatsValueName.StatsValueNameFrameHeightSent,
                                     mediaStreamTrackStats.FrameHeight);
+                                FramesPerSecondChanged?.Invoke("SELF", mediaStreamTrackStats.FramesPerSecond.ToString("0.#"));
+                                ResolutionChanged?.Invoke("SELF", mediaStreamTrackStats.FrameWidth, mediaStreamTrackStats.FrameHeight);
                             }
                         }
                     }
@@ -518,16 +529,16 @@ namespace PeerConnectionClient.Win10.Shared
             {
                 case RTCStatsType.Track:
                     RTCMediaStreamTrackStats mediaStreamTrackStats = stats.ToTrack();
-                    if (mediaStreamTrackStats != null)
+                    if (mediaStreamTrackStats != null && !mediaStreamTrackStats.TrackId.Contains("audio"))
                     {
                         if (mediaStreamTrackStats.RemoteSource)
                         {
-                            FramesPerSecondChanged?.Invoke("PEER", mediaStreamTrackStats.FramesPerSecond.ToString("0.##%"));
+                            FramesPerSecondChanged?.Invoke("PEER", mediaStreamTrackStats.FramesPerSecond.ToString("0.#"));
                             ResolutionChanged?.Invoke("PEER", mediaStreamTrackStats.FrameWidth, mediaStreamTrackStats.FrameHeight);
                         }
                         else
                         {
-                            FramesPerSecondChanged?.Invoke("SELF", mediaStreamTrackStats.FramesPerSecond.ToString("0.##%"));
+                            FramesPerSecondChanged?.Invoke("SELF", mediaStreamTrackStats.FramesPerSecond.ToString("0.#"));
                             ResolutionChanged?.Invoke("SELF", mediaStreamTrackStats.FrameWidth, mediaStreamTrackStats.FrameHeight);
                         }
                     }
