@@ -161,10 +161,10 @@ namespace PeerConnectionClient.Win10.Shared
                 string color = GetColor(valueNames);
 
                 string formated = "[" + "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}" + "]";
-                await SendToPlotly(formated, id, graphTitle);
-                //datasets.Add(formated);
+                //a-wait SendToPlotly(formated, id, graphTitle);
+                datasets.Add(formated);
             }
-            //string ret = "[" + String.Join(",", datasets.ToArray()) + "]";
+            string ret = "[" + String.Join(",", datasets.ToArray()) + "]";
             //return ret;
         }
 
@@ -187,7 +187,9 @@ namespace PeerConnectionClient.Win10.Shared
             string graphTitle = GetTitle(valueNames);
             string color = GetColor(valueNames);
 
-            string formated = "[" + "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}" + "]";
+            //string formated = "[" + "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}" + "]";
+
+            string formated = "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}";
 
             Dictionary<string,string> dictionary = new Dictionary<string, string>
             {
@@ -252,7 +254,7 @@ namespace PeerConnectionClient.Win10.Shared
                    { "key", key },
                    {"origin", "plot" },
                     {"platform","lisp"},
-                    { "args",dictionary["args"]},
+                    { "args","[" + dictionary["args"] + "]"},
                     {"kwargs","{\"filename\": \"" + filename + "\",\"fileopt\": \"append\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"" + dictionary["trackId"] + "_" + dictionary["title"] + "\"},\"world_readable\": true}"},
                 };
 
@@ -280,7 +282,7 @@ namespace PeerConnectionClient.Win10.Shared
                    {"origin", "plot" },
                     {"platform","lisp"},
                     { "args",args},
-                    {"kwargs","{\"filename\": \"" + filename + "\",\"fileopt\": \"append\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"" + plotTitle + "\"},\"world_readable\": true}"},
+                    {"kwargs","{\"filename\": \"" + filename + "\",\"fileopt\": \"new\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"" + plotTitle + "\"},\"world_readable\": true}"},
                 };
 
                 var content = new FormUrlEncodedContent(values);
