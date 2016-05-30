@@ -163,6 +163,11 @@ namespace PeerConnectionClient.Win10.Shared
         private Dictionary<string, StatsData> callsStatsDictionary { get; set; }
         private Dictionary<string, IList<RTCStatsReport>> callsStatsReportDictionary { get; set; }
         // /tester/peercc/device/codec/<notes-if-present>/<YYYMMDD-HHMM>/dataset 
+
+
+        public static event FramesPerSecondChangedEventHandler FramesPerSecondChanged;
+        public static event ResolutionChangedEventHandler ResolutionChanged;
+
         private OrtcStatsManager()
         {
             //this.callMetricsStatsReportList = new List<RTCStatsReport>();
@@ -507,6 +512,30 @@ namespace PeerConnectionClient.Win10.Shared
             }
         }
 
+        private void UpdateCurrentFrame(RTCStats stats, StatsData statsData)
+        {
+            switch (stats.StatsType)
+            {
+                case RTCStatsType.Track:
+                    RTCMediaStreamTrackStats mediaStreamTrackStats = stats.ToTrack();
+                    if (mediaStreamTrackStats != null)
+                    {
+                        if (mediaStreamTrackStats.RemoteSource)
+                        {
+                            FramesPerSecondChanged?.Invoke("PEER", mediaStreamTrackStats.FramesPerSecond.ToString("0.##%"));
+                            ResolutionChanged?.Invoke("PEER", mediaStreamTrackStats.FrameWidth, mediaStreamTrackStats.FrameHeight);
+                        }
+                        else
+                        {
+                            FramesPerSecondChanged?.Invoke("SELF", mediaStreamTrackStats.FramesPerSecond.ToString("0.##%"));
+                            ResolutionChanged?.Invoke("SELF", mediaStreamTrackStats.FrameWidth, mediaStreamTrackStats.FrameHeight);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
         private async void CollectCallMetrics3(object state)
         {
             CallDuration += scheduleTimeInSeconds;
@@ -518,7 +547,10 @@ namespace PeerConnectionClient.Win10.Shared
                 foreach (var statId in report.StatsIds)
                 {
                     RTCStats stats = report.GetStats(statId);
-                    ParseStats(stats, statsData);
+                    if (IsStatsCollectionEnabled)
+                        ParseStats(stats, statsData);
+                    else
+                        UpdateCurrentFrame(stats,statsData);
                 }
             }
         }

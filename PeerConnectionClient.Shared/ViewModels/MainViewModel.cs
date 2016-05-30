@@ -32,6 +32,7 @@ using PeerConnectionClient.Utilities;
 using PeerConnectionClient.Media_Extension;
 using org.ortc;
 using org.ortc.adapter;
+using PeerConnectionClient.Win10.Shared;
 using CaptureCapability = PeerConnectionClient.Media_Extension.CaptureCapability;
 using FrameCounterHelper = org.ortc.FrameCounterHelper;
 using Media = PeerConnectionClient.Media_Extension.Media;
@@ -246,7 +247,7 @@ namespace PeerConnectionClient.ViewModels
             //Conductor.Instance.Media.OnMediaDevicesChanged += OnMediaDevicesChanged;
 
             // Handler for Peer/Self video frame rate changed event
-            FrameCounterHelper.FramesPerSecondChanged += (id, frameRate) =>
+            OrtcStatsManager.FramesPerSecondChanged += (id, frameRate) =>
             {
                 RunOnUiThread(() =>
                 {
@@ -262,7 +263,7 @@ namespace PeerConnectionClient.ViewModels
             };
 
             // Handler for Peer/Self video resolution changed event 
-            ResolutionHelper.ResolutionChanged += (id, width, height) =>
+            OrtcStatsManager.ResolutionChanged += (id, width, height) =>
             {
                 RunOnUiThread(() =>
                 {
