@@ -348,10 +348,13 @@ namespace PeerConnectionClient.Win10.Shared
             public IList<int> Timestamps { get; } 
             public Dictionary<string,TrackStatsData> TrackStatsDictionary { get; }
 
+            public TimeSpan TimeToSetupCall { get; set; }
+
             public StatsData()
             {
                 Timestamps = new List<int>();
                 TrackStatsDictionary = new Dictionary<string, TrackStatsData>();
+                
             }
 
             public TrackStatsData GetTrackStatsData(string trackId, bool outgoing = true)
@@ -456,6 +459,9 @@ namespace PeerConnectionClient.Win10.Shared
 
                         if (tsd != null)
                         {
+                            if (statsData.TimeToSetupCall.Milliseconds == 0 && inboundRtpStreamStats.PacketsReceived > 0)
+                                statsData.TimeToSetupCall = DateTime.Now - statsData.StarTime;
+
                             tsd.AddAverage(RTCStatsValueName.StatsValueNameBytesReceived,
                                 inboundRtpStreamStats.BytesReceived);
 
