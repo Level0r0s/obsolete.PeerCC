@@ -614,7 +614,7 @@ namespace PeerConnectionClient.Signalling
                             Debug.WriteLine("Conductor: Sending answer: " + answer.FormattedDescription);
                             SendSdp(answer);
                             if (AppInsightsEnabled)
-                                OrtcStatsManager.Instance.StartCallWatch();
+                                OrtcStatsManager.Instance.StartCallWatch(_sessionId, false);
                                 //StatsManager.Instance.TrackCallStarted();
                         }
                     }
@@ -710,7 +710,7 @@ namespace PeerConnectionClient.Signalling
                     Debug.WriteLine("Conductor: Sending offer: " + offer.FormattedDescription);
                     SendSdp(offer);
                     if (AppInsightsEnabled)
-                        OrtcStatsManager.Instance.StartCallWatch();
+                        OrtcStatsManager.Instance.StartCallWatch(_sessionId,true);
                     //StatsManager.Instance.TrackCallStarted();
                 }
             }

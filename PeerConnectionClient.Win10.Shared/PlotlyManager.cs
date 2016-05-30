@@ -5,6 +5,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Networking;
+using Windows.Networking.Connectivity;
+using PeerConnectionClient.Signalling;
+using PeerConnectionClient.Utilities;
 
 namespace PeerConnectionClient.Win10.Shared
 {
@@ -219,10 +223,16 @@ namespace PeerConnectionClient.Win10.Shared
             var timestampsStr = "[" + String.Join(",", statsData.Timestamps.ToArray()) + "]";
             //List<string> datasets = new List<string>();
             //List<Dictionary<string, string>> datasets = new List<Dictionary<string, string>>();
-
+            var hostname = NetworkInformation.GetHostNames().FirstOrDefault(h => h.Type == HostNameType.DomainName);
+            string ret = hostname?.CanonicalName ?? "<unknown host>";
+            var strCaller = statsData.IsCaller ? "caller_" : "callee_";
+            var basePath = statsData.StarTime.ToString("yyyyMMdd") + "/" + id + "/" + strCaller + hostname;
+            if (statsData.IsCaller)
+                basePath += Conductor.Instance.AudioCodec.Name + "_" + Conductor.Instance.VideoCodec.Name;
             foreach (var trackId in statsData.TrackStatsDictionary.Keys)
             {
                 List<Dictionary<string, string>> datasets = new List<Dictionary<string, string>>();
+                    
                 OrtcStatsManager.TrackStatsData trackStatsData = statsData.TrackStatsDictionary[trackId];
                 foreach (var valueNames in trackStatsData.Data.Keys)
                 {
@@ -234,10 +244,10 @@ namespace PeerConnectionClient.Win10.Shared
                 }
                 foreach (Dictionary<string, string> dict in datasets)
                 {
-                    await SendToPlotly(dict, id);
+                    await SendToPlotly(dict, basePath);
                 }
 
-                await SendSummary(datasets, id, trackId);
+                await SendSummary(datasets, basePath, trackId);
             }
 
             
@@ -245,7 +255,9 @@ namespace PeerConnectionClient.Win10.Shared
 
         public async Task SendToPlotly(Dictionary<string, string> dictionary, string path)
         {
+            //string filename = path + "/" + dictionary["trackId"] + "/" + dictionary["title"];
             string filename = path + "/" + dictionary["trackId"] + "/" + dictionary["title"];
+
             using (var client = new HttpClient())
             {
                 var values = new Dictionary<string, string>
@@ -263,7 +275,7 @@ namespace PeerConnectionClient.Win10.Shared
                 var response = await client.PostAsync(restAPIUrl, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
-                if (responseString != null && responseString.Length > 0)
+                if (!string.IsNullOrEmpty(responseString))
                 {
                     Debug.Write(responseString);
                 }

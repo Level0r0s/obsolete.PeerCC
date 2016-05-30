@@ -191,12 +191,27 @@ namespace PeerConnectionClient.Win10.Shared
         /// </summary>
         private void PrepareForStats()
         {
+            
             _currentId = /*Conductor.Instance.Peer.Name + "/" +*/ Helper.ProductName() + "/" + Helper.DeviceName() + "/" + Helper.OsVersion() + "/" + Conductor.Instance.AudioCodec.Name + "_" + Conductor.Instance.VideoCodec.Name + "/" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + "/dataset";
 
             StatsData statsData = new StatsData();
+            statsData.StarTime = DateTime.Now;
             //All call stats will be stored in this dict, so it can be safely uploaded to server, while other call can be in progress
             callsStatsDictionary.Add(_currentId,statsData);
             
+
+            callMetricsStatsReportList = new List<RTCStatsReport>();
+        }
+
+        private void PrepareStatsForCall(string callId, bool isCaller)
+        {
+            _currentId = callId;
+        
+            StatsData statsData = new StatsData();
+            statsData.IsCaller = isCaller;
+            statsData.StarTime = DateTime.Now;
+            //All call stats will be stored in this dict, so it can be safely uploaded to server, while other call can be in progress
+            callsStatsDictionary.Add(_currentId, statsData);
 
             callMetricsStatsReportList = new List<RTCStatsReport>();
         }
@@ -205,8 +220,8 @@ namespace PeerConnectionClient.Win10.Shared
             if (pc != null)
             {
                 _peerConnection = pc;
-                PrepareForStats();
-                RTCStatsProviderOptions options =
+                //PrepareForStats();
+                /*RTCStatsProviderOptions options =
                     new RTCStatsProviderOptions(new List<RTCStatsType>
                     {
                         RTCStatsType.IceGatherer,
@@ -214,7 +229,7 @@ namespace PeerConnectionClient.Win10.Shared
                         RTCStatsType.DtlsTransport
                     });
 
-                StatsProviderPeerConnection = new RTCStatsProvider(pc, options);
+                StatsProviderPeerConnection = new RTCStatsProvider(pc, options);*/
             }
             else
             {
@@ -241,7 +256,7 @@ namespace PeerConnectionClient.Win10.Shared
                 {
                     if (_isStatsCollectionEnabled)
                     {
-                        StartCallWatch();
+                        //StartCallWatch();
                     }
                     else
                     {
@@ -257,10 +272,12 @@ namespace PeerConnectionClient.Win10.Shared
 
         
 
-        public void StartCallWatch()
+        public void StartCallWatch(string callId, bool isCaller)
         {
             if (_peerConnection != null)
             {
+                PrepareStatsForCall(callId, isCaller);
+
                 RTCStatsProviderOptions options =
                     new RTCStatsProviderOptions(new List<RTCStatsType>
                     {
@@ -314,6 +331,8 @@ namespace PeerConnectionClient.Win10.Shared
         private StatsData currentStatsData;
         internal class StatsData
         {
+            public DateTime StarTime { get; set; }
+            public bool IsCaller { get; set; }
             public IList<int> Timestamps { get; } 
             public Dictionary<string,TrackStatsData> TrackStatsDictionary { get; }
 
@@ -323,14 +342,15 @@ namespace PeerConnectionClient.Win10.Shared
                 TrackStatsDictionary = new Dictionary<string, TrackStatsData>();
             }
 
-            public TrackStatsData GetTrackStatsData(string trackId)
+            public TrackStatsData GetTrackStatsData(string trackId, bool outgoing = true)
             {
                 TrackStatsData ret = null;
                 if (trackId != null && TrackStatsDictionary.ContainsKey(trackId))
                     ret = TrackStatsDictionary[trackId];
                 else
                 {
-                    ret = new TrackStatsData();
+                    ret = new TrackStatsData(trackId);
+                    ret.outgoing = outgoing;
                     TrackStatsDictionary.Add(trackId,ret);
                 }
                 return ret;
@@ -342,8 +362,12 @@ namespace PeerConnectionClient.Win10.Shared
             public Dictionary<RTCStatsValueName,IList<double>> Data{ get; }
             public Dictionary<RTCStatsValueName, double> LastValues { get; }
 
-            public TrackStatsData()
+            public bool outgoing { get; set; }
+            public bool isAudio { get; set; }
+            public TrackStatsData(string trackId)
             {
+                MediaTrackId = trackId;
+                isAudio = trackId.Contains	()
                 Data = new Dictionary<RTCStatsValueName, IList<double>>();
                 LastValues = new Dictionary<RTCStatsValueName, double>();
             }
@@ -411,7 +435,7 @@ namespace PeerConnectionClient.Win10.Shared
                     if (inboundRtpStreamStats != null)
                     {
                         TrackStatsData tsd =
-                            statsData.GetTrackStatsData(inboundRtpStreamStats.RtpStreamStats.MediaTrackId);
+                            statsData.GetTrackStatsData(inboundRtpStreamStats.RtpStreamStats.MediaTrackId, false);
 
                         if (tsd != null)
                         {
@@ -448,7 +472,7 @@ namespace PeerConnectionClient.Win10.Shared
                     if (mediaStreamTrackStats != null)
                     {
                         TrackStatsData tsd =
-                            statsData.GetTrackStatsData(mediaStreamTrackStats.TrackId);
+                            statsData.GetTrackStatsData(mediaStreamTrackStats.TrackId,!mediaStreamTrackStats.RemoteSource);
 
                         if (tsd != null)
                         {
