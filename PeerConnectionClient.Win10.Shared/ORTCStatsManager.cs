@@ -364,10 +364,12 @@ namespace PeerConnectionClient.Win10.Shared
 
             public bool outgoing { get; set; }
             public bool isAudio { get; set; }
+
+            private double _reactionPercentage = 0.0;
             public TrackStatsData(string trackId)
             {
                 MediaTrackId = trackId;
-                isAudio = trackId.Contains	()
+                isAudio = trackId.Contains("audio");
                 Data = new Dictionary<RTCStatsValueName, IList<double>>();
                 LastValues = new Dictionary<RTCStatsValueName, double>();
             }
@@ -396,7 +398,7 @@ namespace PeerConnectionClient.Win10.Shared
                     if (Data.ContainsKey(valueName))
                     {
                         list = (IList<double>)Data[valueName];
-                        
+                        lastValue = value;
                     }
                     else
                     {
@@ -404,16 +406,19 @@ namespace PeerConnectionClient.Win10.Shared
                         Data.Add(valueName, list);
                     }
 
-                    if (LastValues.ContainsKey(valueName))
+                    /*if (LastValues.ContainsKey(valueName))
                         lastValue =  LastValues[valueName];
                     else
-                        LastValues.Add(valueName, lastValue);
+                        LastValues.Add(valueName, lastValue);*/
 
-                    int totalLength = list.Count;
+                    lastValue = ((lastValue * (1.0 - _reactionPercentage)) + (value * _reactionPercentage));
+                    list.Add(lastValue);
+
+                    /*int totalLength = list.Count;
                     double lastAverage = totalLength > 0 ? list.Last() : 0;
                     double valueToAdd = (lastAverage * totalLength + (value - lastValue)) / (totalLength + 1);
                     LastValues[valueName]=value;
-                    list.Add(valueToAdd);
+                    list.Add(valueToAdd);*/
                 }
                 catch (Exception e)
                 {
@@ -473,25 +478,25 @@ namespace PeerConnectionClient.Win10.Shared
                     {
                         TrackStatsData tsd =
                             statsData.GetTrackStatsData(mediaStreamTrackStats.TrackId,!mediaStreamTrackStats.RemoteSource);
-
-                        if (tsd != null)
+                        
+                        if (tsd != null && !tsd.isAudio)
                         {
                             if (mediaStreamTrackStats.RemoteSource)
                             {
                                 tsd.AddData(RTCStatsValueName.StatsValueNameFrameRateReceived,
                                     mediaStreamTrackStats.FramesPerSecond);
-                                tsd.AddAverage(RTCStatsValueName.StatsValueNameFrameWidthReceived,
+                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameWidthReceived,
                                     mediaStreamTrackStats.FrameWidth);
-                                tsd.AddAverage(RTCStatsValueName.StatsValueNameFrameHeightReceived,
+                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameHeightReceived,
                                     mediaStreamTrackStats.FrameHeight);
                             }
                             else
                             {
                                 tsd.AddData(RTCStatsValueName.StatsValueNameFrameRateSent,
                                     mediaStreamTrackStats.FramesPerSecond);
-                                tsd.AddAverage(RTCStatsValueName.StatsValueNameFrameWidthSent,
+                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameWidthSent,
                                     mediaStreamTrackStats.FrameWidth);
-                                tsd.AddAverage(RTCStatsValueName.StatsValueNameFrameHeightSent,
+                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameHeightSent,
                                     mediaStreamTrackStats.FrameHeight);
                             }
                         }
