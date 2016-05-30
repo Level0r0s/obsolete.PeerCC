@@ -28,7 +28,7 @@ using PeerConnectionClient.Media_Extension;
 using PeerConnectionClient.ViewModels;
 using PeerConnectionClient.Win10.Shared;
 using RTCIceCandidate = org.ortc.adapter.RTCIceCandidate;
-
+using System.Text.RegularExpressions;
 
 namespace PeerConnectionClient.Signalling
 {
@@ -119,6 +119,7 @@ namespace PeerConnectionClient.Signalling
         private int _peerId = -1;
         protected bool _videoEnabled = true;
         protected bool _audioEnabled = true;
+        protected String _sessionId;
 
         bool _etwStatsEnabled;
 
@@ -704,8 +705,8 @@ namespace PeerConnectionClient.Signalling
                 if (_peerConnection != null)
                 {
                     var offer = await _peerConnection.CreateOffer();
-
                     await _peerConnection.SetLocalDescription(offer);
+
                     Debug.WriteLine("Conductor: Sending offer: " + offer.FormattedDescription);
                     SendSdp(offer);
                     if (AppInsightsEnabled)
@@ -744,10 +745,20 @@ namespace PeerConnectionClient.Signalling
         {
             var type = description.Type.ToString().ToLower();
 
+            String formattedDescription = description.FormattedDescription;
+
             JsonObject json = null;
             if (description.Type == RTCSessionDescriptionSignalingType.Json)
             {
-                var jsonDescription = JsonObject.Parse(description.FormattedDescription);
+                if (String.IsNullOrEmpty(_sessionId))
+                {
+                    var match = Regex.Match(formattedDescription, "{\"username\":\"-*[a-zA-Z0-9]*\",\"id\":\"([0-9]+)\"");
+                    if (match.Success)
+                    {
+                        _sessionId = match.Groups[1].Value;
+                    }
+                }
+                var jsonDescription = JsonObject.Parse(formattedDescription);
                 var sessionValue = jsonDescription.GetNamedObject(kSessionDescriptionJsonName);
                 json = new JsonObject
                 {
@@ -757,6 +768,12 @@ namespace PeerConnectionClient.Signalling
             }
             else
             {
+                var match = Regex.Match(formattedDescription, "o=[^ ]+ ([0-9]+) [0-9]+ [a-zA-Z]+ [a-zA-Z0-9]+ [0-9\\.]+");
+                if (match.Success)
+                {
+                    _sessionId = match.Groups[1].Value;
+                }
+
                 var prefix = type.Substring(0, "sdp".Length);
                 if (prefix == "sdp")
                 {
@@ -766,7 +783,7 @@ namespace PeerConnectionClient.Signalling
                 json = new JsonObject
                 {
                     {kSessionDescriptionTypeName, JsonValue.CreateStringValue(type)},
-                    {kSessionDescriptionSdpName, JsonValue.CreateStringValue(description.FormattedDescription)}
+                    {kSessionDescriptionSdpName, JsonValue.CreateStringValue(formattedDescription)}
                 };
             }
             SendMessage(json);
