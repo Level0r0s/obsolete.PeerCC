@@ -1404,14 +1404,21 @@ namespace PeerConnectionClient.ViewModels
 
                 if (_loggingEnabled)
                 {
-                    WebRTC.EnableLogging(LogLevel.LOGLVL_INFO);
+                    Logger.InstallTelnetLogger(UInt16.Parse(_traceServerPort), 60, true);
+                    Logger.SetLogLevel(org.ortc.Log.Level.Debug);
+                    //Logger.SetLogLevel(org.ortc.Log.Component.OrtcLibIceGatherer, org.ortc.Log.Level.Trace);
+                    //Logger.SetLogLevel(org.ortc.Log.Component.OrtcLibIceTransport, org.ortc.Log.Level.Trace);
+                    //Logger.SetLogLevel(org.ortc.Log.Component.Services, org.ortc.Log.Level.Trace);
+                    //Logger.SetLogLevel(org.ortc.Log.Component.ServicesTurn, org.ortc.Log.Level.Trace);
+                    //Logger.SetLogLevel(org.ortc.Log.Component.ServicesStun, org.ortc.Log.Level.Trace);
+                    //Logger.SetLogLevel(org.ortc.Log.Component.ServicesWire, org.ortc.Log.Level.Trace);
 
-                    var msgDialog = new MessageDialog("WebRTC logging enabled, connect to TCP port 47003 to receive log stream.");
+                    var msgDialog = new MessageDialog("ORTC logging enabled, connect to TCP port " + _traceServerPort + " to receive log stream.");
                     var asyncOp = msgDialog.ShowAsync();
                 }
                 else
                 {
-                    WebRTC.DisableLogging();
+                    Logger.UninstallTelnetLogger();
                     var task = SavingLogging();
                 }
             }
