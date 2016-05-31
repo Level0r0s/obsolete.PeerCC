@@ -5,6 +5,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Networking;
+using Windows.Networking.Connectivity;
+using PeerConnectionClient.Signalling;
+using PeerConnectionClient.Utilities;
 
 namespace PeerConnectionClient.Win10.Shared
 {
@@ -115,6 +119,7 @@ namespace PeerConnectionClient.Win10.Shared
             return "";
         }
 
+
         public string GetColor(RTCStatsValueName valueName)
         {
             switch (valueName)
@@ -147,6 +152,38 @@ namespace PeerConnectionClient.Win10.Shared
                     break;
             }
             return "purple";
+        }
+
+        private string GetYAxisTitle(RTCStatsValueName valueName)
+        {
+            switch (valueName)
+            {
+                case RTCStatsValueName.StatsValueNameBytesSent:
+                case RTCStatsValueName.StatsValueNameBytesReceived:
+                    return "Bytes";
+                    break;
+                case RTCStatsValueName.StatsValueNamePacketsSent:
+                case RTCStatsValueName.StatsValueNamePacketsReceived:
+                case RTCStatsValueName.StatsValueNamePacketsLost:
+                    return "Packets";
+                    break;
+
+                case RTCStatsValueName.StatsValueNameCurrentEndToEndDelayMs:
+                    return "Delay (ms)";
+                    break;
+
+                case RTCStatsValueName.StatsValueNameFrameRateSent:
+                case RTCStatsValueName.StatsValueNameFrameRateReceived:
+                    return "Frames";
+                    break;
+                case RTCStatsValueName.StatsValueNameFrameHeightReceived:
+                case RTCStatsValueName.StatsValueNameFrameWidthReceived:
+                case RTCStatsValueName.StatsValueNameFrameWidthSent:
+                case RTCStatsValueName.StatsValueNameFrameHeightSent:
+                    return "Pixels";
+                    break;
+            }
+            return "";
         }
         //{\"x\": [0, 1, 2], \"y\": [3, 11, 16],\"line\": {\"color\":\"purple\"},\"name\":\"Frame Rates\"}
         private async Task FormatDataForSending(OrtcStatsManager.TrackStatsData trackStatsData, string formatedTimestamps, string id, string trackId)
@@ -219,33 +256,42 @@ namespace PeerConnectionClient.Win10.Shared
             var timestampsStr = "[" + String.Join(",", statsData.Timestamps.ToArray()) + "]";
             //List<string> datasets = new List<string>();
             //List<Dictionary<string, string>> datasets = new List<Dictionary<string, string>>();
-
+            var hostname = NetworkInformation.GetHostNames().FirstOrDefault(h => h.Type == HostNameType.DomainName);
+            string ret = hostname?.CanonicalName ?? "<unknown host>";
+            var strCaller = statsData.IsCaller ? "caller_" : "callee_";
+            var basePath = statsData.StarTime.ToString("yyyyMMdd") + "/" + id + "/" + strCaller + hostname;
+            if (statsData.IsCaller)
+                basePath += "_" + Conductor.Instance.AudioCodec.Name + "_" + Conductor.Instance.VideoCodec.Name;
             foreach (var trackId in statsData.TrackStatsDictionary.Keys)
             {
                 List<Dictionary<string, string>> datasets = new List<Dictionary<string, string>>();
+                    
                 OrtcStatsManager.TrackStatsData trackStatsData = statsData.TrackStatsDictionary[trackId];
                 foreach (var valueNames in trackStatsData.Data.Keys)
                 {
                     //string formattedString = FormatDataForSending(trackStatsData, timestampsStr, valueNames);
                     Dictionary<string, string> dictionary = FormatDataForSending2(trackStatsData, timestampsStr, valueNames);
                     dictionary.Add("trackId",trackId);
+                    dictionary.Add("yaxisTitle", GetYAxisTitle(valueNames));
                     datasets.Add(dictionary);
                     //datasets.Add(formattedString);
                 }
                 foreach (Dictionary<string, string> dict in datasets)
                 {
-                    await SendToPlotly(dict, id);
+                    await SendToPlotly(dict, basePath, trackStatsData.outgoing);
                 }
 
-                await SendSummary(datasets, id, trackId);
+                await SendSummary(datasets, basePath, trackId);
             }
 
             
         }
 
-        public async Task SendToPlotly(Dictionary<string, string> dictionary, string path)
+        public async Task SendToPlotly(Dictionary<string, string> dictionary, string path, bool outgoing)
         {
+            //string filename = path + "/" + dictionary["trackId"] + "/" + dictionary["title"];
             string filename = path + "/" + dictionary["trackId"] + "/" + dictionary["title"];
+
             using (var client = new HttpClient())
             {
                 var values = new Dictionary<string, string>
@@ -255,7 +301,7 @@ namespace PeerConnectionClient.Win10.Shared
                    {"origin", "plot" },
                     {"platform","lisp"},
                     { "args","[" + dictionary["args"] + "]"},
-                    {"kwargs","{\"filename\": \"" + filename + "\",\"fileopt\": \"append\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"" + dictionary["trackId"] + "_" + dictionary["title"] + "\"},\"world_readable\": true}"},
+                    {"kwargs","{\"filename\": \"" + filename + "\",\"fileopt\": \"append\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"" + dictionary["trackId"] + "_" + (outgoing?"outgoing":"incoming") + " (" + dictionary["title"] + ")"+ "\",\"xaxis\": {\"title\": \"Time (s)\"},\"yaxis\": {\"title\":" + dictionary["yaxisTitle"]+"\"}},\"world_readable\": true}"}
                 };
 
                 var content = new FormUrlEncodedContent(values);
@@ -263,7 +309,7 @@ namespace PeerConnectionClient.Win10.Shared
                 var response = await client.PostAsync(restAPIUrl, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
-                if (responseString != null && responseString.Length > 0)
+                if (!string.IsNullOrEmpty(responseString))
                 {
                     Debug.Write(responseString);
                 }
@@ -296,5 +342,7 @@ namespace PeerConnectionClient.Win10.Shared
                 }
             }
         }
+
+        
     }
 }
