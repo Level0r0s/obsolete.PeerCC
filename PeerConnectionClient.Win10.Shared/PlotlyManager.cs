@@ -39,44 +39,44 @@ namespace PeerConnectionClient.Win10.Shared
             }
         }
 
-        public string GetTitle(RTCStatsValueName valueName)
+        public string GetTitle(RtcStatsValueName valueName)
         {
             switch (valueName)
             {
-                case RTCStatsValueName.StatsValueNameBytesReceived:
+                case RtcStatsValueName.StatsValueNameBytesReceived:
                     return "Received Bytes";
                     break;
-                case RTCStatsValueName.StatsValueNamePacketsReceived:
+                case RtcStatsValueName.StatsValueNamePacketsReceived:
                     return "Received Packets";
                     break;
-                case RTCStatsValueName.StatsValueNamePacketsLost:
+                case RtcStatsValueName.StatsValueNamePacketsLost:
                     return "Lost Packets";
                     break;
-                case RTCStatsValueName.StatsValueNameCurrentEndToEndDelayMs:
+                case RtcStatsValueName.StatsValueNameCurrentEndToEndDelayMs:
                     return "End To End Delay";
                     break;
-                case RTCStatsValueName.StatsValueNameBytesSent:
+                case RtcStatsValueName.StatsValueNameBytesSent:
                     return "Sent Bytes";
                     break;
-                case RTCStatsValueName.StatsValueNamePacketsSent:
+                case RtcStatsValueName.StatsValueNamePacketsSent:
                     return "Sent Packets";
                     break;
-                case RTCStatsValueName.StatsValueNameFrameRateReceived:
+                case RtcStatsValueName.StatsValueNameFrameRateReceived:
                     return "Frame Rate Received";
                     break;
-                case RTCStatsValueName.StatsValueNameFrameWidthReceived:
+                case RtcStatsValueName.StatsValueNameFrameWidthReceived:
                     return "Frame Width Received";
                     break;
-                case RTCStatsValueName.StatsValueNameFrameHeightReceived:
+                case RtcStatsValueName.StatsValueNameFrameHeightReceived:
                     return "Frame Heigh Received";
                     break;
-                case RTCStatsValueName.StatsValueNameFrameRateSent:
+                case RtcStatsValueName.StatsValueNameFrameRateSent:
                     return "Frame Rate Sent";
                     break;
-                case RTCStatsValueName.StatsValueNameFrameWidthSent:
+                case RtcStatsValueName.StatsValueNameFrameWidthSent:
                     return "Frame Width Sent";
                     break;
-                case RTCStatsValueName.StatsValueNameFrameHeightSent:
+                case RtcStatsValueName.StatsValueNameFrameHeightSent:
                     return "Frame Height Sent";
                     break;
             }
@@ -84,73 +84,73 @@ namespace PeerConnectionClient.Win10.Shared
         }
 
 
-        public string GetColor(RTCStatsValueName valueName)
+        public string GetColor(RtcStatsValueName valueName)
         {
             switch (valueName)
             {
-                case RTCStatsValueName.StatsValueNameBytesReceived:
-                case RTCStatsValueName.StatsValueNameBytesSent:
+                case RtcStatsValueName.StatsValueNameBytesReceived:
+                case RtcStatsValueName.StatsValueNameBytesSent:
                     return "blue";
                     break;
-                case RTCStatsValueName.StatsValueNamePacketsReceived:
-                case RTCStatsValueName.StatsValueNamePacketsSent:
+                case RtcStatsValueName.StatsValueNamePacketsReceived:
+                case RtcStatsValueName.StatsValueNamePacketsSent:
                     return "green";
                     break;
-                case RTCStatsValueName.StatsValueNamePacketsLost:
+                case RtcStatsValueName.StatsValueNamePacketsLost:
                     return "red";
                     break;
-                case RTCStatsValueName.StatsValueNameCurrentEndToEndDelayMs:
+                case RtcStatsValueName.StatsValueNameCurrentEndToEndDelayMs:
                     return "yellow";
                     break;
-                case RTCStatsValueName.StatsValueNameFrameRateReceived:
-                case RTCStatsValueName.StatsValueNameFrameRateSent:
+                case RtcStatsValueName.StatsValueNameFrameRateReceived:
+                case RtcStatsValueName.StatsValueNameFrameRateSent:
                     return "black";
                     break;
-                case RTCStatsValueName.StatsValueNameFrameWidthReceived:
-                case RTCStatsValueName.StatsValueNameFrameWidthSent:
+                case RtcStatsValueName.StatsValueNameFrameWidthReceived:
+                case RtcStatsValueName.StatsValueNameFrameWidthSent:
                     return "grey";
                     break;
-                case RTCStatsValueName.StatsValueNameFrameHeightReceived:
-                case RTCStatsValueName.StatsValueNameFrameHeightSent:
+                case RtcStatsValueName.StatsValueNameFrameHeightReceived:
+                case RtcStatsValueName.StatsValueNameFrameHeightSent:
                     return "orange";
                     break;
             }
             return "purple";
         }
 
-        private string GetYAxisTitle(RTCStatsValueName valueName)
+        private string GetYAxisTitle(RtcStatsValueName valueName)
         {
             switch (valueName)
             {
-                case RTCStatsValueName.StatsValueNameBytesSent:
-                case RTCStatsValueName.StatsValueNameBytesReceived:
+                case RtcStatsValueName.StatsValueNameBytesSent:
+                case RtcStatsValueName.StatsValueNameBytesReceived:
                     return "Bytes";
                     break;
-                case RTCStatsValueName.StatsValueNamePacketsSent:
-                case RTCStatsValueName.StatsValueNamePacketsReceived:
-                case RTCStatsValueName.StatsValueNamePacketsLost:
+                case RtcStatsValueName.StatsValueNamePacketsSent:
+                case RtcStatsValueName.StatsValueNamePacketsReceived:
+                case RtcStatsValueName.StatsValueNamePacketsLost:
                     return "Packets";
                     break;
 
-                case RTCStatsValueName.StatsValueNameCurrentEndToEndDelayMs:
+                case RtcStatsValueName.StatsValueNameCurrentEndToEndDelayMs:
                     return "Delay (ms)";
                     break;
 
-                case RTCStatsValueName.StatsValueNameFrameRateSent:
-                case RTCStatsValueName.StatsValueNameFrameRateReceived:
+                case RtcStatsValueName.StatsValueNameFrameRateSent:
+                case RtcStatsValueName.StatsValueNameFrameRateReceived:
                     return "Frames";
                     break;
-                case RTCStatsValueName.StatsValueNameFrameHeightReceived:
-                case RTCStatsValueName.StatsValueNameFrameWidthReceived:
-                case RTCStatsValueName.StatsValueNameFrameWidthSent:
-                case RTCStatsValueName.StatsValueNameFrameHeightSent:
+                case RtcStatsValueName.StatsValueNameFrameHeightReceived:
+                case RtcStatsValueName.StatsValueNameFrameWidthReceived:
+                case RtcStatsValueName.StatsValueNameFrameWidthSent:
+                case RtcStatsValueName.StatsValueNameFrameHeightSent:
                     return "Pixels";
                     break;
             }
             return "";
         }
 
-        private Dictionary<string, string> FormatDataForSending(OrtcStatsManager.TrackStatsData trackStatsData, string formatedTimestamps, RTCStatsValueName valueNames)
+        private Dictionary<string, string> FormatDataForSending(OrtcStatsManager.TrackStatsData trackStatsData, string formatedTimestamps, RtcStatsValueName valueNames)
         {
             var values = trackStatsData.Data[valueNames];
             var valuesStr = "[" + String.Join(",", values.ToArray()) + "]";
@@ -182,9 +182,9 @@ namespace PeerConnectionClient.Win10.Shared
         {
             IList<string> argsCallItems = new List<string>();
 
-            string formatedArgsStartTime = "{\"x\": " + statsData.StarTime + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + "black" + "\"}" + ",\"name\":\"" + "Start time" + "\"}";
+            string formatedArgsStartTime = "{\"x\": " + "[" + statsData.StarTime + "]" + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + "black" + "\"}" + ",\"name\":\"" + "Start time" + "\"}";
             argsCallItems.Add(formatedArgsStartTime);
-            string formatedArgsTimeToSetupCall = "{\"x\": " + statsData.TimeToSetupCall.Milliseconds + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + "black" + "\"}" + ",\"name\":\"" + "Time To Setup Call" + "\"}";
+            string formatedArgsTimeToSetupCall = "{\"x\": " + "[" + statsData.TimeToSetupCall.Milliseconds + "]" + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + "black" + "\"}" + ",\"name\":\"" + "Time To Setup Call" + "\"}";
             argsCallItems.Add(formatedArgsTimeToSetupCall);
 
             foreach (var trackId in statsData.TrackStatsDictionary.Keys)
@@ -195,7 +195,7 @@ namespace PeerConnectionClient.Win10.Shared
                 {
                     var values = trackStatsData.Data[valueName];
                     double averageValue = values.Average();
-                    argsItems.Add("{\"x\": " + averageValue.ToString("0.##") + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + (trackStatsData.outgoing ? "blue" : "green") + "\"}" + ",\"name\":\"" + "Average " + (trackStatsData.outgoing?"outgoing " : "incoming ") + GetTitle(valueName) + "\"}");
+                    argsItems.Add("{\"x\": " + "[" + averageValue.ToString("0.##") + "]" + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + (trackStatsData.outgoing ? "blue" : "green") + "\"}" + ",\"name\":\"" + "Average " + (trackStatsData.outgoing?"outgoing " : "incoming ") + GetTitle(valueName) + "\"}");
                 }
                 string argsTrack = String.Join(",", argsItems.ToArray());
                 argsCallItems.Add(argsTrack);
@@ -254,7 +254,7 @@ namespace PeerConnectionClient.Win10.Shared
                    {"origin", "plot" },
                     {"platform","lisp"},
                     { "args","[" + dictionary["args"] + "]"},
-                    {"kwargs","{\"filename\": \"" + filename + "\",\"fileopt\": \"append\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"" + dictionary["trackId"] + "_" + (outgoing?"outgoing":"incoming") + " (" + dictionary["title"] + ")"+ "\",\"xaxis\": {\"title\": \"Time (s)\"},\"yaxis\": {\"title\":" + dictionary["yaxisTitle"]+"\"}},\"world_readable\": true}"}
+                    {"kwargs","{\"filename\": \"" + filename + "\",\"fileopt\": \"new\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"" + dictionary["trackId"] + "_" + (outgoing?"outgoing":"incoming") + " (" + dictionary["title"] + ")"+ "\",\"xaxis\": {\"title\": \"Time (s)\"},\"yaxis\": {\"title\":" + "\"" + dictionary["yaxisTitle"]+"\"}},\"world_readable\": true}"}
                 };
 
                 var content = new FormUrlEncodedContent(values);

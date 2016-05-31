@@ -15,7 +15,7 @@ using RtcPeerConnection = org.ortc.adapter.RTCPeerConnection;
 namespace PeerConnectionClient.Win10.Shared
 {
     public delegate void UploadedStatsData(string id);
-    public enum RTCStatsValueName
+    public enum RtcStatsValueName
     {
         StatsValueNameActiveConnection = 0,
         StatsValueNameAudioInputLevel = 1,
@@ -311,7 +311,7 @@ namespace PeerConnectionClient.Win10.Shared
             public bool IsCaller { get; set; }
             public IList<int> Timestamps { get; } 
             public Dictionary<string,TrackStatsData> TrackStatsDictionary { get; }
-
+            private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
             public TimeSpan TimeToSetupCall { get; set; }
 
             public StatsData()
@@ -320,26 +320,42 @@ namespace PeerConnectionClient.Win10.Shared
                 TrackStatsDictionary = new Dictionary<string, TrackStatsData>();
                 
             }
-
+            private Object thisLock = new Object();
             public TrackStatsData GetTrackStatsData(string trackId, bool outgoing = true)
             {
-                TrackStatsData ret = null;
-                if (trackId != null && TrackStatsDictionary.ContainsKey(trackId))
-                    ret = TrackStatsDictionary[trackId];
-                else
+                try
                 {
-                    ret = new TrackStatsData(trackId);
-                    ret.outgoing = outgoing;
-                    TrackStatsDictionary.Add(trackId,ret);
+
+                TrackStatsData ret = null;
+                lock (thisLock)
+                {
+                    
+                    if (!string.IsNullOrEmpty(trackId))
+                    {
+                        if (TrackStatsDictionary.ContainsKey(trackId))
+                            ret = TrackStatsDictionary[trackId];
+                        else
+                        {
+                            ret = new TrackStatsData(trackId) { outgoing = outgoing };
+                            TrackStatsDictionary.Add(trackId, ret);
+                        }
+                    }
+                    return ret;
                 }
-                return ret;
+                }
+                catch (Exception e)
+                {
+
+                    Debug.Write(e);
+                }
+                return null;
             }
         }
         internal class TrackStatsData
         {
             public string MediaTrackId { get; set; }
-            public Dictionary<RTCStatsValueName,IList<double>> Data{ get; }
-            public Dictionary<RTCStatsValueName, double> LastValues { get; }
+            public Dictionary<RtcStatsValueName,IList<double>> Data{ get; }
+            public Dictionary<RtcStatsValueName, double> LastValues { get; }
 
             public bool outgoing { get; set; }
             public bool isAudio { get; set; }
@@ -349,148 +365,144 @@ namespace PeerConnectionClient.Win10.Shared
             {
                 MediaTrackId = trackId;
                 isAudio = trackId.Contains("audio");
-                Data = new Dictionary<RTCStatsValueName, IList<double>>();
-                LastValues = new Dictionary<RTCStatsValueName, double>();
+                Data = new Dictionary<RtcStatsValueName, IList<double>>();
+                LastValues = new Dictionary<RtcStatsValueName, double>();
             }
+            private Object thisLock = new Object();
 
-            public void AddData(RTCStatsValueName valueName, double value)
+            private IList<double> getList(RtcStatsValueName valueName)
             {
                 IList<double> list;
-                if (Data.ContainsKey(valueName))
+                lock (thisLock)
                 {
-                    list = Data[valueName];
-                }
-                else
-                {
-                    list = new List<double>();
-                    Data.Add(valueName,list);
-                }
-                list.Add(value);
-            }
-
-            public void AddAverage(RTCStatsValueName valueName, double value)
-            {
-                try
-                {
-                    IList<double> list;
-                    double lastValue = 0;
+                   
                     if (Data.ContainsKey(valueName))
                     {
-                        list = (IList<double>)Data[valueName];
-                        lastValue = list.Last();
+                        list = Data[valueName];
                     }
                     else
                     {
                         list = new List<double>();
                         Data.Add(valueName, list);
-                        lastValue = value;
                     }
-
-                    /*if (LastValues.ContainsKey(valueName))
-                        lastValue =  LastValues[valueName];
-                    else
-                        LastValues.Add(valueName, lastValue);*/
-
-                    lastValue = ((lastValue * (1.0 - _reactionPercentage)) + (value * _reactionPercentage));
-                    list.Add(lastValue);
-
-                    /*int totalLength = list.Count;
-                    double lastAverage = totalLength > 0 ? list.Last() : 0;
-                    double valueToAdd = (lastAverage * totalLength + (value - lastValue)) / (totalLength + 1);
-                    LastValues[valueName]=value;
-                    list.Add(valueToAdd);*/
                 }
-                catch (Exception e)
-                {
-                    Debug.Write(e);
-                }
-                
+                return list;
+            }
+            public void AddData(RtcStatsValueName valueName, double value)
+            {
+                IList<double> list = getList(valueName);
+
+                list.Add(value);
+            }
+
+            public void AddAverage(RtcStatsValueName valueName, double value)
+            {
+                IList<double> list = getList(valueName); ;
+                double lastValue = list.Count > 0 ? list.Last() : value;
+
+                lastValue = ((lastValue * (1.0 - _reactionPercentage)) + (value * _reactionPercentage));
+                list.Add(lastValue);
             }
         }
 
-        private StatsData activeStatsData;
-
         private void ParseStats(RTCStats stats, StatsData statsData)
         {
-            switch (stats.StatsType)
+            try
             {
-                case RTCStatsType.InboundRtp:
-                    //Debug.WriteLine("RTCStatsType.InboundRtp:" + statId);
-                    RTCInboundRtpStreamStats inboundRtpStreamStats = stats.ToInboundRtp();
-                    if (inboundRtpStreamStats != null)
-                    {
-                        TrackStatsData tsd =
-                            statsData.GetTrackStatsData(inboundRtpStreamStats.RtpStreamStats.MediaTrackId, false);
-
-                        if (tsd != null)
+                switch (stats.StatsType)
+                {
+                    case RTCStatsType.InboundRtp:
+                        //Debug.WriteLine("RTCStatsType.InboundRtp:" + statId);
+                        RTCInboundRtpStreamStats inboundRtpStreamStats = stats.ToInboundRtp();
+                        if (inboundRtpStreamStats != null)
                         {
-                            if (statsData.TimeToSetupCall.Milliseconds == 0 && inboundRtpStreamStats.PacketsReceived > 0)
-                                statsData.TimeToSetupCall = DateTime.Now - statsData.StarTime;
+                            TrackStatsData tsd =
+                                statsData.GetTrackStatsData(inboundRtpStreamStats.RtpStreamStats.MediaTrackId, false);
 
-                            tsd.AddAverage(RTCStatsValueName.StatsValueNameBytesReceived,
-                                inboundRtpStreamStats.BytesReceived);
+                            if (tsd != null)
+                            {
+                                if (statsData.TimeToSetupCall.Milliseconds == 0 && inboundRtpStreamStats.PacketsReceived > 0)
+                                    statsData.TimeToSetupCall = DateTime.Now - statsData.StarTime;
 
-                            tsd.AddAverage(RTCStatsValueName.StatsValueNamePacketsReceived,
-                                inboundRtpStreamStats.PacketsReceived);
+                                tsd.AddAverage(RtcStatsValueName.StatsValueNameBytesReceived,
+                                    inboundRtpStreamStats.BytesReceived);
 
-                            tsd.AddAverage(RTCStatsValueName.StatsValueNamePacketsLost, inboundRtpStreamStats.PacketsLost);
+                                tsd.AddAverage(RtcStatsValueName.StatsValueNamePacketsReceived,
+                                    inboundRtpStreamStats.PacketsReceived);
 
-                            tsd.AddData(RTCStatsValueName.StatsValueNameCurrentEndToEndDelayMs,
-                                inboundRtpStreamStats.EndToEndDelay);
+                                tsd.AddAverage(RtcStatsValueName.StatsValueNamePacketsLost, inboundRtpStreamStats.PacketsLost);
+
+                                tsd.AddData(RtcStatsValueName.StatsValueNameCurrentEndToEndDelayMs,
+                                    inboundRtpStreamStats.EndToEndDelay);
+                            }
                         }
-                    }
-                    break;
-                case RTCStatsType.OutboundRtp:
-                    RTCOutboundRtpStreamStats outboundRtpStreamStats = stats.ToOutboundRtp();
-                    if (outboundRtpStreamStats != null)
-                    {
-                        TrackStatsData tsd =
-                            statsData.GetTrackStatsData(outboundRtpStreamStats.RtpStreamStats.MediaTrackId);
-
-                        if (tsd != null)
+                        break;
+                    case RTCStatsType.OutboundRtp:
+                        RTCOutboundRtpStreamStats outboundRtpStreamStats = stats.ToOutboundRtp();
+                        if (outboundRtpStreamStats != null)
                         {
-                            tsd.AddAverage(RTCStatsValueName.StatsValueNameBytesSent, outboundRtpStreamStats.BytesSent);
+                            TrackStatsData tsd =
+                                statsData.GetTrackStatsData(outboundRtpStreamStats.RtpStreamStats.MediaTrackId);
 
-                            tsd.AddAverage(RTCStatsValueName.StatsValueNamePacketsSent, outboundRtpStreamStats.PacketsSent);
+                            if (tsd != null)
+                            {
+                                tsd.AddAverage(RtcStatsValueName.StatsValueNameBytesSent, outboundRtpStreamStats.BytesSent);
+
+                                tsd.AddAverage(RtcStatsValueName.StatsValueNamePacketsSent, outboundRtpStreamStats.PacketsSent);
+                            }
                         }
-                    }
-                    break;
-                case RTCStatsType.Track:
-                    RTCMediaStreamTrackStats mediaStreamTrackStats = stats.ToTrack();
-                    if (mediaStreamTrackStats != null)
-                    {
-                        TrackStatsData tsd =
-                            statsData.GetTrackStatsData(mediaStreamTrackStats.TrackId,!mediaStreamTrackStats.RemoteSource);
+                        break;
+                    case RTCStatsType.Track:
+                        RTCMediaStreamTrackStats mediaStreamTrackStats = stats.ToTrack();
+                        if (mediaStreamTrackStats != null)
+                        {
+                            try
+                            {
+
+                            TrackStatsData tsd =
+                                statsData.GetTrackStatsData(mediaStreamTrackStats.TrackId,!mediaStreamTrackStats.RemoteSource);
                         
-                        if (tsd != null && !tsd.isAudio)
-                        {
-                            if (mediaStreamTrackStats.RemoteSource)
+                            if (tsd != null && !tsd.isAudio)
                             {
-                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameRateReceived,
-                                    mediaStreamTrackStats.FramesPerSecond);
-                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameWidthReceived,
-                                    mediaStreamTrackStats.FrameWidth);
-                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameHeightReceived,
-                                    mediaStreamTrackStats.FrameHeight);
-                                FramesPerSecondChanged?.Invoke("PEER", mediaStreamTrackStats.FramesPerSecond.ToString("0.#"));
-                                ResolutionChanged?.Invoke("PEER", mediaStreamTrackStats.FrameWidth, mediaStreamTrackStats.FrameHeight);
+                                if (mediaStreamTrackStats.RemoteSource)
+                                {
+                                    tsd.AddData(RtcStatsValueName.StatsValueNameFrameRateReceived,
+                                        mediaStreamTrackStats.FramesPerSecond);
+                                    tsd.AddData(RtcStatsValueName.StatsValueNameFrameWidthReceived,
+                                        mediaStreamTrackStats.FrameWidth);
+                                    tsd.AddData(RtcStatsValueName.StatsValueNameFrameHeightReceived,
+                                        mediaStreamTrackStats.FrameHeight);
+                                    FramesPerSecondChanged?.Invoke("PEER", mediaStreamTrackStats.FramesPerSecond.ToString("0.#"));
+                                    ResolutionChanged?.Invoke("PEER", mediaStreamTrackStats.FrameWidth, mediaStreamTrackStats.FrameHeight);
+                                }
+                                else
+                                {
+                                    tsd.AddData(RtcStatsValueName.StatsValueNameFrameRateSent,
+                                        mediaStreamTrackStats.FramesPerSecond);
+                                    tsd.AddData(RtcStatsValueName.StatsValueNameFrameWidthSent,
+                                        mediaStreamTrackStats.FrameWidth);
+                                    tsd.AddData(RtcStatsValueName.StatsValueNameFrameHeightSent,
+                                        mediaStreamTrackStats.FrameHeight);
+                                    FramesPerSecondChanged?.Invoke("SELF", mediaStreamTrackStats.FramesPerSecond.ToString("0.#"));
+                                    ResolutionChanged?.Invoke("SELF", mediaStreamTrackStats.FrameWidth, mediaStreamTrackStats.FrameHeight);
+                                }
                             }
-                            else
-                            {
-                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameRateSent,
-                                    mediaStreamTrackStats.FramesPerSecond);
-                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameWidthSent,
-                                    mediaStreamTrackStats.FrameWidth);
-                                tsd.AddData(RTCStatsValueName.StatsValueNameFrameHeightSent,
-                                    mediaStreamTrackStats.FrameHeight);
-                                FramesPerSecondChanged?.Invoke("SELF", mediaStreamTrackStats.FramesPerSecond.ToString("0.#"));
-                                ResolutionChanged?.Invoke("SELF", mediaStreamTrackStats.FrameWidth, mediaStreamTrackStats.FrameHeight);
+
+                                }
+                                catch (Exception e)
+                                {
+
+                                    Debug.Write(e);
+                                }
                             }
-                        }
-                    }
-                    break;
-                default:
-                    break;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Write(e); 
             }
         }
 
