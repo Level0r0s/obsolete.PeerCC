@@ -182,7 +182,7 @@ namespace PeerConnectionClient.Win10.Shared
         {
             IList<string> argsCallItems = new List<string>();
 
-            string formatedArgsStartTime = "{\"x\": " + "[" + statsData.StarTime + "]" + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + "black" + "\"}" + ",\"name\":\"" + "Start time" + "\"}";
+            //string formatedArgsStartTime = "{\"x\": " + "[" + statsData.StarTime + "]" + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + "black" + "\"}" + ",\"name\":\"" + "Start time" + "\"}";
             argsCallItems.Add(formatedArgsStartTime);
             string formatedArgsTimeToSetupCall = "{\"x\": " + "[" + statsData.TimeToSetupCall.Milliseconds + "]" + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + "black" + "\"}" + ",\"name\":\"" + "Time To Setup Call" + "\"}";
             argsCallItems.Add(formatedArgsTimeToSetupCall);
