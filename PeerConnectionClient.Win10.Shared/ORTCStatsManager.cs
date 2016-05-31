@@ -392,7 +392,7 @@ namespace PeerConnectionClient.Win10.Shared
             public void AddData(RTCStatsValueName valueName, double value)
             {
                 IList<double> list;
-                if (value != null && Data.ContainsKey(valueName))
+                if (Data.ContainsKey(valueName))
                 {
                     list = Data[valueName];
                 }
@@ -413,12 +413,13 @@ namespace PeerConnectionClient.Win10.Shared
                     if (Data.ContainsKey(valueName))
                     {
                         list = (IList<double>)Data[valueName];
-                        lastValue = value;
+                        lastValue = list.Last();
                     }
                     else
                     {
                         list = new List<double>();
                         Data.Add(valueName, list);
+                        lastValue = value;
                     }
 
                     /*if (LastValues.ContainsKey(valueName))

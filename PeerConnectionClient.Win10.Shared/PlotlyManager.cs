@@ -248,6 +248,35 @@ namespace PeerConnectionClient.Win10.Shared
             string title = "Summary for the track " + trackId;
             await SendToPlotly(ret, path, trackId,title);
         }
+
+        public async Task CreateCallSummary(OrtcStatsManager.StatsData statsData, string id, string path)
+        {
+            IList<string> argsCallItems = new List<string>();
+
+            //string formated = "[" + "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}" + "]";
+
+            string formatedArgsStartTime = "{\"x\": " + statsData.StarTime + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + "black" + "\"}" + ",\"name\":\"" + "Start time" + "\"}";
+            argsCallItems.Add(formatedArgsStartTime);
+            string formatedArgsTimeToSetupCall = "{\"x\": " + statsData.TimeToSetupCall.Milliseconds + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + "black" + "\"}" + ",\"name\":\"" + "Time To Setup Call" + "\"}";
+            argsCallItems.Add(formatedArgsTimeToSetupCall);
+
+            foreach (var trackId in statsData.TrackStatsDictionary.Keys)
+            {
+                OrtcStatsManager.TrackStatsData trackStatsData = statsData.TrackStatsDictionary[trackId];
+                IList<string> argsItems = new List<string>();
+                foreach (var valueName in trackStatsData.Data.Keys)
+                {
+                    var values = trackStatsData.Data[valueName];
+                    double averageValue = values.Average();
+                    argsItems.Add("{\"x\": " + averageValue.ToString("0.##") + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + (trackStatsData.outgoing ? "blue" : "green") + "\"}" + ",\"name\":\"" + "Average " + (trackStatsData.outgoing?"outgoing " : "incoming ") + GetTitle(valueName) + "\"}");
+                }
+                string argsTrack = String.Join(",", argsItems.ToArray());
+                argsCallItems.Add(argsTrack);
+            }
+            string args = "[" + String.Join(",", argsCallItems.ToArray()) + "]";
+            string title = "Call Summary";
+            await SendToPlotly(args, path, "CallSummary", title);
+        }
         public async Task SendData(OrtcStatsManager.StatsData statsData, string id)
         {
             if (statsData == null)
@@ -284,7 +313,7 @@ namespace PeerConnectionClient.Win10.Shared
                 await SendSummary(datasets, basePath, trackId);
             }
 
-            
+            await CreateCallSummary(statsData, id, basePath);
         }
 
         public async Task SendToPlotly(Dictionary<string, string> dictionary, string path, bool outgoing)
