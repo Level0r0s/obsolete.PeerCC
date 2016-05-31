@@ -14,6 +14,7 @@ using RtcPeerConnection = org.ortc.adapter.RTCPeerConnection;
 
 namespace PeerConnectionClient.Win10.Shared
 {
+    public delegate void UploadedStatsData(string id);
     public enum RTCStatsValueName
     {
         StatsValueNameActiveConnection = 0,
@@ -122,28 +123,7 @@ namespace PeerConnectionClient.Win10.Shared
         StatsValueNameCurrentEndToEndDelayMs = 103
     }
 
-    /*public class CallMatrics
-    {
-        public IDictionary<RTCStatsValueName, IDictionary<string, CallMatricsData>> Data { get; set; }
-
-        public CallMatrics()
-        {
-            Data = new Dictionary<RTCStatsValueName, IDictionary<string, CallMatricsData>>();
-        }
-    }
-
-    public class CallMatricsData
-    {
-        public string Id { get; set; }
-        public IList<object> DataList { get; set; }
-        public IList<object> Timestamps { get; set; }
-
-        public CallMatricsData()
-        {
-            DataList = new List<object>();
-            Timestamps = new List<object>();
-        }
-    }*/
+    
     class OrtcStatsManager
     {
         private static volatile OrtcStatsManager _instance;
@@ -153,16 +133,16 @@ namespace PeerConnectionClient.Win10.Shared
         private string _currentId;
         private bool _isStatsCollectionEnabled;
         private Timer _callMetricsTimer;
-        private const int scheduleTimeInSeconds = 2;
+        private const int scheduleTimeInSeconds = 1;
         private int CallDuration { get; set; }
         private RTCStatsProvider StatsProviderPeerConnection { get; set; }
         private RTCStatsProvider StatsProviderPeerConnectionCall { get; set; }
         private IList<RTCStatsReport> callMetricsStatsReportList { get; set; }
-        //private Dictionary<string,IDictionary<RTCStatsValueName,IList<object>>> callsMetricsDictionary {get; set;}
-        //private Dictionary<string, CallMatrics> callsMetricsDictionary { get; set; }
+
         private Dictionary<string, StatsData> callsStatsDictionary { get; set; }
         private Dictionary<string, IList<RTCStatsReport>> callsStatsReportDictionary { get; set; }
-        // /tester/peercc/device/codec/<notes-if-present>/<YYYMMDD-HHMM>/dataset 
+        public static int counter = 0;
+        public static bool send = true;
 
 
         public static event FramesPerSecondChangedEventHandler FramesPerSecondChanged;
@@ -170,11 +150,15 @@ namespace PeerConnectionClient.Win10.Shared
 
         private OrtcStatsManager()
         {
-            //this.callMetricsStatsReportList = new List<RTCStatsReport>();
-            //callsMetricsDictionary = new Dictionary<string, IDictionary<RTCStatsValueName, IList<object>>>();
-            //callsMetricsDictionary = new Dictionary<string, CallMatrics>();
             callsStatsReportDictionary = new Dictionary<string, IList<RTCStatsReport>>();
             callsStatsDictionary = new Dictionary<string, StatsData>();
+            PlotlyManager.StatsUploaded += PlotlyManager_StatsUploaded;
+        }
+
+        private void PlotlyManager_StatsUploaded(string id)
+        {
+            if (callsStatsDictionary.ContainsKey(id))
+                callsStatsDictionary.Remove(id);
         }
 
         public static OrtcStatsManager Instance
@@ -232,16 +216,6 @@ namespace PeerConnectionClient.Win10.Shared
             if (pc != null)
             {
                 _peerConnection = pc;
-                //PrepareForStats();
-                /*RTCStatsProviderOptions options =
-                    new RTCStatsProviderOptions(new List<RTCStatsType>
-                    {
-                        RTCStatsType.IceGatherer,
-                        RTCStatsType.Codec,
-                        RTCStatsType.DtlsTransport
-                    });
-
-                StatsProviderPeerConnection = new RTCStatsProvider(pc, options);*/
             }
             else
             {
@@ -319,8 +293,7 @@ namespace PeerConnectionClient.Win10.Shared
             }
         }
         
-        public static int counter = 0;
-        public static bool send = true;
+        
         public void StopCallWatch()
         {
             if (_callMetricsTimer != null)
@@ -329,16 +302,7 @@ namespace PeerConnectionClient.Win10.Shared
             }
         }
 
-        /*private async void CollectCallMetrics2(object state)
-        {
-            RTCStatsReport report = await StatsProviderPeerConnectionCall.GetStats();
-            CallMatrics callMatrics = callsMetricsDictionary[_currentId];
 
-            if (report != null)
-            {
-                callMetricsStatsReportList.Add(report);
-            }
-        }*/
 
         private StatsData currentStatsData;
         internal class StatsData

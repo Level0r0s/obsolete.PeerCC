@@ -22,6 +22,9 @@ namespace PeerConnectionClient.Win10.Shared
         private readonly string key = "hei6r5e6rd";
         private readonly string email = "erik@hookflash.com";
         private readonly string restAPIUrl = "https://plot.ly/clientresp";
+
+        public static event UploadedStatsData StatsUploaded;
+
         public static PlotlyManager Instance
         {
             get
@@ -33,45 +36,6 @@ namespace PeerConnectionClient.Win10.Shared
                 }
 
                 return _instance;
-            }
-        }
-
-        //public async void SendData(List<object> dict)
-        public async void SendData(IList<object> data, IList<object> timestamps, string name)
-        {
-            var dataStr = "[" + String.Join(",", data.ToArray()) + "]";
-            var timestampsStr = "[" + String.Join(",", timestamps.ToArray()) + "]";
-            var argsStr = "\"[" + dataStr + "," + timestampsStr + "]\"";
-            using (var client = new HttpClient())
-            {
-                var values = new Dictionary<string, string>
-                {
-                   { "un", username },
-                   { "key", key },
-                   {"origin", "plot" },
-                    {"platform","lisp"},
-                    { "args",argsStr},
-                    {"kwargs","{\"filename\": \"" + name + "\",\"fileopt\": \"new\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"experimental data\"},\"world_readable\": true}"},
-                };
-                /*var values = new Dictionary<string, string>
-                {
-                   { "un", username },
-                   { "key", key },
-                   {"origin", "plot" },
-                    {"platform","lisp"},
-                    { "args","[[0, 1, 2], [3, 1, 6]],[{\"x\": [0, 1, 2], \"y\": [3, 1, 6]}],[{\"x\": [0, 1, 2], \"y\": [3, 1, 6], \"name\": \"Experimental\", \"marker\": {\"symbol\": \"square\", \"color\": \"purple\"}}, {\"x\": [1, 2, 3], \"y\": [3, 4, 5], \"name\": \"Control\"}]"},
-                    {"kwargs","{\"filename\": \"plot from api\",\"fileopt\": \"overwrite\",\"style\": {\"type\": \"bar\"}, \"traces\": [0,3,5],\"layout\": {\"title\": \"experimental data\"},\"world_readable\": true}"},
-                };*/
-
-                var content = new FormUrlEncodedContent(values);
-
-                var response = await client.PostAsync(restAPIUrl, content);
-
-                var responseString = await response.Content.ReadAsStringAsync();
-                if (responseString != null && responseString.Length > 0)
-                {
-                    Debug.Write(responseString);
-                }
             }
         }
 
@@ -185,46 +149,13 @@ namespace PeerConnectionClient.Win10.Shared
             }
             return "";
         }
-        //{\"x\": [0, 1, 2], \"y\": [3, 11, 16],\"line\": {\"color\":\"purple\"},\"name\":\"Frame Rates\"}
-        private async Task FormatDataForSending(OrtcStatsManager.TrackStatsData trackStatsData, string formatedTimestamps, string id, string trackId)
-        {
-            List<string> datasets= new List<string>();
-            //foreach (var values in trackStatsData.Data.Values)
-            foreach (var valueNames in trackStatsData.Data.Keys)
-            {
-                var values = trackStatsData.Data[valueNames];
-                var valuesStr = "[" + String.Join(",", values.ToArray()) + "]";
-                string graphTitle = GetTitle(valueNames);
-                string color = GetColor(valueNames);
 
-                string formated = "[" + "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}" + "]";
-                //a-wait SendToPlotly(formated, id, graphTitle);
-                datasets.Add(formated);
-            }
-            string ret = "[" + String.Join(",", datasets.ToArray()) + "]";
-            //return ret;
-        }
-
-        private string FormatDataForSending(OrtcStatsManager.TrackStatsData trackStatsData, string formatedTimestamps, RTCStatsValueName valueNames)
+        private Dictionary<string, string> FormatDataForSending(OrtcStatsManager.TrackStatsData trackStatsData, string formatedTimestamps, RTCStatsValueName valueNames)
         {
             var values = trackStatsData.Data[valueNames];
             var valuesStr = "[" + String.Join(",", values.ToArray()) + "]";
             string graphTitle = GetTitle(valueNames);
             string color = GetColor(valueNames);
-
-            string formated = "[" + "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}" + "]";
-
-            return formated;
-        }
-
-        private Dictionary<string, string> FormatDataForSending2(OrtcStatsManager.TrackStatsData trackStatsData, string formatedTimestamps, RTCStatsValueName valueNames)
-        {
-            var values = trackStatsData.Data[valueNames];
-            var valuesStr = "[" + String.Join(",", values.ToArray()) + "]";
-            string graphTitle = GetTitle(valueNames);
-            string color = GetColor(valueNames);
-
-            //string formated = "[" + "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}" + "]";
 
             string formated = "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}";
 
@@ -239,8 +170,6 @@ namespace PeerConnectionClient.Win10.Shared
 
         public async Task SendSummary(List<Dictionary<string, string>> datasets, string path, string trackId)
         {
-            //string ret = datasets.Aggregate("[", (current, dict) => current.Length==1?current:(current+",") + dict["args"]);
-
             string ret = "[";
             foreach (var dataset in datasets)
                 ret = (ret.Length == 1 ? ret : (ret + ",")) + dataset["args"];
@@ -252,8 +181,6 @@ namespace PeerConnectionClient.Win10.Shared
         public async Task CreateCallSummary(OrtcStatsManager.StatsData statsData, string id, string path)
         {
             IList<string> argsCallItems = new List<string>();
-
-            //string formated = "[" + "{\"x\": " + formatedTimestamps + ", \"y\": " + valuesStr + ",\"line\": " + "{\"color\":\"" + color + "\"}" + ",\"name\":\"" + graphTitle + "\"}" + "]";
 
             string formatedArgsStartTime = "{\"x\": " + statsData.StarTime + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + "black" + "\"}" + ",\"name\":\"" + "Start time" + "\"}";
             argsCallItems.Add(formatedArgsStartTime);
@@ -283,8 +210,7 @@ namespace PeerConnectionClient.Win10.Shared
                 return;
 
             var timestampsStr = "[" + String.Join(",", statsData.Timestamps.ToArray()) + "]";
-            //List<string> datasets = new List<string>();
-            //List<Dictionary<string, string>> datasets = new List<Dictionary<string, string>>();
+
             var hostname = NetworkInformation.GetHostNames().FirstOrDefault(h => h.Type == HostNameType.DomainName);
             string ret = hostname?.CanonicalName ?? "<unknown host>";
             var strCaller = statsData.IsCaller ? "caller_" : "callee_";
@@ -298,12 +224,10 @@ namespace PeerConnectionClient.Win10.Shared
                 OrtcStatsManager.TrackStatsData trackStatsData = statsData.TrackStatsDictionary[trackId];
                 foreach (var valueNames in trackStatsData.Data.Keys)
                 {
-                    //string formattedString = FormatDataForSending(trackStatsData, timestampsStr, valueNames);
-                    Dictionary<string, string> dictionary = FormatDataForSending2(trackStatsData, timestampsStr, valueNames);
+                    Dictionary<string, string> dictionary = FormatDataForSending(trackStatsData, timestampsStr, valueNames);
                     dictionary.Add("trackId",trackId);
                     dictionary.Add("yaxisTitle", GetYAxisTitle(valueNames));
                     datasets.Add(dictionary);
-                    //datasets.Add(formattedString);
                 }
                 foreach (Dictionary<string, string> dict in datasets)
                 {
@@ -314,11 +238,11 @@ namespace PeerConnectionClient.Win10.Shared
             }
 
             await CreateCallSummary(statsData, id, basePath);
+            StatsUploaded?.Invoke(id);
         }
 
         public async Task SendToPlotly(Dictionary<string, string> dictionary, string path, bool outgoing)
         {
-            //string filename = path + "/" + dictionary["trackId"] + "/" + dictionary["title"];
             string filename = path + "/" + dictionary["trackId"] + "/" + dictionary["title"];
 
             using (var client = new HttpClient())
