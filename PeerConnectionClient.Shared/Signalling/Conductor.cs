@@ -346,9 +346,9 @@ namespace PeerConnectionClient.Signalling
 
                     _peerConnection.Close(); // Slow, so do this after UI updated and camera turned off
                     _sessionId = null;
-                    if (AppInsightsEnabled)
+                    //if (AppInsightsEnabled)
                     {
-                        //OrtcStatsManager.Instance.CallEnded();
+                        OrtcStatsManager.Instance.CallEnded();
                     }
                         //StatsManager.Instance.TrackCallEnded();
                     _peerConnection = null;

@@ -287,7 +287,7 @@ namespace PeerConnectionClient.Win10.Shared
         {
             StopCallWatch();
             
-            if (callsStatsDictionary != null && callsStatsDictionary.ContainsKey(_currentId))
+            if (IsStatsCollectionEnabled && callsStatsDictionary != null && callsStatsDictionary.ContainsKey(_currentId))
             {
                 await PlotlyManager.Instance.SendData(callsStatsDictionary[_currentId], _currentId);
             }

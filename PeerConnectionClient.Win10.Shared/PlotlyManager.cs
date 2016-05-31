@@ -168,14 +168,14 @@ namespace PeerConnectionClient.Win10.Shared
             return dictionary;
         }
 
-        public async Task SendSummary(List<Dictionary<string, string>> datasets, string path, string trackId)
+        public async Task SendSummary(List<Dictionary<string, string>> datasets, string path, string trackId, bool outgoing)
         {
             string ret = "[";
             foreach (var dataset in datasets)
                 ret = (ret.Length == 1 ? ret : (ret + ",")) + dataset["args"];
             ret += "]";
             string title = "Summary for the track " + trackId;
-            await SendToPlotly(ret, path, trackId,title);
+            await SendToPlotly(ret, path, trackId,title,outgoing);
         }
 
         public async Task CreateCallSummary(OrtcStatsManager.StatsData statsData, string id, string path)
@@ -234,7 +234,7 @@ namespace PeerConnectionClient.Win10.Shared
                     await SendToPlotly(dict, basePath, trackStatsData.outgoing);
                 }
 
-                await SendSummary(datasets, basePath, trackId);
+                await SendSummary(datasets, basePath, trackId, trackStatsData.outgoing);
             }
 
             await CreateCallSummary(statsData, id, basePath);
@@ -243,7 +243,7 @@ namespace PeerConnectionClient.Win10.Shared
 
         public async Task SendToPlotly(Dictionary<string, string> dictionary, string path, bool outgoing)
         {
-            string filename = path + "/" + dictionary["trackId"] + "/" + dictionary["title"];
+            string filename = path + "/" + (outgoing ? "o-" : "i-") + dictionary["trackId"] + "/" + dictionary["title"];
 
             using (var client = new HttpClient())
             {
@@ -268,9 +268,9 @@ namespace PeerConnectionClient.Win10.Shared
                 }
             }
         }
-        public async Task SendToPlotly(string args, string path, string trackId, string title=null)
+        public async Task SendToPlotly(string args, string path, string trackId, string title=null, bool outgoing=true)
         {
-            string filename = path + "/" + trackId;
+            string filename = path + "/" + (outgoing ? "o-" : "i-") + trackId;
             string plotTitle = title == null ? trackId : title;
             using (var client = new HttpClient())
             {
