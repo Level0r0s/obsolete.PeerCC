@@ -408,14 +408,6 @@
                                             ItemsSource="{Binding NewIceServer.Types}"
                                             SelectedItem="{Binding NewIceServer.Type, Mode=TwoWay}"
                                             Width="160"/>
-                                        <Controls:ErrorControl DataContext="{Binding NewIceServer.Port}">
-                                            <Controls:ErrorControl.InnerContent>
-                                                <TextBox
-                                                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                    Header="Port"
-                                                    Width="160"/>
-                                            </Controls:ErrorControl.InnerContent>
-                                        </Controls:ErrorControl>
                                         <TextBox
                                             Text="{Binding NewIceServer.Username, Mode=TwoWay}"
                                             Header="Username"

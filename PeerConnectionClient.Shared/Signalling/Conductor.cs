@@ -899,7 +899,7 @@ namespace PeerConnectionClient.Signalling
                 {
                     url = "turn:";
                 }
-                url += iceServer.Host.Value + ":" + iceServer.Port.Value;
+                url += iceServer.Host.Value;
                 RTCIceServer server = new RTCIceServer()
                 {
                     Urls = new List<string>(),

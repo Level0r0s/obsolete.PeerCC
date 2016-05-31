@@ -2111,11 +2111,11 @@ namespace PeerConnectionClient.ViewModels
             {
                 // Default values:
                 configIceServers.Clear();
-                configIceServers.Add(new IceServer("stun.l.google.com", "19302", IceServer.ServerType.STUN));
-                configIceServers.Add(new IceServer("stun1.l.google.com", "19302", IceServer.ServerType.STUN));
-                configIceServers.Add(new IceServer("stun2.l.google.com", "19302", IceServer.ServerType.STUN));
-                configIceServers.Add(new IceServer("stun3.l.google.com", "19302", IceServer.ServerType.STUN));
-                configIceServers.Add(new IceServer("stun4.l.google.com", "19302", IceServer.ServerType.STUN));
+                configIceServers.Add(new IceServer("stun.l.google.com:19302", IceServer.ServerType.STUN));
+                configIceServers.Add(new IceServer("stun1.l.google.com:19302", IceServer.ServerType.STUN));
+                configIceServers.Add(new IceServer("stun2.l.google.com:19302", IceServer.ServerType.STUN));
+                configIceServers.Add(new IceServer("stun3.l.google.com:19302", IceServer.ServerType.STUN));
+                configIceServers.Add(new IceServer("stun4.l.google.com:19302", IceServer.ServerType.STUN));
             }
 
             if (settings.Values["NTPServer"] != null && (string) settings.Values["NTPServer"] != "")
