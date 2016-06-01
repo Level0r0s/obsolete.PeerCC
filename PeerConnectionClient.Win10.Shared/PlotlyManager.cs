@@ -41,113 +41,116 @@ namespace PeerConnectionClient.Win10.Shared
 
         public string GetTitle(RtcStatsValueName valueName)
         {
+            string ret = "";
             switch (valueName)
             {
                 case RtcStatsValueName.StatsValueNameBytesReceived:
-                    return "Received Bytes";
+                    ret = "Received Bytes";
                     break;
                 case RtcStatsValueName.StatsValueNamePacketsReceived:
-                    return "Received Packets";
+                    ret = "Received Packets";
                     break;
                 case RtcStatsValueName.StatsValueNamePacketsLost:
-                    return "Lost Packets";
+                    ret = "Lost Packets";
                     break;
                 case RtcStatsValueName.StatsValueNameCurrentEndToEndDelayMs:
-                    return "End To End Delay";
+                    ret = "End To End Delay";
                     break;
                 case RtcStatsValueName.StatsValueNameBytesSent:
-                    return "Sent Bytes";
+                    ret = "Sent Bytes";
                     break;
                 case RtcStatsValueName.StatsValueNamePacketsSent:
-                    return "Sent Packets";
+                    ret = "Sent Packets";
                     break;
                 case RtcStatsValueName.StatsValueNameFrameRateReceived:
-                    return "Frame Rate Received";
+                    ret = "Frame Rate Received";
                     break;
                 case RtcStatsValueName.StatsValueNameFrameWidthReceived:
-                    return "Frame Width Received";
+                    ret = "Frame Width Received";
                     break;
                 case RtcStatsValueName.StatsValueNameFrameHeightReceived:
-                    return "Frame Heigh Received";
+                    ret = "Frame Heigh Received";
                     break;
                 case RtcStatsValueName.StatsValueNameFrameRateSent:
-                    return "Frame Rate Sent";
+                    ret = "Frame Rate Sent";
                     break;
                 case RtcStatsValueName.StatsValueNameFrameWidthSent:
-                    return "Frame Width Sent";
+                    ret = "Frame Width Sent";
                     break;
                 case RtcStatsValueName.StatsValueNameFrameHeightSent:
-                    return "Frame Height Sent";
+                    ret = "Frame Height Sent";
                     break;
             }
-            return "";
+            return ret;
         }
 
 
         public string GetColor(RtcStatsValueName valueName)
         {
+            string ret = "black";
             switch (valueName)
             {
                 case RtcStatsValueName.StatsValueNameBytesReceived:
                 case RtcStatsValueName.StatsValueNameBytesSent:
-                    return "blue";
+                    ret = "blue";
                     break;
                 case RtcStatsValueName.StatsValueNamePacketsReceived:
                 case RtcStatsValueName.StatsValueNamePacketsSent:
-                    return "green";
+                    ret = "green";
                     break;
                 case RtcStatsValueName.StatsValueNamePacketsLost:
-                    return "red";
+                    ret = "red";
                     break;
                 case RtcStatsValueName.StatsValueNameCurrentEndToEndDelayMs:
-                    return "yellow";
+                    ret = "yellow";
                     break;
                 case RtcStatsValueName.StatsValueNameFrameRateReceived:
                 case RtcStatsValueName.StatsValueNameFrameRateSent:
-                    return "black";
+                    ret = "black";
                     break;
                 case RtcStatsValueName.StatsValueNameFrameWidthReceived:
                 case RtcStatsValueName.StatsValueNameFrameWidthSent:
-                    return "grey";
+                    ret = "grey";
                     break;
                 case RtcStatsValueName.StatsValueNameFrameHeightReceived:
                 case RtcStatsValueName.StatsValueNameFrameHeightSent:
-                    return "orange";
+                    ret = "orange";
                     break;
             }
-            return "purple";
+            return ret;
         }
 
         private string GetYAxisTitle(RtcStatsValueName valueName)
         {
+            string ret = "";
             switch (valueName)
             {
                 case RtcStatsValueName.StatsValueNameBytesSent:
                 case RtcStatsValueName.StatsValueNameBytesReceived:
-                    return "Bytes";
+                    ret = "Bytes";
                     break;
                 case RtcStatsValueName.StatsValueNamePacketsSent:
                 case RtcStatsValueName.StatsValueNamePacketsReceived:
                 case RtcStatsValueName.StatsValueNamePacketsLost:
-                    return "Packets";
+                    ret = "Packets";
                     break;
 
                 case RtcStatsValueName.StatsValueNameCurrentEndToEndDelayMs:
-                    return "Delay (ms)";
+                    ret = "Delay (ms)";
                     break;
 
                 case RtcStatsValueName.StatsValueNameFrameRateSent:
                 case RtcStatsValueName.StatsValueNameFrameRateReceived:
-                    return "Frames";
+                    ret = "Frames";
                     break;
                 case RtcStatsValueName.StatsValueNameFrameHeightReceived:
                 case RtcStatsValueName.StatsValueNameFrameWidthReceived:
                 case RtcStatsValueName.StatsValueNameFrameWidthSent:
                 case RtcStatsValueName.StatsValueNameFrameHeightSent:
-                    return "Pixels";
+                    ret = "Pixels";
                     break;
             }
-            return "";
+            return ret;
         }
 
         private Dictionary<string, string> FormatDataForSending(OrtcStatsManager.TrackStatsData trackStatsData, string formatedTimestamps, RtcStatsValueName valueNames)
@@ -170,9 +173,7 @@ namespace PeerConnectionClient.Win10.Shared
 
         public async Task SendSummary(List<Dictionary<string, string>> datasets, string path, string trackId, bool outgoing)
         {
-            string ret = "[";
-            foreach (var dataset in datasets)
-                ret = (ret.Length == 1 ? ret : (ret + ",")) + dataset["args"];
+            string ret = datasets.Aggregate("[", (current, dataset) => (current.Length == 1 ? current : current + ",") + dataset["args"]);
             ret += "]";
             string title = "Summary for the track " + trackId;
             await SendToPlotly(ret, path, trackId,title,outgoing);
@@ -190,13 +191,7 @@ namespace PeerConnectionClient.Win10.Shared
             foreach (var trackId in statsData.TrackStatsDictionary.Keys)
             {
                 OrtcStatsManager.TrackStatsData trackStatsData = statsData.TrackStatsDictionary[trackId];
-                IList<string> argsItems = new List<string>();
-                foreach (var valueName in trackStatsData.Data.Keys)
-                {
-                    var values = trackStatsData.Data[valueName];
-                    double averageValue = values.Average();
-                    argsItems.Add("{\"x\": " + "[" + averageValue.ToString("0.##") + "]" + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + (trackStatsData.outgoing ? "blue" : "green") + "\"}" + ",\"name\":\"" + "Average " + (trackStatsData.outgoing?"outgoing " : "incoming ") + GetTitle(valueName) + "\"}");
-                }
+                IList<string> argsItems = (from valueName in trackStatsData.Data.Keys let values = trackStatsData.Data[valueName] let averageValue = values.Average() select "{\"x\": " + "[" + averageValue.ToString("0.##") + "]" + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + (trackStatsData.Outgoing ? "blue" : "green") + "\"}" + ",\"name\":\"" + "Average " + (trackStatsData.Outgoing ? "outgoing " : "incoming ") + GetTitle(valueName) + "\"}").ToList();
                 string argsTrack = String.Join(",", argsItems.ToArray());
                 argsCallItems.Add(argsTrack);
             }
@@ -231,10 +226,10 @@ namespace PeerConnectionClient.Win10.Shared
                 }
                 foreach (Dictionary<string, string> dict in datasets)
                 {
-                    await SendToPlotly(dict, basePath, trackStatsData.outgoing);
+                    await SendToPlotly(dict, basePath, trackStatsData.Outgoing);
                 }
 
-                await SendSummary(datasets, basePath, trackId, trackStatsData.outgoing);
+                await SendSummary(datasets, basePath, trackId, trackStatsData.Outgoing);
             }
 
             await CreateCallSummary(statsData, id, basePath);
@@ -271,7 +266,7 @@ namespace PeerConnectionClient.Win10.Shared
         public async Task SendToPlotly(string args, string path, string trackId, string title=null, bool outgoing=true)
         {
             string filename = path + "/" + (outgoing ? "o-" : "i-") + trackId;
-            string plotTitle = title == null ? trackId : title;
+            string plotTitle = title ?? trackId;
             using (var client = new HttpClient())
             {
                 var values = new Dictionary<string, string>
@@ -289,7 +284,7 @@ namespace PeerConnectionClient.Win10.Shared
                 var response = await client.PostAsync(restAPIUrl, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();
-                if (responseString != null && responseString.Length > 0)
+                if (!string.IsNullOrEmpty(responseString))
                 {
                     Debug.Write(responseString);
                 }

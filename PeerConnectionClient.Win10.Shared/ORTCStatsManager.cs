@@ -124,7 +124,7 @@ namespace PeerConnectionClient.Win10.Shared
     }
 
     
-    class OrtcStatsManager
+    class OrtcStatsManager : IDisposable
     {
         private static volatile OrtcStatsManager _instance;
         private static readonly object SyncRoot = new object();
@@ -133,32 +133,25 @@ namespace PeerConnectionClient.Win10.Shared
         private string _currentId;
         private bool _isStatsCollectionEnabled;
         private Timer _callMetricsTimer;
-        private const int scheduleTimeInSeconds = 1;
+        private const int ScheduleTimeInSeconds = 1;
         private int CallDuration { get; set; }
-        private RTCStatsProvider StatsProviderPeerConnection { get; set; }
         private RTCStatsProvider StatsProviderPeerConnectionCall { get; set; }
-        private IList<RTCStatsReport> callMetricsStatsReportList { get; set; }
 
-        private Dictionary<string, StatsData> callsStatsDictionary { get; set; }
-        private Dictionary<string, IList<RTCStatsReport>> callsStatsReportDictionary { get; set; }
-        public static int counter = 0;
-        public static bool send = true;
-
+        private Dictionary<string, StatsData> CallsStatsDictionary { get; }
 
         public static event FramesPerSecondChangedEventHandler FramesPerSecondChanged;
         public static event ResolutionChangedEventHandler ResolutionChanged;
 
         private OrtcStatsManager()
         {
-            callsStatsReportDictionary = new Dictionary<string, IList<RTCStatsReport>>();
-            callsStatsDictionary = new Dictionary<string, StatsData>();
+            CallsStatsDictionary = new Dictionary<string, StatsData>();
             PlotlyManager.StatsUploaded += PlotlyManager_StatsUploaded;
         }
 
         private void PlotlyManager_StatsUploaded(string id)
         {
-            if (callsStatsDictionary.ContainsKey(id))
-                callsStatsDictionary.Remove(id);
+            if (CallsStatsDictionary.ContainsKey(id))
+                CallsStatsDictionary.Remove(id);
         }
 
         public static OrtcStatsManager Instance
@@ -175,41 +168,24 @@ namespace PeerConnectionClient.Win10.Shared
             }
         }
 
-        /// <summary>
-        /// For each call create unique id and a list where will be stored stats data.
-        /// </summary>
-        private void PrepareForStats()
-        {
-            
-            _currentId = /*Conductor.Instance.Peer.Name + "/" +*/ Helper.ProductName() + "/" + Helper.DeviceName() + "/" + Helper.OsVersion() + "/" + Conductor.Instance.AudioCodec.Name + "_" + Conductor.Instance.VideoCodec.Name + "/" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + "/dataset";
-
-            StatsData statsData = new StatsData();
-            statsData.StarTime = DateTime.Now;
-            //All call stats will be stored in this dict, so it can be safely uploaded to server, while other call can be in progress
-            callsStatsDictionary.Add(_currentId,statsData);
-            
-
-            callMetricsStatsReportList = new List<RTCStatsReport>();
-        }
-
         private void PrepareStatsForCall(string callId, bool isCaller)
         {
             _currentId = callId;
 
             try
             {
-                StatsData statsData = new StatsData();
-                statsData.IsCaller = isCaller;
-                statsData.StarTime = DateTime.Now;
+                StatsData statsData = new StatsData
+                {
+                    IsCaller = isCaller,
+                    StarTime = DateTime.Now
+                };
                 //All call stats will be stored in this dict, so it can be safely uploaded to server, while other call can be in progress
-                callsStatsDictionary.Add(_currentId, statsData);
+                CallsStatsDictionary.Add(_currentId, statsData);
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e);
             }
-
-            callMetricsStatsReportList = new List<RTCStatsReport>();
         }
         public void Initialize(RtcPeerConnection pc)
         {
@@ -226,9 +202,6 @@ namespace PeerConnectionClient.Win10.Shared
         public void Reset()
         {
             _peerConnection = null;
-            callMetricsStatsReportList = null;
-            //callMetricsStatsReportList = new List<RTCStatsReport>();
-            //callMetricsStatsReportList.Clear();
             StatsProviderPeerConnectionCall = null;
         }
 
@@ -275,7 +248,7 @@ namespace PeerConnectionClient.Win10.Shared
                 CallDuration = 0;
                 AutoResetEvent autoEvent = new AutoResetEvent(false);
                 TimerCallback tcb = CollectCallMetrics3;
-                _callMetricsTimer = new Timer(tcb, autoEvent, 0, scheduleTimeInSeconds*1000);
+                _callMetricsTimer = new Timer(tcb, autoEvent, 0, ScheduleTimeInSeconds*1000);
             }
             else
             {
@@ -287,31 +260,26 @@ namespace PeerConnectionClient.Win10.Shared
         {
             StopCallWatch();
             
-            if (IsStatsCollectionEnabled && callsStatsDictionary != null && callsStatsDictionary.ContainsKey(_currentId))
+            if (IsStatsCollectionEnabled && CallsStatsDictionary != null && CallsStatsDictionary.ContainsKey(_currentId))
             {
-                await PlotlyManager.Instance.SendData(callsStatsDictionary[_currentId], _currentId);
+                await PlotlyManager.Instance.SendData(CallsStatsDictionary[_currentId], _currentId);
             }
         }
         
         
         public void StopCallWatch()
         {
-            if (_callMetricsTimer != null)
-            {
-                _callMetricsTimer.Dispose();
-            }
+            _callMetricsTimer?.Dispose();
+            _callMetricsTimer = null;
         }
 
-
-
-        private StatsData currentStatsData;
         internal class StatsData
         {
             public DateTime StarTime { get; set; }
             public bool IsCaller { get; set; }
             public IList<int> Timestamps { get; } 
             public Dictionary<string,TrackStatsData> TrackStatsDictionary { get; }
-            private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
+
             public TimeSpan TimeToSetupCall { get; set; }
 
             public StatsData()
@@ -320,36 +288,37 @@ namespace PeerConnectionClient.Win10.Shared
                 TrackStatsDictionary = new Dictionary<string, TrackStatsData>();
                 
             }
-            private Object thisLock = new Object();
+            private readonly Object _thisLock = new Object();
             public TrackStatsData GetTrackStatsData(string trackId, bool outgoing = true)
             {
+                TrackStatsData ret = null;
                 try
                 {
-
-                TrackStatsData ret = null;
-                lock (thisLock)
-                {
-                    
                     if (!string.IsNullOrEmpty(trackId))
                     {
                         if (TrackStatsDictionary.ContainsKey(trackId))
                             ret = TrackStatsDictionary[trackId];
                         else
                         {
-                            ret = new TrackStatsData(trackId) { outgoing = outgoing };
-                            TrackStatsDictionary.Add(trackId, ret);
+                            lock (_thisLock)
+                            {
+                                if (TrackStatsDictionary.ContainsKey(trackId))
+                                    ret = TrackStatsDictionary[trackId];
+                                else
+                                {
+                                    ret = new TrackStatsData(trackId) { Outgoing = outgoing };
+                                    TrackStatsDictionary.Add(trackId, ret);
+                                }
+                            }
                         }
                     }
-                    return ret;
-                }
-                }
-                catch (Exception e)
+                } catch (Exception e)
                 {
-
                     Debug.Write(e);
                 }
-                return null;
+                return ret;
             }
+            
         }
         internal class TrackStatsData
         {
@@ -357,50 +326,55 @@ namespace PeerConnectionClient.Win10.Shared
             public Dictionary<RtcStatsValueName,IList<double>> Data{ get; }
             public Dictionary<RtcStatsValueName, double> LastValues { get; }
 
-            public bool outgoing { get; set; }
-            public bool isAudio { get; set; }
+            public bool Outgoing { get; set; }
+            public bool IsAudio { get; set; }
 
             private double _reactionPercentage = 0.0;
             public TrackStatsData(string trackId)
             {
                 MediaTrackId = trackId;
-                isAudio = trackId.Contains("audio");
+                IsAudio = trackId.Contains("audio");
                 Data = new Dictionary<RtcStatsValueName, IList<double>>();
                 LastValues = new Dictionary<RtcStatsValueName, double>();
             }
-            private Object thisLock = new Object();
+            private readonly object _thisLock = new object();
 
-            private IList<double> getList(RtcStatsValueName valueName)
+            private IList<double> GetList(RtcStatsValueName valueName)
             {
                 IList<double> list;
-                lock (thisLock)
+
+                if (Data.ContainsKey(valueName))
                 {
-                   
-                    if (Data.ContainsKey(valueName))
+                    list = Data[valueName];
+                }
+                else
+                {
+                    lock (_thisLock)
                     {
-                        list = Data[valueName];
-                    }
-                    else
-                    {
-                        list = new List<double>();
-                        Data.Add(valueName, list);
+                        if (Data.ContainsKey(valueName))
+                            list = Data[valueName];
+                        else
+                        {
+                            list = new List<double>();
+                            Data.Add(valueName, list);
+                        } 
                     }
                 }
                 return list;
             }
             public void AddData(RtcStatsValueName valueName, double value)
             {
-                IList<double> list = getList(valueName);
+                IList<double> list = GetList(valueName);
 
                 list.Add(value);
             }
 
             public void AddAverage(RtcStatsValueName valueName, double value)
             {
-                IList<double> list = getList(valueName); ;
+                IList<double> list = GetList(valueName);
                 double lastValue = list.Count > 0 ? list.Last() : value;
 
-                lastValue = ((lastValue * (1.0 - _reactionPercentage)) + (value * _reactionPercentage));
+                lastValue = lastValue * (1.0 - _reactionPercentage) + value * _reactionPercentage;
                 list.Add(lastValue);
             }
         }
@@ -462,7 +436,7 @@ namespace PeerConnectionClient.Win10.Shared
                             TrackStatsData tsd =
                                 statsData.GetTrackStatsData(mediaStreamTrackStats.TrackId,!mediaStreamTrackStats.RemoteSource);
                         
-                            if (tsd != null && !tsd.isAudio)
+                            if (tsd != null && !tsd.IsAudio)
                             {
                                 if (mediaStreamTrackStats.RemoteSource)
                                 {
@@ -496,8 +470,6 @@ namespace PeerConnectionClient.Win10.Shared
                                 }
                             }
                         break;
-                    default:
-                        break;
                 }
             }
             catch (Exception e)
@@ -506,7 +478,7 @@ namespace PeerConnectionClient.Win10.Shared
             }
         }
 
-        private void UpdateCurrentFrame(RTCStats stats, StatsData statsData)
+        private void UpdateCurrentFrame(RTCStats stats)
         {
             switch (stats.StatsType)
             {
@@ -526,14 +498,12 @@ namespace PeerConnectionClient.Win10.Shared
                         }
                     }
                     break;
-                default:
-                    break;
             }
         }
         private async void CollectCallMetrics3(object state)
         {
-            CallDuration += scheduleTimeInSeconds;
-            StatsData statsData = callsStatsDictionary[_currentId];
+            CallDuration += ScheduleTimeInSeconds;
+            StatsData statsData = CallsStatsDictionary[_currentId];
             statsData.Timestamps.Add(CallDuration);
             RTCStatsReport report = await StatsProviderPeerConnectionCall.GetStats();
             if (report != null)
@@ -544,10 +514,23 @@ namespace PeerConnectionClient.Win10.Shared
                     if (IsStatsCollectionEnabled)
                         ParseStats(stats, statsData);
                     else
-                        UpdateCurrentFrame(stats,statsData);
+                        UpdateCurrentFrame(stats);
                 }
             }
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _callMetricsTimer?.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

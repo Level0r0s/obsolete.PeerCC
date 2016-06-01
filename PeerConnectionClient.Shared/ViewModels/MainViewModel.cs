@@ -72,7 +72,7 @@ namespace PeerConnectionClient.ViewModels
 
             // Configure application version string format
             var version = Windows.ApplicationModel.Package.Current.Id.Version;
-            AppVersion = String.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
+            AppVersion = $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
 
             IsReadyToConnect = true;
             _settingsButtonChecked = false;
@@ -111,7 +111,7 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         /// <param name="sender">The object where the handler is attached.</param>
         /// <param name="e">Details about the exception routed event.</param>
-        public void PeerVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
+        public void PeerVideo_MediaFailed(object sender, ExceptionRoutedEventArgs e)
         {
           Debug.WriteLine("PeerVideo_MediaFailed");
           if (_peerVideoTrack != null)
@@ -134,7 +134,7 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         /// <param name="sender">The object where the handler is attached.</param>
         /// <param name="e">Details about the exception routed event.</param>
-        public void SelfVideo_MediaFailed(object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs e)
+        public void SelfVideo_MediaFailed(object sender, ExceptionRoutedEventArgs e)
         {
           Debug.WriteLine("SelfVideo_MediaFailed");
           if (_selfVideoTrack != null && VideoLoopbackEnabled)
@@ -153,12 +153,12 @@ namespace PeerConnectionClient.ViewModels
 
         // Help to make sure the screen is not locked while on call
         readonly DisplayRequest _keepScreenOnRequest = new DisplayRequest();
-        private bool _keepOnScreenRequested = false;
+        private bool _keepOnScreenRequested;
 
         private MediaStreamTrack _peerVideoTrack;
         private MediaStreamTrack _selfVideoTrack;
 
-        private NtpService _ntpService;
+        private readonly NtpService _ntpService;
 
         /// <summary>
         /// The initializer for MainViewModel.
@@ -190,7 +190,7 @@ namespace PeerConnectionClient.ViewModels
                 savedAudioPlayoutDeviceId = (string)settings.Values["SelectedAudioPlayoutDeviceId"];
             }
 
-            MediaDevices.EnumerateDevices().AsTask().ContinueWith((devices) =>
+            MediaDevices.EnumerateDevices().AsTask().ContinueWith(devices =>
             {
                 foreach (MediaDeviceInfo devInfo in devices.Result)
                 {
@@ -299,12 +299,9 @@ namespace PeerConnectionClient.ViewModels
             {
                 RunOnUiThread(() =>
                 {
-                    if (Peers != null)
-                    {
-                        var peerToRemove = Peers.FirstOrDefault(p => p.Id == peerId);
-                        if (peerToRemove != null)
-                            Peers.Remove(peerToRemove);
-                    }
+                    var peerToRemove = Peers?.FirstOrDefault(p => p.Id == peerId);
+                    if (peerToRemove != null)
+                        Peers.Remove(peerToRemove);
                 });
             };
 
@@ -340,10 +337,7 @@ namespace PeerConnectionClient.ViewModels
                     IsMicrophoneEnabled = false;
                     IsCameraEnabled = false;
                     IsDisconnecting = false;
-                    if (Peers != null)
-                    {
-                        Peers.Clear();
-                    }
+                    Peers?.Clear();
                 });
             };
 
@@ -503,10 +497,7 @@ namespace PeerConnectionClient.ViewModels
             LoadSettings();
             RunOnUiThread(() =>
             {
-                if (OnInitialized != null)
-                {
-                    OnInitialized();
-                }
+                OnInitialized?.Invoke();
             });
         }
 
@@ -568,7 +559,7 @@ namespace PeerConnectionClient.ViewModels
                 }
                 foreach (MediaDevice removedVideoCaptureDevices in videoCaptureDevicesToRemove)
                 {
-                    if (SelectedCamera.Id == removedVideoCaptureDevices.Id)
+                    if (SelectedCamera != null && SelectedCamera.Id == removedVideoCaptureDevices.Id)
                     {
                         SelectedCamera = null;
                     }
@@ -597,13 +588,13 @@ namespace PeerConnectionClient.ViewModels
             //var audioCaptureDevices = Conductor.Instance.Media.GetAudioCaptureDevices();
             RunOnUiThread(() =>
             {
-                var SelectedMicrophoneId = SelectedMicrophone != null ? SelectedMicrophone.Id : null;
+                var selectedMicrophoneId = SelectedMicrophone?.Id;
                 SelectedMicrophone = null;
                 Microphones.Clear();
                 foreach (MediaDevice audioCaptureDevice in audioCaptureDevices)
                 {
                     Microphones.Add(audioCaptureDevice);
-                    if (audioCaptureDevice.Id == SelectedMicrophoneId)
+                    if (audioCaptureDevice.Id == selectedMicrophoneId)
                     {
                         SelectedMicrophone = Microphones.Last();
                     }
@@ -1320,7 +1311,7 @@ namespace PeerConnectionClient.ViewModels
                         }
                         else
                         {
-                            SelectedCapResItem = defaultResolution.ResolutionDescription;
+                            SelectedCapResItem = defaultResolution?.ResolutionDescription;
                         }
                     });
                     OnPropertyChanged("AllCapRes");
@@ -1485,8 +1476,10 @@ namespace PeerConnectionClient.ViewModels
 
             if (logFile != null)
             {
-                Windows.Storage.Pickers.FileSavePicker savePicker = new Windows.Storage.Pickers.FileSavePicker();
-                savePicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+                Windows.Storage.Pickers.FileSavePicker savePicker = new Windows.Storage.Pickers.FileSavePicker
+                {
+                    SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary
+                };
 
                 // Generate log file with timestamp
                 DateTime now = DateTime.Now;
@@ -1494,7 +1487,7 @@ namespace PeerConnectionClient.ViewModels
                 String targetFileName = string.Format("webrt_logging_{0}{1}{2}{3}{4}{5}", args);
                 savePicker.SuggestedFileName = targetFileName;
 
-                savePicker.FileTypeChoices.Add("webrtc log", new System.Collections.Generic.List<string>() {".log"});
+                savePicker.FileTypeChoices.Add("webrtc log", new List<string>() {".log"});
 
 #if WINDOWS_PHONE_APP
                 CoreApplication.GetCurrentView().Activated += ViewActivated;
@@ -1619,14 +1612,7 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         public ObservableCollection<String> AllCapRes
         {
-            get
-            {
-                if (_allCapRes == null)
-                {
-                    _allCapRes = new ObservableCollection<String>();
-                }
-                return _allCapRes;
-            }
+            get { return _allCapRes ?? (_allCapRes = new ObservableCollection<String>()); }
             set { SetProperty(ref _allCapRes, value); }
         }
 
@@ -1655,7 +1641,7 @@ namespace PeerConnectionClient.ViewModels
                 opCap.AsTask().ContinueWith(caps =>
                 {
                     var fpsList = from cap in caps.Result where cap.ResolutionDescription == value select cap;
-                    var t = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    var t = CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                     {
                         CaptureCapability defaultFPS = null;
                         uint selectedCapFPSFrameRate = 0;
@@ -1692,14 +1678,7 @@ namespace PeerConnectionClient.ViewModels
         /// </summary>
         public ObservableCollection<CaptureCapability> AllCapFPS
         {
-            get
-            {
-                if (_allCapFPS == null)
-                {
-                    _allCapFPS = new ObservableCollection<CaptureCapability>();
-                }
-                return _allCapFPS;
-            }
+            get { return _allCapFPS ?? (_allCapFPS = new ObservableCollection<CaptureCapability>()); }
             set { SetProperty(ref _allCapFPS, value); }
         }
 
@@ -1962,10 +1941,7 @@ namespace PeerConnectionClient.ViewModels
                 var task = Conductor.Instance.DisconnectFromServer();
             }).Start();
 
-            if (Peers != null)
-            {
-                Peers.Clear();
-            }
+            Peers?.Clear();
         }
 
         /// <summary>
@@ -2163,7 +2139,7 @@ namespace PeerConnectionClient.ViewModels
             if (configCrashReportUserInfo == "")
             {
                 var hostname = NetworkInformation.GetHostNames().FirstOrDefault(h => h.Type == HostNameType.DomainName);
-                configCrashReportUserInfo = hostname != null ? hostname.CanonicalName : "<unknown host>";
+                configCrashReportUserInfo = hostname?.CanonicalName ?? "<unknown host>";
             }
 
             RunOnUiThread(() => { CrashReportUserInfo = configCrashReportUserInfo; });
@@ -2240,10 +2216,10 @@ namespace PeerConnectionClient.ViewModels
             localSettings.Values["PeerCCServerPort"] = _port.Value;
         }
 
-        protected StorageFile webrtcLoggingFile = null;
+        protected StorageFile webrtcLoggingFile;
 
 
-        private Boolean _ntpSyncInProgress = false;
+        private Boolean _ntpSyncInProgress;
 
         /// <summary>
         /// Indicator if sync with ntp is in progress.
@@ -2287,7 +2263,7 @@ namespace PeerConnectionClient.ViewModels
 
         private void HandleNtpTimeSync(long ntpTime)
         {
-            Debug.WriteLine(String.Format("New NTP time: {0}", ntpTime));
+            Debug.WriteLine("New NTP time: {0}", ntpTime);
             Ortc.NtpServerTime = ntpTime;
             NtpSyncInProgress = false;
         }
@@ -2348,7 +2324,7 @@ namespace PeerConnectionClient.ViewModels
         }
 
         // Timer to measure CPU/Memory usage
-        private DispatcherTimer _appPerfTimer = null;
+        private DispatcherTimer _appPerfTimer;
 
         /// <summary>
         /// Start or stop App Performance check 
@@ -2357,10 +2333,7 @@ namespace PeerConnectionClient.ViewModels
         {
             if (!_tracingEnabled && !ETWStatsEnabled)
             {
-                if (_appPerfTimer != null)
-                {
-                    _appPerfTimer.Stop();
-                }
+                _appPerfTimer?.Stop();
 
                 return;
             }

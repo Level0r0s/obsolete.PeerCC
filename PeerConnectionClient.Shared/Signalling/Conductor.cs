@@ -69,14 +69,8 @@ namespace PeerConnectionClient.Signalling
         /// The signaller property.
         /// Helps to pass WebRTC session signals between client and server.
         /// </summary>
-        public Signaller Signaller
-        {
-            get
-            {
-                return _signaller;
-            }
-        }
-        
+        public Signaller Signaller => _signaller;
+
         /// <summary>
         /// Video codec used in WebRTC session.
         /// </summary>
@@ -97,24 +91,18 @@ namespace PeerConnectionClient.Signalling
         private static readonly string kSessionDescriptionJsonName = "session";
 
         RTCPeerConnection _peerConnection;
-        Media _media;
+        readonly Media _media;
 
         /// <summary>
         /// Media property to provide media details.
         /// </summary>
-        public Media Media
-        {
-            get
-            {
-                return _media;
-            }
-        }
+        public Media Media => _media;
 
         public ObservableCollection<Peer> Peers;
         public Peer Peer;
         MediaStream MediaStream { get; set; }
         //private IList<MediaStreamTrack> Tracks { get; set; }
-        List<RTCIceServer> _iceServers;
+        readonly List<RTCIceServer> _iceServers;
 
         private int _peerId = -1;
         protected bool _videoEnabled = true;
@@ -367,7 +355,7 @@ namespace PeerConnectionClient.Signalling
         /// <param name="evt">Details about RTC Peer Connection Ice event.</param>
         private void PeerConnection_OnIceCandidate(RTCPeerConnectionIceEvent evt)
         {
-            double index = (null != evt.Candidate.SdpMLineIndex ? (double) evt.Candidate.SdpMLineIndex : -1);
+            double index = null != evt.Candidate.SdpMLineIndex ? (double) evt.Candidate.SdpMLineIndex : -1;
 
             JsonObject json;
 
@@ -442,10 +430,10 @@ namespace PeerConnectionClient.Signalling
         /// <summary>
         /// Handler for Signaller's OnPeerHangup event.
         /// </summary>
-        /// <param name="peer_id">ID of the peer to hung up the call with.</param>
-        void Signaller_OnPeerHangup(int peer_id)
+        /// <param name="peerId">ID of the peer to hung up the call with.</param>
+        void Signaller_OnPeerHangup(int peerId)
         {
-            if (peer_id == _peerId)
+            if (peerId == _peerId)
             {
                 Debug.WriteLine("Conductor: Our peer hung up.");
                 ClosePeerConnection();
@@ -470,11 +458,11 @@ namespace PeerConnectionClient.Signalling
         /// <summary>
         /// Handler for Signaller's OnPeerDisconnected event.
         /// </summary>
-        /// <param name="peer_id">ID of disconnected peer.</param>
-        private void Signaller_OnPeerDisconnected(int peer_id)
+        /// <param name="peerId">ID of disconnected peer.</param>
+        private void Signaller_OnPeerDisconnected(int peerId)
         {
             // is the same peer or peer_id does not exist (0) in case of 500 Error
-            if (peer_id == _peerId || peer_id == 0)
+            if (peerId == _peerId || peerId == 0)
             {
                 Debug.WriteLine("Conductor: Our peer disconnected.");
                 ClosePeerConnection();
