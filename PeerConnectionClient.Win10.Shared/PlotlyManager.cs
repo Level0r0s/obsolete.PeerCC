@@ -24,6 +24,8 @@ namespace PeerConnectionClient.Win10.Shared
         private readonly string restAPIUrl = "https://plot.ly/clientresp";
 
         public static event UploadedStatsData StatsUploaded;
+        public static event UpdateUploadintStatsState UpdateUploadingStatsState;
+        public bool Uploading { get; set; }
 
         public static PlotlyManager Instance
         {
@@ -203,37 +205,46 @@ namespace PeerConnectionClient.Win10.Shared
         {
             if (statsData == null)
                 return;
-
-            var timestampsStr = "[" + String.Join(",", statsData.Timestamps.ToArray()) + "]";
-
-            var hostname = NetworkInformation.GetHostNames().FirstOrDefault(h => h.Type == HostNameType.DomainName);
-            string ret = hostname?.CanonicalName ?? "<unknown host>";
-            var strCaller = statsData.IsCaller ? "caller_" : "callee_";
-            var basePath = statsData.StarTime.ToString("yyyyMMdd") + "/" + id + "/" + strCaller + hostname;
-            if (statsData.IsCaller)
-                basePath += "_" + Conductor.Instance.AudioCodec.Name + "_" + Conductor.Instance.VideoCodec.Name;
-            foreach (var trackId in statsData.TrackStatsDictionary.Keys)
+            UpdateUploadingStatsState?.Invoke(true);
+            try
             {
-                List<Dictionary<string, string>> datasets = new List<Dictionary<string, string>>();
-                    
-                OrtcStatsManager.TrackStatsData trackStatsData = statsData.TrackStatsDictionary[trackId];
-                foreach (var valueNames in trackStatsData.Data.Keys)
+                var timestampsStr = "[" + String.Join(",", statsData.Timestamps.ToArray()) + "]";
+
+                var hostname = NetworkInformation.GetHostNames().FirstOrDefault(h => h.Type == HostNameType.DomainName);
+                string ret = hostname?.CanonicalName ?? "<unknown host>";
+                var strCaller = statsData.IsCaller ? "caller_" : "callee_";
+                var basePath = statsData.StarTime.ToString("yyyyMMdd") + "/" + id + "/" + strCaller + hostname;
+                if (statsData.IsCaller)
+                    basePath += "_" + Conductor.Instance.AudioCodec.Name + "_" + Conductor.Instance.VideoCodec.Name;
+                foreach (var trackId in statsData.TrackStatsDictionary.Keys)
                 {
-                    Dictionary<string, string> dictionary = FormatDataForSending(trackStatsData, timestampsStr, valueNames);
-                    dictionary.Add("trackId",trackId);
-                    dictionary.Add("yaxisTitle", GetYAxisTitle(valueNames));
-                    datasets.Add(dictionary);
-                }
-                foreach (Dictionary<string, string> dict in datasets)
-                {
-                    await SendToPlotly(dict, basePath, trackStatsData.Outgoing);
+                    List<Dictionary<string, string>> datasets = new List<Dictionary<string, string>>();
+
+                    OrtcStatsManager.TrackStatsData trackStatsData = statsData.TrackStatsDictionary[trackId];
+                    foreach (var valueNames in trackStatsData.Data.Keys)
+                    {
+                        Dictionary<string, string> dictionary = FormatDataForSending(trackStatsData, timestampsStr,
+                            valueNames);
+                        dictionary.Add("trackId", trackId);
+                        dictionary.Add("yaxisTitle", GetYAxisTitle(valueNames));
+                        datasets.Add(dictionary);
+                    }
+                    foreach (Dictionary<string, string> dict in datasets)
+                    {
+                        await SendToPlotly(dict, basePath, trackStatsData.Outgoing);
+                    }
+
+                    await SendSummary(datasets, basePath, trackId, trackStatsData.Outgoing);
                 }
 
-                await SendSummary(datasets, basePath, trackId, trackStatsData.Outgoing);
+                await CreateCallSummary(statsData, id, basePath);
             }
-
-            await CreateCallSummary(statsData, id, basePath);
+            catch (Exception e)
+            {
+                Debug.Write(e);
+            }
             StatsUploaded?.Invoke(id);
+            UpdateUploadingStatsState?.Invoke(false);
         }
 
         public async Task SendToPlotly(Dictionary<string, string> dictionary, string path, bool outgoing)
@@ -290,7 +301,5 @@ namespace PeerConnectionClient.Win10.Shared
                 }
             }
         }
-
-        
     }
 }

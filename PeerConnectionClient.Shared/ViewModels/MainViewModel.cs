@@ -348,6 +348,7 @@ namespace PeerConnectionClient.ViewModels
 
             Conductor.Instance.OnConnectionHealthStats += Conductor_OnPeerConnectionHealthStats;
 
+            PlotlyManager.UpdateUploadingStatsState += PlotlyManager_OnUpdatedUploadingStatsState;
             // Connected to a peer event handler
             Conductor.Instance.OnPeerConnectionCreated += () =>
             {
@@ -707,6 +708,10 @@ namespace PeerConnectionClient.ViewModels
             PeerConnectionHealthStats = stats;
         }
 
+        private void PlotlyManager_OnUpdatedUploadingStatsState(bool uploading)
+        {
+            IsUploadingStatsInProgress = uploading;
+        }
         #region Bindings
 
         private ValidableNonEmptyString _ntpServer;
@@ -2009,6 +2014,13 @@ namespace PeerConnectionClient.ViewModels
         {
             get { return _settingsButtonChecked; }
             set { SetProperty(ref _settingsButtonChecked, value); }
+        }
+
+        private bool _isUploading;
+        public bool IsUploadingStatsInProgress
+        {
+            get { return _isUploading; }
+            set { SetProperty(ref _isUploading, value); }
         }
 
         /// <summary>

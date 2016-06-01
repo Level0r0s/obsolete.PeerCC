@@ -58,7 +58,20 @@
                     RelativePanel.AlignBottomWithPanel="True"
                     RelativePanel.AlignTopWithPanel="True"
                     Margin="10">
-                    <ToggleButton 
+                    <StackPanel 
+                    HorizontalAlignment="Right"
+                    x:Name="SettingsButtonStack"
+                    Orientation="Horizontal"
+                    RelativePanel.AlignBottomWithPanel="True"
+                    RelativePanel.AlignTopWithPanel="True"
+                    Margin="0">
+                        <TextBlock 
+                        Margin="5"
+                            HorizontalAlignment="Left"
+                        Foreground="Gray" 
+                        Text="Uploading stats..."
+                        Visibility="{Binding IsUploadingStatsInProgress, Converter={StaticResource BoolToVisConverter}}" Width="148"/>
+                        <ToggleButton 
                         Name="ToggletSettingsButton"
                         HorizontalAlignment="Right"
                         Margin="5"
@@ -66,9 +79,10 @@
                         IsChecked="{Binding SettingsButtonChecked, Mode=TwoWay}"
                         Command="{Binding SettingsButtonCommand}"
                         Background="Gray">
-                        <Image Source="/Assets/Settings-100.png"
+                            <Image Source="/Assets/Settings-100.png"
                                Style="{StaticResource CallActionImage}"/>
-                    </ToggleButton>
+                        </ToggleButton>
+                    </StackPanel>
                     <TextBlock 
                         Margin="5"
                         Foreground="Red" 
