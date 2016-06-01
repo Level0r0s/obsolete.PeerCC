@@ -160,6 +160,7 @@ namespace PeerConnectionClient.ViewModels
 
         private readonly NtpService _ntpService;
 
+        
         /// <summary>
         /// The initializer for MainViewModel.
         /// </summary>
@@ -2119,6 +2120,9 @@ namespace PeerConnectionClient.ViewModels
                 ntpServerAddress = new ValidableNonEmptyString((string) settings.Values["NTPServer"]);
             }
 
+            if (settings.Values.ContainsKey("logger"))
+                AppInsightsEnabled = (bool)settings.Values["logger"];
+
             RunOnUiThread(() =>
             {
                 IceServers = configIceServers;
@@ -2386,18 +2390,7 @@ namespace PeerConnectionClient.ViewModels
                 }
 
                 Conductor.Instance.AppInsightsEnabled = _appInsightsEnabled;
-
-                if (_appInsightsEnabled)
-                {
-                    //WebRTC.StartTracing();
-                }
-                else
-                {
-                    //Conductor.Instance.AppInsightsEnabled = _appInsightsEnabled;
-                    // WebRTC.StopTracing();
-                    //   WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
-                }
-                
+                Windows.Storage.ApplicationData.Current.LocalSettings.Values["logger"] = _appInsightsEnabled;                
             }
         }
     }
