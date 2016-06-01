@@ -795,7 +795,7 @@ namespace PeerConnectionClient.Signalling
             await _signaller.SendToPeer(_peerId, "BYE");
             //if (AppInsightsEnabled)
             {
-                OrtcStatsManager.Instance.CallEnded();
+                //OrtcStatsManager.Instance.CallEnded();
             }
                 //StatsManager.Instance.TrackCallEnded();
         }
