@@ -143,6 +143,9 @@ namespace PeerConnectionClient.Win10.Shared
         public static event FramesPerSecondChangedEventHandler FramesPerSecondChanged;
         public static event ResolutionChangedEventHandler ResolutionChanged;
 
+        //public IList<double> TestReceivedBytes = new List<double>();
+        //public IList<double> TestReceivedPackets = new List<double>();
+        
         private OrtcStatsManager()
         {
             CallsStatsDictionary = new Dictionary<string, StatsData>();
@@ -330,7 +333,7 @@ namespace PeerConnectionClient.Win10.Shared
             public bool Outgoing { get; set; }
             public bool IsAudio { get; set; }
 
-            private double _reactionPercentage = 0.0;
+            private double _reactionPercentage = 0.2;
             public TrackStatsData(string trackId)
             {
                 MediaTrackId = trackId;
@@ -358,6 +361,7 @@ namespace PeerConnectionClient.Win10.Shared
                         {
                             list = new List<double>();
                             Data.Add(valueName, list);
+                            LastValues.Add(valueName, 0);
                         } 
                     }
                 }
@@ -370,12 +374,19 @@ namespace PeerConnectionClient.Win10.Shared
                 list.Add(value);
             }
 
-            public void AddAverage(RtcStatsValueName valueName, double value)
+            public void AddAverage(RtcStatsValueName valueName, double value, bool calculateDifference = true)
             {
                 IList<double> list = GetList(valueName);
                 double lastValue = list.Count > 0 ? list.Last() : value;
 
-                lastValue = lastValue * (1.0 - _reactionPercentage) + value * _reactionPercentage;
+                double input = value;
+                if (calculateDifference)
+                {
+                    input = value - LastValues[valueName];
+                    LastValues[valueName] = value;
+                }
+
+                lastValue = lastValue * (1.0 - _reactionPercentage) + input * _reactionPercentage;
                 list.Add(lastValue);
             }
         }
@@ -399,9 +410,13 @@ namespace PeerConnectionClient.Win10.Shared
                                 if (statsData.TimeToSetupCall.Milliseconds == 0 && inboundRtpStreamStats.PacketsReceived > 0)
                                     statsData.TimeToSetupCall = DateTime.Now - statsData.StarTime;
 
+                                //if (!tsd.IsAudio)
+                                //    TestReceivedBytes.Add(inboundRtpStreamStats.BytesReceived);
                                 tsd.AddAverage(RtcStatsValueName.StatsValueNameBytesReceived,
                                     inboundRtpStreamStats.BytesReceived);
 
+                                //if (!tsd.IsAudio)
+                                    //TestReceivedPackets.Add(inboundRtpStreamStats.PacketsReceived);
                                 tsd.AddAverage(RtcStatsValueName.StatsValueNamePacketsReceived,
                                     inboundRtpStreamStats.PacketsReceived);
 
