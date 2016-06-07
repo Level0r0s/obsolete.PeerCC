@@ -209,6 +209,13 @@ namespace PeerConnectionClient.Win10.Shared
         {
             if (statsData == null)
                 return;
+
+            if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Key))
+            {
+                OnError?.Invoke("To use Plotly sevices it is required to enter a valid username and a key.");
+                return;
+            }
+
             _listOfErrors.Clear();
             UpdateUploadingStatsState?.Invoke(true);
             try
