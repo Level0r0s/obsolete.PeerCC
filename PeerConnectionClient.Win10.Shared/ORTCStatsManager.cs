@@ -16,6 +16,7 @@ namespace PeerConnectionClient.Win10.Shared
 {
     public delegate void UploadedStatsData(string id);
     public delegate void UpdateUploadintStatsState(bool uploading);
+    public delegate void OnError(string error);
     public enum RtcStatsValueName
     {
         StatsValueNameActiveConnection = 0,

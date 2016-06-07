@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
+using Windows.Data.Json;
 using Windows.Networking;
 using Windows.Networking.Connectivity;
+using Windows.UI.Popups;
 using PeerConnectionClient.Signalling;
-using PeerConnectionClient.Utilities;
 
 namespace PeerConnectionClient.Win10.Shared
 {
@@ -17,14 +17,16 @@ namespace PeerConnectionClient.Win10.Shared
         private static volatile PlotlyManager _instance;
         private static readonly object SyncRoot = new object();
 
-        private readonly string username = "hookflash";
-        private readonly string password = "QGC4s8XjbPmZoq";
-        private readonly string key = "hei6r5e6rd";
-        private readonly string email = "erik@hookflash.com";
+        internal string Username { get; set; }
+
+        internal string Key { get; set; }
+
+        private readonly IList<string> _listOfErrors = new List<string>(); 
         private readonly string restAPIUrl = "https://plot.ly/clientresp";
 
         public static event UploadedStatsData StatsUploaded;
         public static event UpdateUploadintStatsState UpdateUploadingStatsState;
+        public static event OnError OnError;
         public bool Uploading { get; set; }
 
         public static PlotlyManager Instance
@@ -167,26 +169,25 @@ namespace PeerConnectionClient.Win10.Shared
             Dictionary<string,string> dictionary = new Dictionary<string, string>
             {
                  { "args",formated },
-                 { "title",graphTitle },
+                 { "title",graphTitle }
             };
 
             return dictionary;
         }
 
-        public async Task SendSummary(List<Dictionary<string, string>> datasets, string path, string trackId, bool outgoing)
+        public async Task SendTrackSummary(List<Dictionary<string, string>> datasets, string path, string trackId, bool outgoing)
         {
             string ret = datasets.Aggregate("[", (current, dataset) => (current.Length == 1 ? current : current + ",") + dataset["args"]);
             ret += "]";
             string title = "Summary for the track " + trackId;
-            await SendToPlotly(ret, path, trackId,title,outgoing);
+            if (!ret.Equals("[]"))
+                await SendToPlotly(ret, path, trackId,title,outgoing);
         }
 
-        public async Task CreateCallSummary(OrtcStatsManager.StatsData statsData, string id, string path)
+        public async Task SendCallSummary(OrtcStatsManager.StatsData statsData, string id, string path)
         {
             IList<string> argsCallItems = new List<string>();
 
-            //string formatedArgsStartTime = "{\"x\": " + "[" + statsData.StarTime + "]" + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + "black" + "\"}" + ",\"name\":\"" + "Start time" + "\"}";
-            //argsCallItems.Add(formatedArgsStartTime);
             string formatedArgsTimeToSetupCall = "{\"x\": " + "[" + statsData.TimeToSetupCall.Milliseconds + "]" + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + "black" + "\"}" + ",\"name\":\"" + "Time To Setup Call" + "\"}";
             argsCallItems.Add(formatedArgsTimeToSetupCall);
 
@@ -194,8 +195,11 @@ namespace PeerConnectionClient.Win10.Shared
             {
                 OrtcStatsManager.TrackStatsData trackStatsData = statsData.TrackStatsDictionary[trackId];
                 IList<string> argsItems = (from valueName in trackStatsData.Data.Keys let values = trackStatsData.Data[valueName] let averageValue = values.Average() select "{\"x\": " + "[" + averageValue.ToString("0.##") + "]" + ", \"y\": " + "[0]" + ",\"line\": " + "{\"color\":\"" + (trackStatsData.Outgoing ? "blue" : "green") + "\"}" + ",\"name\":\"" + "Average " + (trackStatsData.Outgoing ? "outgoing " : "incoming ") + GetTitle(valueName) + "\"}").ToList();
-                string argsTrack = String.Join(",", argsItems.ToArray());
-                argsCallItems.Add(argsTrack);
+                if (argsItems.Count > 0)
+                {
+                    string argsTrack = String.Join(",", argsItems.ToArray());
+                    argsCallItems.Add(argsTrack);
+                }
             }
             string args = "[" + String.Join(",", argsCallItems.ToArray()) + "]";
             string title = "Call Summary";
@@ -205,13 +209,14 @@ namespace PeerConnectionClient.Win10.Shared
         {
             if (statsData == null)
                 return;
+            _listOfErrors.Clear();
             UpdateUploadingStatsState?.Invoke(true);
             try
             {
                 var timestampsStr = "[" + String.Join(",", statsData.Timestamps.ToArray()) + "]";
 
                 var hostname = NetworkInformation.GetHostNames().FirstOrDefault(h => h.Type == HostNameType.DomainName);
-                string ret = hostname?.CanonicalName ?? "<unknown host>";
+                //string ret = hostname?.CanonicalName ?? "<unknown host>";
                 var strCaller = statsData.IsCaller ? "caller_" : "callee_";
                 var basePath = statsData.StarTime.ToString("yyyyMMdd") + "/" + id + "/" + strCaller + hostname;
                 if (statsData.IsCaller)
@@ -234,10 +239,10 @@ namespace PeerConnectionClient.Win10.Shared
                         await SendToPlotly(dict, basePath, trackStatsData.Outgoing);
                     }
 
-                    await SendSummary(datasets, basePath, trackId, trackStatsData.Outgoing);
+                    await SendTrackSummary(datasets, basePath, trackId, trackStatsData.Outgoing);
                 }
 
-                await CreateCallSummary(statsData, id, basePath);
+                await SendCallSummary(statsData, id, basePath);
             }
             catch (Exception e)
             {
@@ -255,8 +260,8 @@ namespace PeerConnectionClient.Win10.Shared
             {
                 var values = new Dictionary<string, string>
                 {
-                   { "un", username },
-                   { "key", key },
+                   { "un", Username },
+                   { "key", Key },
                    {"origin", "plot" },
                     {"platform","lisp"},
                     { "args","[" + dictionary["args"] + "]"},
@@ -265,16 +270,11 @@ namespace PeerConnectionClient.Win10.Shared
 
                 var content = new FormUrlEncodedContent(values);
 
-                var response = await client.PostAsync(restAPIUrl, content);
-
-                var responseString = await response.Content.ReadAsStringAsync();
-                if (!string.IsNullOrEmpty(responseString))
-                {
-                    Debug.Write(responseString);
-                }
+                await Send(client, content);
             }
         }
-        public async Task SendToPlotly(string args, string path, string trackId, string title=null, bool outgoing=true)
+
+        public async Task SendToPlotly(string args, string path, string trackId, string title = null, bool outgoing = true)
         {
             string filename = path + "/" + (outgoing ? "o-" : "i-") + trackId;
             string plotTitle = title ?? trackId;
@@ -282,24 +282,41 @@ namespace PeerConnectionClient.Win10.Shared
             {
                 var values = new Dictionary<string, string>
                 {
-                   { "un", username },
-                   { "key", key },
+                   { "un", Username },
+                   { "key", Key },
                    {"origin", "plot" },
                     {"platform","lisp"},
                     { "args",args},
-                    {"kwargs","{\"filename\": \"" + filename + "\",\"fileopt\": \"new\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"" + plotTitle + "\"},\"world_readable\": true}"},
+                    {"kwargs","{\"filename\": \"" + filename + "\",\"fileopt\": \"new\",\"style\": {\"type\": \"scatter\"},\"layout\": {\"title\": \"" + plotTitle + "\"},\"world_readable\": true}"}
                 };
 
                 var content = new FormUrlEncodedContent(values);
+                await Send(client, content);
+            }
+        }
 
-                var response = await client.PostAsync(restAPIUrl, content);
+        private async Task Send(HttpClient client, FormUrlEncodedContent content)
+        {
+            var response = await client.PostAsync(restAPIUrl, content);
 
-                var responseString = await response.Content.ReadAsStringAsync();
-                if (!string.IsNullOrEmpty(responseString))
+            var responseString = await response.Content.ReadAsStringAsync();
+            if (!string.IsNullOrEmpty(responseString))
+            {
+                Debug.Write(responseString);
+                var json = JsonObject.Parse(responseString);
+                string error = json.GetNamedValue("error").GetString();
+                if (!string.IsNullOrEmpty(error))
                 {
-                    Debug.Write(responseString);
+                    if (!_listOfErrors.Contains(error))
+                    {
+                        _listOfErrors.Add(error);
+                        OnError?.Invoke(error);
+                    }
+                    
+                    
                 }
             }
         }
+
     }
 }

@@ -703,6 +703,40 @@
                           RelativePanel.Below="ConnectionHealtStatsToggleSwitch"
                           Margin="5"/>
                 </RelativePanel>
+                <RelativePanel 
+                    Name="PlotlySettingsPanel"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
+                    Margin="5,10,10,12"
+                    Padding="10,5,5,5"
+                    RelativePanel.AlignBottomWithPanel="True"
+                    RelativePanel.AlignTopWithPanel="True"
+                    RelativePanel.RightOf="DebugSettingsPanel"
+                    Visibility="{Binding IsOn,ElementName=AppInsightsToggleSwitch, Converter={StaticResource BoolToVisConverter}}">
+                    <TextBlock 
+                        Name="PlotlySettingsPanelHeader"
+                        Text="Plotly Settings"
+                        Style="{StaticResource SubtitleTextBlockStyle}"
+                        RelativePanel.AlignTopWithPanel="True"/>
+                    <TextBox 
+                        Name="PlotlyUsername"
+                        Header="Plotly Username"
+                        Margin="5"
+                        HorizontalAlignment="Left"
+                        PlaceholderText="username"
+                        Text="{Binding PlotlyUsername, Mode=TwoWay}"
+                        Width="155"
+                        RelativePanel.Below="PlotlySettingsPanelHeader"/>
+                    <TextBox 
+                        Name="PlotlyKey"
+                        Header="Plotly Key"
+                        Margin="5"
+                        Text="{Binding PlotlyKey, Mode=TwoWay}"
+                        HorizontalAlignment="Left"
+                        PlaceholderText="key"
+                        Width="155"
+                        RelativePanel.Below="PlotlyUsername"/>
+                </RelativePanel>
             </RelativePanel>
             <TextBlock
                 Name="AppVersion"

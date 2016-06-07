@@ -350,6 +350,7 @@ namespace PeerConnectionClient.ViewModels
             Conductor.Instance.OnConnectionHealthStats += Conductor_OnPeerConnectionHealthStats;
 
             PlotlyManager.UpdateUploadingStatsState += PlotlyManager_OnUpdatedUploadingStatsState;
+            PlotlyManager.OnError += PlotlyManager_OnError;
             // Connected to a peer event handler
             Conductor.Instance.OnPeerConnectionCreated += () =>
             {
@@ -712,6 +713,20 @@ namespace PeerConnectionClient.ViewModels
         private void PlotlyManager_OnUpdatedUploadingStatsState(bool uploading)
         {
             IsUploadingStatsInProgress = uploading;
+        }
+
+        private void PlotlyManager_OnError(string error)
+        {
+            RunOnUiThread(async ()=>
+            {
+                var messageDialog = new MessageDialog(error);
+
+                messageDialog.Commands.Add(new UICommand("Close"));
+
+                messageDialog.DefaultCommandIndex = 0;
+                messageDialog.CancelCommandIndex = 1;
+                await messageDialog.ShowAsync();
+            });
         }
         #region Bindings
 
@@ -2123,6 +2138,12 @@ namespace PeerConnectionClient.ViewModels
             if (settings.Values.ContainsKey("logger"))
                 AppInsightsEnabled = (bool)settings.Values["logger"];
 
+            if (settings.Values.ContainsKey("plotlyUsername"))
+                PlotlyUsername = (string)settings.Values["plotlyUsername"];
+
+            if (settings.Values.ContainsKey("plotlyKey"))
+                PlotlyKey = (string)settings.Values["plotlyKey"];
+
             RunOnUiThread(() =>
             {
                 IceServers = configIceServers;
@@ -2390,8 +2411,40 @@ namespace PeerConnectionClient.ViewModels
                 }
 
                 Conductor.Instance.AppInsightsEnabled = _appInsightsEnabled;
-                Windows.Storage.ApplicationData.Current.LocalSettings.Values["logger"] = _appInsightsEnabled;                
+                ApplicationData.Current.LocalSettings.Values["logger"] = _appInsightsEnabled;                
             }
         }
+
+        private string _plotlyUsername;
+
+        public string PlotlyUsername
+        {
+            get { return _plotlyUsername; }
+            set
+            {
+                if (!SetProperty(ref _plotlyUsername, value))
+                {
+                    return;
+                }
+                PlotlyManager.Instance.Username = _plotlyUsername;
+                ApplicationData.Current.LocalSettings.Values["plotlyUsername"] = _plotlyUsername;
+            }
+        }
+
+        private string _plotlyKey;
+
+        public string PlotlyKey
+        {
+            get { return _plotlyKey; }
+            set
+            {
+                if (!SetProperty(ref _plotlyKey, value))
+                {
+                    return;
+                }
+                PlotlyManager.Instance.Key = _plotlyKey;
+                ApplicationData.Current.LocalSettings.Values["plotlyKey"] = _plotlyKey;
+            }
+        }   
     }
 }
