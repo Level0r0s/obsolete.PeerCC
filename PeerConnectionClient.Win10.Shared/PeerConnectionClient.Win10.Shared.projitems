@@ -34,7 +34,4 @@
     <Compile Include="$(MSBuildThisFileDirectory)PlotlyManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WebRTC.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <AppxManifest Include="$(MSBuildThisFileDirectory)Package.appxmanifest" />
-  </ItemGroup>
 </Project>
