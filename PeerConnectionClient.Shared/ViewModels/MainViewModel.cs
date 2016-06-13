@@ -644,13 +644,29 @@ namespace PeerConnectionClient.ViewModels
         /// Add remote stream event handler.
         /// </summary>
         /// <param name="evt">Details about Media stream event.</param>
-        private void Conductor_OnAddRemoteTrack(RTCTrackEvent evt)
+        private async void Conductor_OnAddRemoteTrack(RTCTrackEvent evt)
         {
-            _peerVideoTrack = evt.Track;
-            if (evt.Track != null && evt.Track.Kind == MediaStreamTrackKind.Video)
+            if (evt.Track != null)
             {
-                var source = Media.CreateMedia().CreateMediaSource(_peerVideoTrack, "PEER");
-                RunOnUiThread(() => { PeerVideo.SetMediaStreamSource(source); });
+                if (evt.Track.Kind == MediaStreamTrackKind.Video)
+                {
+                    _peerVideoTrack = evt.Track;
+                    var source = Media.CreateMedia().CreateMediaSource(_peerVideoTrack, "PEER");
+                    RunOnUiThread(() => { PeerVideo.SetMediaStreamSource(source); });
+                }
+                else
+                {
+                    var constraints = Helper.MakeConstraints(true, null, MediaDeviceKind.AudioOutput, _selectedAudioPlayoutDevice);
+                    try
+                    {
+                        await evt.Track.ApplyConstraints(constraints.Audio);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Write(e);
+                    }
+                    
+                }
             }
 
             IsReadyToDisconnect = true;
