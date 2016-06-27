@@ -1193,12 +1193,12 @@ namespace PeerConnectionClient.ViewModels
 
                 if (_tracingEnabled)
                 {
-                    WebRTC.StartTracing();
+                    Ortc.StartMediaTracing();
                 }
                 else
                 {
-                    WebRTC.StopTracing();
-                    WebRTC.SaveTrace(_traceServerIp, Int32.Parse(_traceServerPort));
+                    Ortc.StopMediaTracing();
+                    Ortc.SaveMediaTrace(_traceServerIp, Int32.Parse(_traceServerPort));
                 }
 
                 AppPerformanceCheck();
