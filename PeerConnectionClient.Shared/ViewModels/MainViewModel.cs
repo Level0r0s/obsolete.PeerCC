@@ -1434,6 +1434,7 @@ namespace PeerConnectionClient.ViewModels
                 {
                     Logger.InstallTelnetLogger(UInt16.Parse(_traceServerPort), 60, true);
                     Logger.SetLogLevel(org.ortc.Log.Level.Debug);
+                    Logger.SetLogLevel(org.ortc.Log.Component.OrtcLibWebrtc, org.ortc.Log.Level.Detail);
                     //Logger.SetLogLevel(org.ortc.Log.Component.OrtcLibIceGatherer, org.ortc.Log.Level.Trace);
                     //Logger.SetLogLevel(org.ortc.Log.Component.OrtcLibIceTransport, org.ortc.Log.Level.Trace);
                     //Logger.SetLogLevel(org.ortc.Log.Component.Services, org.ortc.Log.Level.Trace);
